@@ -1,12 +1,12 @@
 import React from 'react';
-import { Users, Lock, CreditCard } from 'lucide-react';
+import { Users, Lock, CreditCard, Puzzle } from 'lucide-react';
 
 type MomentBoardCardProps = {
   title?: string;
   date?: string;
   description?: string;
-  isPrivate?: boolean;
-  isShared?: boolean;
+  isOwner: boolean;
+  participantCount: number;
   newCardCount?: number;
 };
 
@@ -14,16 +14,21 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
   title,
   date,
   description,
-  isPrivate = false,
-  isShared = false,
+  isOwner,
+  participantCount,
   newCardCount = 0
 }) => {
   const mainHeading = title || date || 'Untitled Moment';
   
   const renderStatusIcon = () => {
-    if (isPrivate) return <Lock size={20} />;
-    if (isShared) return <Users size={20} />;
-    return null;
+    if (isOwner) {
+      if (participantCount === 0) {
+        return <Lock size={20} />;
+      }
+      return <Users size={20} />;
+    }
+    // User is not owner but has joined the moment
+    return <Puzzle size={20} />;
   };
 
   return (
@@ -38,11 +43,9 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
               <p className="text-gray-400 text-sm">{date}</p>
             )}
           </div>
-          {(isPrivate || isShared) && (
-            <div className="text-teal flex-shrink-0">
-              {renderStatusIcon()}
-            </div>
-          )}
+          <div className="text-teal flex-shrink-0">
+            {renderStatusIcon()}
+          </div>
         </div>
         
         {description && (

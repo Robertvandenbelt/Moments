@@ -1,13 +1,99 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import Navbar from '../components/Navbar';
 import MomentBoardCard from '../components/MomentBoardCard';
 import { Plus } from 'lucide-react';
-import { useTimelineData } from '../hooks/useTimelineData';
+import { supabase } from '../lib/supabaseClient';
+import { MomentBoard } from '../lib/types';
+import { format, parseISO } from 'date-fns';
+
+type GroupedMoments = {
+  [key: string]: {
+    display: string;
+    moments: MomentBoard[];
+  };
+};
 
 const Timeline: React.FC = () => {
-  const { moments, loading, error } = useTimelineData();
+  const [moments, setMoments] = useState<GroupedMoments>({});
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState<string | null>(null);
   const navigate = useNavigate();
+
+  useEffect(() => {
+    const fetchTimeline = async () => {
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          console.error('No access token found');
+          throw new Error('No session');
+        }
+
+        const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/get-user-timeline', {
+          method: 'GET',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json',
+          },
+          credentials: 'omit'
+        });
+
+        if (!response.ok) {
+          const errorText = await response.text();
+          console.error('Response error:', {
+            status: response.status,
+            statusText: response.statusText,
+            body: errorText
+          });
+          throw new Error(`Failed to fetch timeline: ${response.status} ${response.statusText}`);
+        }
+
+        const timelineData = await response.json();
+        if (!Array.isArray(timelineData)) {
+          console.error('Invalid response format:', timelineData);
+          throw new Error('Invalid response format');
+        }
+
+        const grouped = timelineData.reduce((groups: GroupedMoments, moment) => {
+          if (!moment.date_start) return groups;
+          
+          const date = parseISO(moment.date_start);
+          const monthKey = format(date, 'yyyy-MM');
+          const monthDisplay = format(date, 'MMMM yyyy');
+          
+          if (!groups[monthKey]) {
+            groups[monthKey] = {
+              display: monthDisplay,
+              moments: []
+            };
+          }
+          
+          groups[monthKey].moments.push({
+            ...moment,
+            moment_cards: { count: moment.total_card_count }
+          });
+          return groups;
+        }, {});
+
+        Object.keys(grouped).forEach(month => {
+          grouped[month].moments.sort((a, b) => {
+            const dateA = parseISO(a.date_start);
+            const dateB = parseISO(b.date_start);
+            return dateB.getTime() - dateA.getTime();
+          });
+        });
+
+        setMoments(grouped);
+      } catch (err) {
+        console.error('Error:', err);
+        setError(err instanceof Error ? err.message : 'Failed to load timeline');
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    fetchTimeline();
+  }, []);
 
   if (loading) {
     return (
@@ -46,17 +132,20 @@ const Timeline: React.FC = () => {
             <p className="text-gray-500">No moments yet. Create your first one!</p>
           </div>
         ) : (
-          Object.entries(moments).map(([month, monthMoments]) => (
-            <section key={month} className="mb-8">
-              <h2 className="text-xl font-semibold text-gray-400 mb-6">{month}</h2>
-              <div className="space-y-4">
+          Object.entries(moments)
+            .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
+            .map(([month, { display, moments: monthMoments }]) => (
+            <section key={month} className="mb-16">
+              <h2 className="text-xl font-semibold text-gray-400 mb-8">{display}</h2>
+              <div className="flex flex-col gap-6">
                 {monthMoments.map(moment => (
-                  <Link to={`/board/${moment.id}`} key={moment.id}>
+                  <Link to={`/board/${moment.id}`} key={moment.id} className="block">
                     <MomentBoardCard 
                       title={moment.title || undefined}
                       date={moment.date_start}
                       description={moment.description || undefined}
-                      isPrivate={!moment.is_public_preview}
+                      isOwner={moment.is_owner}
+                      participantCount={moment.participant_count || 0}
                       newCardCount={moment.moment_cards?.count || 0}
                     />
                   </Link>

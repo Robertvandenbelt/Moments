@@ -6,6 +6,7 @@ import { MomentBoard } from '../lib/types';
 import LoginForm from '../components/Auth/LoginForm';
 import SignupForm from '../components/Auth/SignupForm';
 import MomentBoardSnippet from '../components/MomentBoardSnippet';
+import { supabase } from '../services/supabase';
 
 const JoinMomentBoard: React.FC = () => {
   const { momentBoardId } = useParams<{ momentBoardId: string }>();
@@ -14,6 +15,7 @@ const JoinMomentBoard: React.FC = () => {
   const [board, setBoard] = useState<MomentBoard | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
+  const [joining, setJoining] = useState(false);
   const [activeTab, setActiveTab] = useState<'login' | 'signup'>('login');
 
   useEffect(() => {
@@ -41,8 +43,39 @@ const JoinMomentBoard: React.FC = () => {
     fetchBoard();
   }, [momentBoardId, user, navigate]);
 
-  const handleJoin = () => {
-    console.log('Joining board:', momentBoardId);
+  const handleJoin = async () => {
+    if (!momentBoardId || !user) return;
+    
+    setJoining(true);
+    try {
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No session');
+      }
+
+      const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/join-moment-board', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ momentBoardId }),
+      });
+
+      if (!response.ok) {
+        const errorText = await response.text();
+        throw new Error(`Failed to join: ${errorText}`);
+      }
+
+      // Redirect to the board page after successful join
+      navigate(`/board/${momentBoardId}`);
+    } catch (err) {
+      console.error('Error joining board:', err);
+      setError(err instanceof Error ? err.message : 'Failed to join moment board');
+    } finally {
+      setJoining(false);
+    }
   };
 
   // Don't render anything while redirecting owner
@@ -94,9 +127,10 @@ const JoinMomentBoard: React.FC = () => {
         {user ? (
           <button
             onClick={handleJoin}
-            className="w-full bg-orange-500 text-white py-4 px-8 rounded-full text-base font-medium hover:bg-orange-600 transition-colors"
+            disabled={joining}
+            className="w-full bg-orange-500 text-white py-4 px-8 rounded-full text-base font-medium hover:bg-orange-600 transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            Join this Moment
+            {joining ? 'Joining...' : 'Join this Moment'}
           </button>
         ) : (
           <div>

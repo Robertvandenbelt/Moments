@@ -28,6 +28,8 @@ export type MomentBoard = {
   created_by: string;
   created_at: string;
   moment_cards: { count: number } | null;
+  is_owner: boolean;
+  participant_count: number;
 };
 
 export type GroupedMoments = {
@@ -39,4 +41,37 @@ export type CreateMomentBoardData = {
   description?: string;
   date_start: string;
   date_end?: string;
+};
+
+export type MomentCard = {
+  id: string;
+  moment_board_id: string;
+  media_url: string | null;
+  optimized_url: string | null;
+  uploaded_by: string;
+  created_at: string;
+  type: 'photo' | 'text';
+  uploader_initial: string;
+  is_favorited: boolean;
+  is_own_card: boolean;
+  uploader_display_name: string;
+};
+
+export type MomentCardViewerProps = {
+  cards: MomentCard[];
+  currentCardIndex: number;
+  onClose: () => void;
+  onNext: () => void;
+  onPrevious: () => void;
+  onFavorite: (cardId: string) => Promise<void>;
+  canDelete?: boolean;
+  onDelete?: (cardId: string) => Promise<void>;
+};
+
+export type MomentCardProps = {
+  card: MomentCard;
+  onFavorite: (cardId: string) => Promise<void>;
+  onClick?: () => void;
+  canDelete?: boolean;
+  onDelete?: (cardId: string) => Promise<void>;
 };

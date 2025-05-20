@@ -39,6 +39,15 @@ export default {
         card: '0 1px 4px rgba(0, 0, 0, 0.08)',
         fab: '0 4px 12px rgba(56, 178, 172, 0.5)',
       },
+      keyframes: {
+        'slide-up': {
+          '0%': { transform: 'translateY(100%)' },
+          '100%': { transform: 'translateY(0)' }
+        }
+      },
+      animation: {
+        'slide-up': 'slide-up 0.3s ease-out'
+      }
     },
   },
   plugins: [],
