@@ -1,0 +1,36 @@
+You're building interactive components and flows for the Moments app — a fast, joyful, and private space for sharing group memories. Think of it as a lightweight, human-centered alternative to cloud albums or chat threads. Moments are emotionally warm, minimal, and built to disappear into the background.
+
+🔧 Core Development Principles
+Use React (JSX + hooks) inside Bolt; keep logic composable and UI stateless where possible.
+
+Use Tailwind CSS and Tailwind UI Plus Blocks as the base for all layout and styling.
+
+Icons: Lucide React only — import what you need.
+
+Avoid any additional UI libraries, state frameworks, or animation dependencies.
+
+Lightweight > clever. Performance and clarity first.
+
+🧱 Tech Rules
+Supabase Edge Functions must be used for all writes/mutations involving:
+shared state (e.g. boards, cards),
+permissions (e.g. joining, deleting, updating).
+Reads and simple user interactions (like favoriting, filtering) are done via direct Supabase table queries on the frontend.
+Do NOT use Supabase views, triggers, or Postgres functions for business logic.
+Use Supabase Storage and Image Transformations for media.
+All uploads must go to predefined bucket paths (see tech spec).
+Never modify or overwrite existing Edge Functions
+
+🛑 Edge Function Handling
+All Supabase Edge Functions are maintained outside this project. Do not write to /supabase/functions, and do not generate or deploy any functions.
+
+💡 UX Musts
+Flows should feel instant and emotionally rewarding.
+
+Sharing Moments must be frictionless — no token or OAuth barriers.
+
+Prioritize clarity over configuration, emotion over expression.
+
+Animations should be natural and subtle — just enough to make interactions feel alive.
+
+Build like this is the final product, not a prototype.
