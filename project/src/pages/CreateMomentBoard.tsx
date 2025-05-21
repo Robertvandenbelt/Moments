@@ -59,7 +59,7 @@ const CreateMomentBoard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-teal-500 px-8 pt-8 pb-24">
+    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 px-8 pt-8 pb-24">
       {step === 1 ? (
         <div className="max-w-md mx-auto">
           <Link to="/timeline" className="text-white">

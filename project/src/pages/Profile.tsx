@@ -41,7 +41,7 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-teal flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
       </div>
     );
@@ -50,7 +50,7 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-teal px-4 pt-6 pb-10">
+    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 px-8 pt-6 pb-10">
       <Link to="/timeline" className="text-white">
         <ArrowLeft size={32} />
       </Link>
@@ -60,37 +60,38 @@ const Profile: React.FC = () => {
         <p className="text-white text-sm">{user?.email}</p>
       </div>
 
-      <div className="bg-white rounded-2xl p-6 shadow-card">
-        <div className="max-w-md mx-auto space-y-4">
-          <ProfileStat 
-            count={stats.privateCount} 
-            label="private moments" 
-            description="You created and nobody joined" 
-            type="private" 
-          />
-          <ProfileStat 
-            count={stats.sharedCount} 
-            label="shared moments" 
-            description="You created and others joined" 
-            type="shared" 
-          />
-          <ProfileStat 
-            count={stats.joinedCount} 
-            label="joined moments" 
-            description="Somebody else created and you joined" 
-            type="joined" 
-          />
-          <ProfileStat 
-            count={stats.cardsAdded} 
-            label="cards added" 
-            description="Photo or text cards you added to your own or others moments" 
-            type="cards" 
-          />
+      <div className="max-w-md mx-auto">
+        <div className="bg-white rounded-2xl p-6 shadow-card">
+          <div className="space-y-4">
+            <ProfileStat 
+              count={stats.privateCount} 
+              label="private moments" 
+              description="You created and nobody joined" 
+              type="private" 
+            />
+            <ProfileStat 
+              count={stats.sharedCount} 
+              label="shared moments" 
+              description="You created and others joined" 
+              type="shared" 
+            />
+            <ProfileStat 
+              count={stats.joinedCount} 
+              label="joined moments" 
+              description="Somebody else created and you joined" 
+              type="joined" 
+            />
+            <ProfileStat 
+              count={stats.cardsAdded} 
+              label="cards added" 
+              description="Photo or text cards you added to your own or others moments" 
+              type="cards" 
+            />
+          </div>
         </div>
-      </div>
-
-      <div className="mt-8 max-w-md mx-auto">
-        <LogoutButton />
+        <div className="mt-8">
+          <LogoutButton />
+        </div>
       </div>
     </div>
   );

@@ -1,0 +1,9 @@
+@echo off
+echo Pulling latest changes from GitHub...
+git pull origin main
+
+echo Installing dependencies...
+npm install
+
+echo Starting development server...
+npm run dev 
