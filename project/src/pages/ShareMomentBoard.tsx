@@ -89,36 +89,41 @@ const ShareMomentBoard: React.FC = () => {
         </div>
 
         {board && (
-          <div className="w-full max-w-md mb-8">
-            <MomentBoardSnippet
-              title={board.title || undefined}
-              dateStart={board.date_start}
-              dateEnd={board.date_end || undefined}
-              description={board.description || undefined}
-            />
+          <div className="w-full max-w-md">
+            <div className="overflow-hidden">
+              <div className="rounded-t-2xl overflow-hidden">
+                <MomentBoardSnippet
+                  title={board.title || undefined}
+                  dateStart={board.date_start}
+                  dateEnd={board.date_end || undefined}
+                  className="shadow-lg"
+                />
+              </div>
+              <div className="bg-white rounded-b-2xl shadow-lg">
+                <div className="p-4">
+                  <div className="flex items-center gap-2">
+                    <input
+                      type="text"
+                      value={shareLink}
+                      readOnly
+                      className="flex-1 bg-transparent px-3 py-2 focus:outline-none text-sm sm:text-base truncate"
+                    />
+                    <button
+                      onClick={handleCopy}
+                      className="shrink-0 px-4 py-2 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
+                    >
+                      {copied ? 'Copied!' : 'Copy'}
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
         )}
 
-        <div className="w-full max-w-md bg-white rounded-2xl p-4 mb-8 shadow-lg">
-          <div className="flex items-center gap-2">
-            <input
-              type="text"
-              value={shareLink}
-              readOnly
-              className="flex-1 bg-transparent px-3 py-2 focus:outline-none text-sm sm:text-base truncate"
-            />
-            <button
-              onClick={handleCopy}
-              className="shrink-0 px-4 py-2 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
-            >
-              {copied ? 'Copied!' : 'Copy'}
-            </button>
-          </div>
-        </div>
-
         <button
           onClick={handleWhatsAppShare}
-          className="w-full max-w-md bg-[#25D366] text-white py-4 rounded-full font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-xl"
+          className="w-full max-w-md bg-[#25D366] text-white py-4 rounded-full font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-xl mt-8"
         >
           Share via WhatsApp
         </button>

@@ -5,12 +5,14 @@ type MomentBoardSnippetProps = {
   title?: string;
   dateStart: string;
   dateEnd?: string;
+  className?: string;
 };
 
 const MomentBoardSnippet: React.FC<MomentBoardSnippetProps> = ({
   title,
   dateStart,
-  dateEnd
+  dateEnd,
+  className = ''
 }) => {
   const formatDate = (date: string) => {
     const parsed = new Date(date);
@@ -25,11 +27,14 @@ const MomentBoardSnippet: React.FC<MomentBoardSnippetProps> = ({
   const mainHeading = title ? title : dateRange;
   
   return (
-    <div className="bg-white rounded-2xl p-6 shadow-card">
-      <h3 className="text-xl font-bold text-gray-900 mb-2">
-        {mainHeading}
-      </h3>
-      {title && <p className="text-gray-500">{dateRange}</p>}
+    <div className={`bg-white ${className}`}>
+      <div className="p-6">
+        <h3 className="text-xl font-bold text-gray-900 mb-2">
+          {mainHeading}
+        </h3>
+        {title && <p className="text-gray-500">{dateRange}</p>}
+      </div>
+      <div className="h-px bg-orange-500" />
     </div>
   );
 };

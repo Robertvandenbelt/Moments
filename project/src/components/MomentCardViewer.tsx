@@ -1,8 +1,6 @@
-import React, { useState } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight, MoreVertical } from 'lucide-react';
+import React from 'react';
+import { X, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { MomentCardViewerProps } from '../lib/types';
-import ConfirmDialog from './ConfirmDialog';
-import { deleteMomentBoard } from '../services/momentBoard';
 
 const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   cards,
@@ -10,11 +8,8 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   onClose,
   onNext,
   onPrevious,
-  onFavorite,
-  canDelete,
-  onDelete
+  onFavorite
 }) => {
-  const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const currentCard = cards[currentCardIndex];
   const isFirst = currentCardIndex === 0;
   const isLast = currentCardIndex === cards.length - 1;
@@ -22,24 +17,6 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await onFavorite(currentCard.id);
-  };
-
-  const handleDeleteClick = (e: React.MouseEvent) => {
-    e.stopPropagation();
-    setShowDeleteConfirm(true);
-  };
-
-  const handleDeleteConfirm = async () => {
-    try {
-      await deleteMomentBoard(currentCard.id);
-      if (onDelete) {
-        await onDelete(currentCard.id);
-      }
-      setShowDeleteConfirm(false);
-    } catch (error) {
-      console.error('Failed to delete moment board:', error);
-      // You might want to show an error toast here
-    }
   };
 
   return (
@@ -93,42 +70,20 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
             <span className="text-white text-lg font-medium">
               {currentCard.uploader_display_name}
             </span>
-            <div className="flex items-center gap-4">
-              <button
-                onClick={handleFavorite}
-                className={`text-white hover:text-orange-500 transition-colors ${
-                  currentCard.is_favorited ? 'text-orange-500' : ''
-                }`}
-              >
-                <Heart 
-                  size={24} 
-                  className={currentCard.is_favorited ? 'fill-current' : ''} 
-                />
-              </button>
-              {canDelete && (
-                <button
-                  onClick={handleDeleteClick}
-                  className="text-white hover:text-gray-300 transition-colors"
-                >
-                  <MoreVertical size={24} />
-                </button>
-              )}
-            </div>
+            <button
+              onClick={handleFavorite}
+              className={`text-white hover:text-orange-500 transition-colors ${
+                currentCard.is_favorited ? 'text-orange-500' : ''
+              }`}
+            >
+              <Heart 
+                size={24} 
+                className={currentCard.is_favorited ? 'fill-current' : ''} 
+              />
+            </button>
           </div>
         </div>
       </div>
-
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        title="Delete Moment Board"
-        message="Are you sure you want to delete this moment board? This action cannot be undone and will remove all associated cards and comments."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        onConfirm={handleDeleteConfirm}
-        onCancel={() => setShowDeleteConfirm(false)}
-        isDestructive={true}
-      />
     </div>
   );
 };
