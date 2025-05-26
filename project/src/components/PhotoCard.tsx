@@ -24,13 +24,13 @@ const PhotoCard: React.FC<MomentCardProps> = ({
   return (
     <div 
       onClick={onClick}
-      className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer"
+      className="relative rounded-xl overflow-hidden group cursor-pointer flex justify-center items-center w-full h-full"
     >
-      {card.optimized_url && (
+      {card.media_url && (
         <img 
-          src={card.optimized_url} 
+          src={`https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${card.media_url.split('/').pop()}?width=800&height=800&resize=contain&quality=80`} 
           alt=""
-          className="w-full h-full object-cover"
+          className="max-h-[80vh] max-w-full object-contain mx-auto block h-auto w-auto"
           loading="lazy"
         />
       )}

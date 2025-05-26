@@ -50,12 +50,12 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
 
       {/* Main content */}
       <div className="max-w-4xl w-full mx-auto px-12">
-        <div className="relative">
+        <div className="relative flex justify-center items-center" style={{ minHeight: '80vh' }}>
           {currentCard.type === 'photo' ? (
             <img
-              src={currentCard.media_url || ''}
+              src={`https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${currentCard.media_url?.split('/').pop()}?width=800&height=800&resize=contain&quality=80`}
               alt=""
-              className="w-full rounded-xl"
+              className="max-h-[80vh] max-w-full object-contain mx-auto block h-auto w-auto"
             />
           ) : (
             <div className="aspect-video bg-gradient-to-br from-teal-500 to-lime-300 rounded-xl p-12 flex items-center justify-center">

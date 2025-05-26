@@ -86,6 +86,44 @@ const MomentBoard: React.FC = () => {
     fetchBoardData();
   }, [id]);
 
+  const displayedCards = data ? (showFavoritesOnly ? data.cards.filter((card) => card.is_favorited) : data.cards) : [];
+  useEffect(() => {
+    if (selectedCardIndex !== null) {
+      if (displayedCards.length === 0) {
+        setSelectedCardIndex(null); // Close viewer if no cards left
+      } else if (selectedCardIndex >= displayedCards.length) {
+        setSelectedCardIndex(displayedCards.length - 1); // Go to previous card if last was removed
+      } else if (selectedCardIndex < 0) {
+        setSelectedCardIndex(0); // Go to first card if index is negative
+      }
+    }
+  }, [displayedCards, selectedCardIndex]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="min-h-screen bg-gray-100">
+        <div className="p-6">
+          <Link to="/timeline" className="inline-block text-gray-900 hover:text-gray-700 transition-colors">
+            <ArrowLeft size={32} />
+          </Link>
+        </div>
+        <div className="px-6">
+          <p className="text-red-500">{error || 'Board not found'}</p>
+        </div>
+      </div>
+    );
+  }
+
+  const { board, cards } = data;
+
   const formatDate = (date: string) => {
     return format(parseISO(date), 'MMMM d, yyyy');
   };
@@ -192,32 +230,6 @@ const MomentBoard: React.FC = () => {
     }
   };
 
-  if (loading) {
-    return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
-      </div>
-    );
-  }
-
-  if (error || !data) {
-    return (
-      <div className="min-h-screen bg-gray-100">
-        <div className="p-6">
-          <Link to="/timeline" className="inline-block text-gray-900 hover:text-gray-700 transition-colors">
-            <ArrowLeft size={32} />
-          </Link>
-        </div>
-        <div className="px-6">
-          <p className="text-red-500">{error || 'Board not found'}</p>
-        </div>
-      </div>
-    );
-  }
-
-  const { board, cards } = data;
-  const displayedCards = showFavoritesOnly ? cards.filter(card => card.is_favorited) : cards;
-
   return (
     <div className="min-h-screen bg-gray-100 relative">
       <div className="p-6 flex justify-between items-center">
@@ -285,7 +297,7 @@ const MomentBoard: React.FC = () => {
 
         {/* Grid of cards */}
         <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-6">
-          {displayedCards.map((card, index) => (
+          {displayedCards.map((card: import('../lib/types').MomentCard, index: number) => (
             card.type === 'photo' ? (
               <PhotoCard
                 key={card.id}
