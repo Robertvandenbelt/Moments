@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { X, Heart, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { MomentCardViewerProps } from '../lib/types';
 
 const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
@@ -8,7 +8,9 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   onClose,
   onNext,
   onPrevious,
-  onFavorite
+  onFavorite,
+  canDelete,
+  onDelete
 }) => {
   const currentCard = cards[currentCardIndex];
   const isFirst = currentCardIndex === 0;
@@ -17,6 +19,13 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await onFavorite(currentCard.id);
+  };
+
+  const handleDelete = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    if (onDelete) {
+      await onDelete(currentCard.id);
+    }
   };
 
   return (
@@ -48,6 +57,16 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
         </button>
       )}
 
+      {/* Delete button */}
+      {canDelete && (
+        <button
+          onClick={handleDelete}
+          className="absolute top-4 left-4 text-white hover:text-red-500 transition-colors"
+        >
+          <Trash2 size={28} />
+        </button>
+      )}
+
       {/* Main content */}
       <div className="max-w-4xl w-full mx-auto px-12">
         <div className="relative flex justify-center items-center" style={{ minHeight: '80vh' }}>
@@ -60,7 +79,7 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
           ) : (
             <div className="aspect-video bg-gradient-to-br from-teal-500 to-lime-300 rounded-xl p-12 flex items-center justify-center">
               <p className="text-white text-2xl font-medium text-center">
-                {currentCard.media_url}
+                {currentCard.description}
               </p>
             </div>
           )}

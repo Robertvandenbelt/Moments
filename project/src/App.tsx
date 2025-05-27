@@ -12,6 +12,7 @@ import CreateMomentBoard from './pages/CreateMomentBoard';
 import ShareMomentBoard from './pages/ShareMomentBoard';
 import MomentBoard from './pages/MomentBoard';
 import JoinMomentBoard from './pages/JoinMomentBoard';
+import EditMomentBoard from './pages/EditMomentBoard';
 
 function App() {
   return (
@@ -79,6 +80,15 @@ function App() {
             element={
               <ProtectedRoute>
                 <MomentBoard />
+              </ProtectedRoute>
+            } 
+          />
+
+          <Route 
+            path="/edit/:id" 
+            element={
+              <ProtectedRoute>
+                <EditMomentBoard />
               </ProtectedRoute>
             } 
           />

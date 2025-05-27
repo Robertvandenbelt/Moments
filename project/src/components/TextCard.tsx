@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Heart, Trash2 } from 'lucide-react';
 import { MomentCardProps } from '../lib/types';
 
@@ -9,6 +9,8 @@ const TextCard: React.FC<MomentCardProps> = ({
   canDelete,
   onDelete 
 }) => {
+  const [isDeleting, setIsDeleting] = useState(false);
+
   const handleFavorite = async (e: React.MouseEvent) => {
     e.stopPropagation();
     await onFavorite(card.id);
@@ -16,20 +18,29 @@ const TextCard: React.FC<MomentCardProps> = ({
 
   const handleDelete = async (e: React.MouseEvent) => {
     e.stopPropagation();
-    if (onDelete) {
+    if (!onDelete) return;
+
+    try {
+      setIsDeleting(true);
       await onDelete(card.id);
+    } catch (error) {
+      console.error('Failed to delete card:', error);
+    } finally {
+      setIsDeleting(false);
     }
   };
 
   return (
     <div 
       onClick={onClick}
-      className="relative aspect-square rounded-xl overflow-hidden group cursor-pointer bg-gradient-to-br from-teal-500 to-lime-300 p-6"
+      className={`relative aspect-square rounded-xl overflow-hidden group cursor-pointer bg-gradient-to-br from-teal-500 to-lime-300 p-6 ${
+        isDeleting ? 'opacity-50 pointer-events-none' : ''
+      }`}
     >
       {/* Text content */}
       <div className="h-full flex items-center justify-center">
         <p className="text-white text-lg font-medium line-clamp-6 text-center">
-          {card.media_url}
+          {card.description}
         </p>
       </div>
 
@@ -58,7 +69,10 @@ const TextCard: React.FC<MomentCardProps> = ({
       {canDelete && (
         <button
           onClick={handleDelete}
-          className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+          disabled={isDeleting}
+          className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/50 text-white 
+            ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-500 hover:bg-opacity-70'} 
+            transition-all duration-200`}
         >
           <Trash2 size={16} />
         </button>

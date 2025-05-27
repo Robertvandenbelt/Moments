@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2 } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
@@ -8,6 +8,9 @@ import PhotoCard from '../components/PhotoCard';
 import TextCard from '../components/TextCard';
 import MomentCardViewer from '../components/MomentCardViewer';
 import ConfirmDialog from '../components/ConfirmDialog';
+import PhotoUploadSheet from '../components/PhotoUploadSheet';
+import TextUploadSheet from '../components/TextUploadSheet';
+import { addTextCard, deleteMomentCard } from '../services/momentCard';
 
 type MomentBoardData = {
   board: {
@@ -48,6 +51,10 @@ const MomentBoard: React.FC = () => {
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
+  const [showPhotoUpload, setShowPhotoUpload] = useState(false);
+  const [showTextUpload, setShowTextUpload] = useState(false);
+  const [isSubmitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -184,8 +191,29 @@ const MomentBoard: React.FC = () => {
   };
 
   const handleDelete = async (cardId: string) => {
-    // TODO: Implement delete functionality
-    console.log('Delete card:', cardId);
+    try {
+      await deleteMomentCard(cardId);
+      
+      // Update local state to remove the deleted card
+      setData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          cards: prev.cards.filter(c => c.id !== cardId)
+        };
+      });
+
+      // If we're in the card viewer, close it if this was the last card
+      if (selectedCardIndex !== null) {
+        const newCards = data?.cards.filter(c => c.id !== cardId) ?? [];
+        if (newCards.length === 0) {
+          setSelectedCardIndex(null);
+        }
+      }
+    } catch (err) {
+      console.error('Error deleting card:', err);
+      setError(err instanceof Error ? err.message : 'Failed to delete card');
+    }
   };
 
   const handleDeleteMoment = async () => {
@@ -227,6 +255,42 @@ const MomentBoard: React.FC = () => {
       console.error('Error deleting moment board:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete moment board');
       setShowDeleteConfirm(false); // Close the confirm dialog on error
+    }
+  };
+
+  const handlePhotoUploadSuccess = (newCard: any) => {
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        cards: [...prev.cards, newCard]
+      };
+    });
+  };
+
+  const handleTextCardCreate = async (text: string) => {
+    if (!id || !data) return;
+    setIsSubmitting(true);
+
+    try {
+      const newCard = await addTextCard(id, text);
+      
+      // Update the local state with the new card
+      setData(prev => {
+        if (!prev) return prev;
+        return {
+          ...prev,
+          cards: [...prev.cards, newCard]
+        };
+      });
+
+      // Close the text upload sheet
+      setShowTextUpload(false);
+    } catch (err) {
+      console.error('Error creating text card:', err);
+      setError(err instanceof Error ? err.message : 'Failed to create text card');
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -359,7 +423,10 @@ const MomentBoard: React.FC = () => {
                     <span>Delete Moment</span>
                   </button>
                   <button 
-                    onClick={() => console.log('Edit Moment')}
+                    onClick={() => {
+                      setIsBottomSheetOpen(false);
+                      navigate(`/edit/${id}`);
+                    }}
                     className="w-full flex items-center gap-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
                   >
                     <Edit size={20} />
@@ -391,6 +458,87 @@ const MomentBoard: React.FC = () => {
         onCancel={() => setShowDeleteConfirm(false)}
         isDestructive={true}
       />
+
+      {/* FAB and Menu */}
+      <div className="fixed bottom-6 right-6 flex flex-col items-end">
+        {/* FAB Menu */}
+        {isFabMenuOpen && (
+          <>
+            {/* Backdrop */}
+            <div 
+              className="fixed inset-0 bg-black/20 z-40"
+              onClick={() => setIsFabMenuOpen(false)}
+            />
+            
+            <div className="absolute bottom-[4.5rem] right-[0.375rem] z-50 flex flex-col gap-2 animate-slide-up">
+              {/* Add Photo Card */}
+              <button
+                onClick={() => {
+                  setIsFabMenuOpen(false);
+                  setShowPhotoUpload(true);
+                }}
+                className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+              >
+                <Camera size={24} className="text-teal-500" />
+              </button>
+
+              {/* Add Text Card */}
+              <button
+                onClick={() => {
+                  setIsFabMenuOpen(false);
+                  setShowTextUpload(true);
+                }}
+                className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+              >
+                <Type size={24} className="text-teal-500" />
+              </button>
+
+              {/* Share Board - Only for owners */}
+              {board.role === 'owner' && (
+                <button
+                  onClick={() => {
+                    setIsFabMenuOpen(false);
+                    navigate(`/share/${id}`);
+                  }}
+                  className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+                >
+                  <Share2 size={24} className="text-teal-500" />
+                </button>
+              )}
+            </div>
+          </>
+        )}
+
+        {/* Main FAB */}
+        <button 
+          onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
+          className="fab z-50"
+          aria-label="Add content"
+        >
+          <Plus size={28} className={`transition-transform ${isFabMenuOpen ? 'rotate-45' : ''}`} />
+        </button>
+      </div>
+
+      {/* Photo Upload Sheet */}
+      {showPhotoUpload && id && (
+        <PhotoUploadSheet
+          momentBoardId={id}
+          onClose={() => setShowPhotoUpload(false)}
+          onSuccess={(newCard) => {
+            handlePhotoUploadSuccess(newCard);
+            setShowPhotoUpload(false);
+          }}
+        />
+      )}
+
+      {/* Text Upload Sheet */}
+      {showTextUpload && (
+        <TextUploadSheet
+          onClose={() => setShowTextUpload(false)}
+          onSubmit={handleTextCardCreate}
+          isSubmitting={isSubmitting}
+        />
+      )}
     </div>
   );
 };

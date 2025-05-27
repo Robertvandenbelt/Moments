@@ -48,6 +48,7 @@ export type MomentCard = {
   moment_board_id: string;
   media_url: string | null;
   optimized_url: string | null;
+  description: string | null;
   uploaded_by: string;
   created_at: string;
   type: 'photo' | 'text';
@@ -57,7 +58,15 @@ export type MomentCard = {
   uploader_display_name: string;
 };
 
-export type MomentCardViewerProps = {
+export interface MomentCardProps {
+  card: MomentCard;
+  onFavorite: (cardId: string) => Promise<void>;
+  onClick?: () => void;
+  canDelete?: boolean;
+  onDelete?: (cardId: string) => Promise<void>;
+}
+
+export interface MomentCardViewerProps {
   cards: MomentCard[];
   currentCardIndex: number;
   onClose: () => void;
@@ -66,12 +75,4 @@ export type MomentCardViewerProps = {
   onFavorite: (cardId: string) => Promise<void>;
   canDelete?: boolean;
   onDelete?: (cardId: string) => Promise<void>;
-};
-
-export type MomentCardProps = {
-  card: MomentCard;
-  onFavorite: (cardId: string) => Promise<void>;
-  onClick?: () => void;
-  canDelete?: boolean;
-  onDelete?: (cardId: string) => Promise<void>;
-};
+}
