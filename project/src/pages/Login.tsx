@@ -1,9 +1,13 @@
 import React from 'react';
 import LoginForm from '../components/Auth/LoginForm';
+import { Link } from 'react-router-dom';
 
 const Login: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 flex flex-col items-center justify-center px-6">
+      <Link to="/" className="fixed top-6 left-6 z-50 text-white hover:text-orange-300 text-base font-medium transition-colors bg-transparent">
+        ← Back to Home
+      </Link>
       <div className="w-full max-w-md text-center mb-12">
         <div className="relative mb-8">
           <div className="absolute -top-24 left-1/2 -translate-x-1/2 w-48 h-48 bg-white/10 rounded-full blur-2xl" />

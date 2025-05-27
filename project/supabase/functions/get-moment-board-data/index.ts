@@ -76,7 +76,7 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', board.created_by).single();
     const { data: participants } = await supabase.from('profiles').select('id, display_name').in('id', shares?.map((s) => s.user_id) || []);
-    const { data: cards } = await supabase.from('moment_cards').select('id, moment_board_id, media_url, uploaded_by, created_at, type').eq('moment_board_id', moment_board_id).order('created_at', {
+    const { data: cards } = await supabase.from('moment_cards').select('id, moment_board_id, media_url, uploaded_by, created_at, type, description').eq('moment_board_id', moment_board_id).order('created_at', {
       ascending: true
     });
 
