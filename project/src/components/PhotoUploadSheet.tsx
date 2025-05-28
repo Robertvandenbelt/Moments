@@ -65,7 +65,7 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
         const filePath = `${momentBoardId}/${fileName}`;
 
         // Upload to Supabase Storage
-        const { error: uploadError, data: uploadData } = await supabase.storage
+        const { error: uploadError } = await supabase.storage
           .from('photos')
           .upload(filePath, preview.file, {
             cacheControl: '3600',
