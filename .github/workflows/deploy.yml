@@ -10,6 +10,23 @@ jobs:
     steps:
       - uses: actions/checkout@v3
       
+      - name: Use Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+
+      - name: Install dependencies
+        run: npm install
+        working-directory: ./project
+
+      - name: Lint
+        run: npm run lint
+        working-directory: ./project
+
+      - name: Build
+        run: npm run build
+        working-directory: ./project
+
       - name: Deploy to Vercel
         uses: amondnet/vercel-action@v25
         with:
