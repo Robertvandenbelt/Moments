@@ -5,6 +5,7 @@ import { MomentCardProps } from '../lib/types';
 // Helper function to get image URL with dimensions
 const getImageUrl = (mediaUrl: string, width: number, height: number = width) => {
   if (!mediaUrl) return '';
+  // The mediaUrl is already a complete Supabase storage URL, just add the transform parameters
   return `${mediaUrl}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 

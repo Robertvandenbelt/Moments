@@ -64,32 +64,6 @@ const MomentBoard: React.FC = () => {
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
 
   useEffect(() => {
-    const updateMomentView = async () => {
-      if (!id) return;
-
-      try {
-        const { data: { session } } = await supabase.auth.getSession();
-        if (!session?.access_token) {
-          throw new Error('No session');
-        }
-
-        const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/update-moment-view', {
-          method: 'POST',
-          headers: {
-            'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({ moment_board_id: id })
-        });
-
-        if (!response.ok) {
-          console.error('Failed to update moment view:', response.statusText);
-        }
-      } catch (err) {
-        console.error('Error updating moment view:', err);
-      }
-    };
-
     const fetchBoardData = async () => {
       if (!id) return;
 
@@ -98,9 +72,6 @@ const MomentBoard: React.FC = () => {
         if (!session?.access_token) {
           throw new Error('No session');
         }
-
-        // Update the view timestamp first
-        await updateMomentView();
 
         const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/get-moment-board-data', {
           method: 'POST',
