@@ -15,7 +15,7 @@
   ],
   "headers": [
     {
-      "source": "/assets/(.*)",
+      "source": "/assets/:all*",
       "headers": [
         {
           "key": "Cache-Control",
@@ -24,7 +24,7 @@
       ]
     },
     {
-      "source": "/(.*\\.(js|css|ico|json))",
+      "source": "/:all*.(js|css|ico|json)",
       "headers": [
         {
           "key": "Cache-Control",
