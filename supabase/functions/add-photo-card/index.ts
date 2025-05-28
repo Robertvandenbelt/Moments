@@ -1,14 +1,19 @@
-import { createClient } from 'https://esm.sh/@supabase/supabase-js@2';
-import { v4 as uuidv4 } from 'https://esm.sh/uuid@9.0.0';
+// Follow this setup guide to integrate the Deno runtime into your application:
+// https://deno.land/manual/examples/deploy_node_server
+
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts";
+import { createClient } from "https://esm.sh/@supabase/supabase-js@2.38.4";
+import { v4 as uuidv4 } from "https://esm.sh/uuid@9.0.0";
 
 // CORS headers for all responses
 const corsHeaders = {
-  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Origin': 'https://www.getmoments.net',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
+  'Access-Control-Allow-Credentials': 'true'
 };
 
-Deno.serve(async (req) => {
+serve(async (req) => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
     return new Response('ok', { headers: corsHeaders });
@@ -59,13 +64,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Derive filename from URL
-    const pathParts = media_url.split('/');
-    const filename = pathParts[pathParts.length - 1];
-    
-    // Fix the storage path to match the upload path (Originals instead of original)
-    const transformedUrl = `${Deno.env.get('SUPABASE_URL')}/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${filename}?width=800&quality=80`;
-
+    // Create the card in the database
     const { data, error } = await supabase
       .from('moment_cards')
       .insert({
@@ -75,7 +74,16 @@ Deno.serve(async (req) => {
         media_url,
         type: 'photo'
       })
-      .select('*')
+      .select(`
+        id,
+        moment_board_id,
+        media_url,
+        optimized_url,
+        description,
+        uploaded_by,
+        created_at,
+        type
+      `)
       .single();
 
     if (error) {
@@ -86,11 +94,19 @@ Deno.serve(async (req) => {
       );
     }
 
+    // Enrich the response with user metadata
+    const enrichedData = {
+      ...data,
+      uploader_initial: user.email?.[0].toUpperCase() || 'U',
+      is_favorited: false,
+      is_own_card: true,
+      uploader_display_name: user.user_metadata?.full_name || 'You',
+      optimized_url: data.optimized_url || data.media_url,
+      description: data.description || ''
+    };
+
     return new Response(
-      JSON.stringify({
-        ...data,
-        photo_transformed_url: transformedUrl
-      }), 
+      JSON.stringify(enrichedData), 
       { 
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200 

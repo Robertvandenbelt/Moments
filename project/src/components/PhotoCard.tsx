@@ -4,8 +4,8 @@ import { MomentCardProps } from '../lib/types';
 
 // Helper function to get image URL with dimensions
 const getImageUrl = (mediaUrl: string, width: number, height: number = width) => {
-  const filename = mediaUrl.split('/').pop();
-  return `https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${filename}?width=${width}&height=${height}&resize=cover&quality=80`;
+  if (!mediaUrl) return '';
+  return `${mediaUrl}?width=${width}&height=${height}&resize=cover&quality=80`;
 };
 
 const PhotoCard: React.FC<MomentCardProps> = ({ 

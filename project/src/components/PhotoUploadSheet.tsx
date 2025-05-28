@@ -63,9 +63,12 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
         const filePath = `${momentBoardId}/${fileName}`;
 
         // Upload to Supabase Storage
-        const { error: uploadError } = await supabase.storage
+        const { error: uploadError, data: uploadData } = await supabase.storage
           .from('photos')
-          .upload(filePath, preview.file);
+          .upload(filePath, preview.file, {
+            cacheControl: '3600',
+            upsert: false
+          });
 
         if (uploadError) throw uploadError;
 
@@ -101,10 +104,10 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
         // Enrich the card with additional fields
         const enrichedCard: MomentCard = {
           ...card,
-          uploader_initial: 'Y',  // Will be replaced by the actual initial in the UI
+          uploader_initial: user.email?.[0].toUpperCase() || 'U',
           is_favorited: false,
           is_own_card: true,
-          uploader_display_name: 'You',
+          uploader_display_name: user.user_metadata?.full_name || 'You',
           optimized_url: card.optimized_url || card.media_url,
           description: card.description || ''
         };
