@@ -6,7 +6,6 @@ type MomentBoardCardProps = {
   date?: string;
   dateEnd?: string;
   description?: string;
-  isOwner: boolean;
   participantCount: number;
   unseenCardCount?: number;
   totalCardCount: number;
@@ -17,7 +16,6 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
   date,
   dateEnd,
   description,
-  isOwner,
   participantCount,
   unseenCardCount = 0,
   totalCardCount = 0

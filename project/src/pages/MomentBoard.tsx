@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -159,7 +159,10 @@ const MomentBoard: React.FC = () => {
     return () => clearTimeout(timer);
   }, [id, user]);
 
-  const displayedCards = data ? (showFavoritesOnly ? data.cards.filter((card) => card.is_favorited) : data.cards) : [];
+  const displayedCards = useMemo(() => {
+    return data ? (showFavoritesOnly ? data.cards.filter((card) => card.is_favorited) : data.cards) : [];
+  }, [data, showFavoritesOnly]);
+
   useEffect(() => {
     if (selectedCardIndex !== null) {
       if (displayedCards.length === 0) {
@@ -195,7 +198,7 @@ const MomentBoard: React.FC = () => {
     );
   }
 
-  const { board, cards } = data;
+  const { board } = data;
 
   const formatDate = (date: string) => {
     return format(parseISO(date), 'MMMM d, yyyy');
@@ -332,7 +335,7 @@ const MomentBoard: React.FC = () => {
     }
   };
 
-  const handlePhotoUploadSuccess = (newCard: any) => {
+  const handlePhotoUploadSuccess = (newCard: MomentCard) => {
     setData(prev => {
       if (!prev) return prev;
       return {

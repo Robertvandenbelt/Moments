@@ -1,44 +1,39 @@
 import React, { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Camera, X, Upload, AlertCircle } from 'lucide-react';
+import { Camera, X } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { v4 as uuidv4 } from 'uuid';
+import { MomentCard } from '../lib/types';
 
-type PhotoUploadSheetProps = {
+interface PhotoUploadSheetProps {
   momentBoardId: string;
   onClose: () => void;
-  onSuccess: (newCard: any) => void;
-};
+  onSuccess: (card: MomentCard) => void;
+}
 
 type UploadPreview = {
+  id: string;
   file: File;
   preview: string;
-  status: 'pending' | 'uploading' | 'error';
-  error?: string;
 };
 
-const MAX_FILES = 5;
+const MAX_FILES = 10;
 const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
-const ACCEPTED_TYPES = ['image/jpeg', 'image/png'];
 
-export const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({
-  momentBoardId,
-  onClose,
-  onSuccess,
-}) => {
+const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onClose, onSuccess }) => {
   const [previews, setPreviews] = useState<UploadPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
-    // Filter out files that exceed size limit or wrong type
-    const validFiles = acceptedFiles.filter(
-      file => file.size <= MAX_FILE_SIZE && ACCEPTED_TYPES.includes(file.type)
-    ).slice(0, MAX_FILES - previews.length);
+    if (previews.length + acceptedFiles.length > MAX_FILES) {
+      alert(`You can only upload up to ${MAX_FILES} photos at once`);
+      return;
+    }
 
-    const newPreviews = validFiles.map(file => ({
+    const newPreviews = acceptedFiles.map(file => ({
+      id: uuidv4(),
       file,
-      preview: URL.createObjectURL(file),
-      status: 'pending' as const,
+      preview: URL.createObjectURL(file)
     }));
 
     setPreviews(prev => [...prev, ...newPreviews]);
@@ -47,159 +42,91 @@ export const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({
   const { getRootProps, getInputProps, isDragActive } = useDropzone({
     onDrop,
     accept: {
-      'image/jpeg': ['.jpg', '.jpeg'],
-      'image/png': ['.png'],
+      'image/jpeg': [],
+      'image/png': []
     },
-    maxFiles: MAX_FILES - previews.length,
     maxSize: MAX_FILE_SIZE,
-    disabled: isUploading || previews.length >= MAX_FILES,
+    disabled: isUploading || previews.length >= MAX_FILES
   });
 
   const handleUpload = async () => {
     if (previews.length === 0) return;
     setIsUploading(true);
 
-    for (const preview of previews) {
-      if (preview.status !== 'pending') continue;
+    try {
+      const { data: { user } } = await supabase.auth.getUser();
+      if (!user) throw new Error('Not logged in');
 
-      try {
-        // Upload to Supabase Storage
+      for (const preview of previews) {
         const fileExt = preview.file.name.split('.').pop();
-        const fileName = `${momentBoardId}_${uuidv4()}.${fileExt}`;
-        const filePath = `PhotoCards/Originals/${fileName}`;
+        const fileName = `${uuidv4()}.${fileExt}`;
+        const filePath = `${momentBoardId}/${fileName}`;
 
-        console.log('Attempting upload with:', {
-          bucket: 'momentcards',
-          filePath,
-          fileType: preview.file.type,
-          fileSize: preview.file.size
-        });
+        // Upload to Supabase Storage
+        const { error: uploadError } = await supabase.storage
+          .from('photos')
+          .upload(filePath, preview.file);
 
-        const { error: uploadError, data: uploadData } = await supabase.storage
-          .from('momentcards')
-          .upload(filePath, preview.file, {
-            cacheControl: '3600',
-            upsert: false,
-            contentType: preview.file.type
-          });
-
-        if (uploadError) {
-          console.error('Storage upload error details:', {
-            error: uploadError,
-            message: uploadError.message,
-            name: uploadError.name,
-            stack: uploadError.stack
-          });
-          throw new Error(`Storage upload failed: ${uploadError.message}`);
-        }
-
-        if (!uploadData?.path) {
-          throw new Error('Upload successful but no path returned');
-        }
-
-        console.log('Upload successful:', uploadData);
+        if (uploadError) throw uploadError;
 
         // Get the public URL
         const { data: { publicUrl } } = supabase.storage
-          .from('momentcards')
+          .from('photos')
           .getPublicUrl(filePath);
 
-        if (!publicUrl) {
-          throw new Error('Failed to get public URL for uploaded file');
-        }
-
-        console.log('Got public URL:', publicUrl);
-
-        // Call Edge function to add photo card
-        try {
-          const { data: { session } } = await supabase.auth.getSession();
-          if (!session?.access_token) throw new Error('No session');
-
-          console.log('Calling Edge function with:', {
-            moment_board_id: momentBoardId,
-            media_url: publicUrl
-          });
-
-          const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/add-photo-card', {
-            method: 'POST',
-            headers: {
-              'Authorization': `Bearer ${session.access_token}`,
-              'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({
-              moment_board_id: momentBoardId,
-              media_url: publicUrl,
-            }),
-          });
-
-          if (!response.ok) {
-            const errorData = await response.json().catch(() => null);
-            console.error('Edge function error:', {
-              status: response.status,
-              statusText: response.statusText,
-              errorData
-            });
-            throw new Error(errorData?.message || `Edge function failed: ${response.statusText}`);
-          }
-
-          const newCard = await response.json();
-          console.log('Edge function success:', newCard);
-          onSuccess(newCard);
-        } catch (err) {
-          // If it's a CORS error or the Edge function is not accessible,
-          // create a temporary card object
-          console.warn('Edge function error (continuing anyway):', err);
-          const tempCard = {
-            id: uuidv4(),
+        // Create the card in the database
+        const { data: card, error: cardError } = await supabase
+          .from('moment_cards')
+          .insert({
             moment_board_id: momentBoardId,
             media_url: publicUrl,
-            type: 'photo',
-            created_at: new Date().toISOString(),
-            is_favorited: false,
-            is_own_card: true,
-            uploader_display_name: 'You'
-          };
-          onSuccess(tempCard);
-        }
+            uploaded_by: user.id,
+            type: 'photo'
+          })
+          .select(`
+            id,
+            moment_board_id,
+            media_url,
+            optimized_url,
+            description,
+            uploaded_by,
+            created_at,
+            type
+          `)
+          .single();
 
-        // Update preview status
-        setPreviews(prev =>
-          prev.map(p =>
-            p === preview ? { ...p, status: 'pending' } : p
-          )
-        );
+        if (cardError) throw cardError;
+        if (!card) throw new Error('Failed to create card');
 
-      } catch (err) {
-        console.error('Upload error:', err);
-        let errorMessage = 'Upload failed';
-        
-        if (err instanceof Error) {
-          if (err.message.includes('storage/')) {
-            errorMessage = 'Storage error: Please try again';
-          } else if (err.message.includes('auth/')) {
-            errorMessage = 'Session expired: Please log in again';
-          } else if (err.message.includes('size')) {
-            errorMessage = 'File too large (max 10MB)';
-          } else {
-            errorMessage = err.message;
-          }
-        }
-        
-        setPreviews(prev =>
-          prev.map(p =>
-            p === preview ? { ...p, status: 'error', error: errorMessage } : p
-          )
-        );
+        // Enrich the card with additional fields
+        const enrichedCard: MomentCard = {
+          ...card,
+          uploader_initial: 'Y',  // Will be replaced by the actual initial in the UI
+          is_favorited: false,
+          is_own_card: true,
+          uploader_display_name: 'You',
+          optimized_url: card.optimized_url || card.media_url,
+          description: card.description || ''
+        };
+
+        onSuccess(enrichedCard);
       }
+
+      onClose();
+    } catch (error) {
+      console.error('Upload error:', error);
+      alert('Failed to upload photos. Please try again.');
+    } finally {
+      setIsUploading(false);
     }
-
-    setIsUploading(false);
   };
 
-  const removePreview = (previewToRemove: UploadPreview) => {
-    URL.revokeObjectURL(previewToRemove.preview);
-    setPreviews(prev => prev.filter(p => p !== previewToRemove));
-  };
+  // Cleanup preview URLs when component unmounts
+  React.useEffect(() => {
+    return () => {
+      previews.forEach(preview => URL.revokeObjectURL(preview.preview));
+    };
+  }, [previews]);
 
   return (
     <>
@@ -253,28 +180,23 @@ export const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({
 
           {/* Preview Grid */}
           {previews.length > 0 && (
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-4 mb-6">
-              {previews.map((preview, index) => (
-                <div key={index} className="relative aspect-square rounded-lg overflow-hidden bg-gray-100">
+            <div className="grid grid-cols-3 gap-2 mb-4">
+              {previews.map(preview => (
+                <div key={preview.id} className="relative aspect-square">
                   <img
                     src={preview.preview}
-                    alt=""
-                    className="w-full h-full object-cover"
+                    alt="Preview"
+                    className="w-full h-full object-cover rounded-lg"
                   />
                   <button
-                    onClick={() => removePreview(preview)}
-                    className="absolute top-2 right-2 p-1 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+                    onClick={() => {
+                      URL.revokeObjectURL(preview.preview);
+                      setPreviews(prev => prev.filter(p => p.id !== preview.id));
+                    }}
+                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
                   >
                     <X size={16} />
                   </button>
-                  {preview.status === 'error' && (
-                    <div className="absolute inset-0 bg-black/50 flex items-center justify-center">
-                      <div className="text-white text-center p-2">
-                        <AlertCircle size={24} className="mx-auto mb-1" />
-                        <p className="text-sm">{preview.error}</p>
-                      </div>
-                    </div>
-                  )}
                 </div>
               ))}
             </div>
@@ -284,10 +206,9 @@ export const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({
           <button
             onClick={handleUpload}
             disabled={previews.length === 0 || isUploading}
-            className="w-full bg-teal-500 text-white py-3 rounded-xl font-medium disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
+            className="w-full bg-teal-500 text-white py-3 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
           >
-            <Upload size={20} />
-            {isUploading ? 'Uploading...' : 'Create photo card(s)'}
+            {isUploading ? 'Uploading...' : 'Upload photos'}
           </button>
         </div>
       </div>

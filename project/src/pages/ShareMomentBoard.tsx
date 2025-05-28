@@ -2,19 +2,38 @@ import React, { useState, useEffect } from 'react';
 import { useNavigate, useParams } from 'react-router-dom';
 import { X } from 'lucide-react';
 import { getShareLink, getMomentBoard } from '../services/supabase';
+import { supabase } from '../lib/supabaseClient';
 import MomentBoardSnippet from '../components/MomentBoardSnippet';
 import confetti from 'canvas-confetti';
 import { MomentBoard } from '../lib/types';
+import { useAuth } from '../context/AuthContext';
 
 const ShareMomentBoard: React.FC = () => {
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
+  const { user } = useAuth();
   const [copied, setCopied] = useState(false);
   const [board, setBoard] = useState<MomentBoard | null>(null);
+  const [userName, setUserName] = useState<string>('');
   
   useEffect(() => {
     if (id) {
       getMomentBoard(id).then(setBoard).catch(console.error);
+    }
+    
+    // Get user's display name
+    if (user) {
+      const fetchUserName = async () => {
+        const { data } = await supabase
+          .from('profiles')
+          .select('display_name')
+          .eq('id', user.id)
+          .single();
+        if (data?.display_name) {
+          setUserName(data.display_name);
+        }
+      };
+      fetchUserName();
     }
     
     // Initial confetti burst
@@ -27,7 +46,7 @@ const ShareMomentBoard: React.FC = () => {
       decay: 0.94,
       ticks: 150
     });
-  }, [id]);
+  }, [id, user]);
 
   if (!id) {
     navigate('/timeline');
@@ -59,7 +78,7 @@ const ShareMomentBoard: React.FC = () => {
   };
 
   const handleWhatsAppShare = () => {
-    const text = encodeURIComponent(`Join my moment: ${shareLink}`);
+    const text = encodeURIComponent(`${userName} has invited you to join his Moment "${board?.title || 'Untitled Moment'}". Join here: ${shareLink}`);
     window.open(`https://wa.me/?text=${text}`, '_blank');
   };
 

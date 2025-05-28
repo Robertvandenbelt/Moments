@@ -34,8 +34,8 @@ const SignupForm: React.FC<SignupFormProps> = ({ isJoin }) => {
       } else {
         navigate('/timeline', { replace: true });
       }
-    } catch (err: any) {
-      setError(err.message || 'Failed to sign up');
+    } catch (err: Error | unknown) {
+      setError(err instanceof Error ? err.message : 'Failed to sign up');
     } finally {
       setLoading(false);
     }
