@@ -33,9 +33,8 @@ const Timeline: React.FC = () => {
           method: 'GET',
           headers: {
             'Authorization': `Bearer ${session.access_token}`,
-            'Content-Type': 'application/json',
-          },
-          credentials: 'omit'
+            'Content-Type': 'application/json'
+          }
         });
 
         if (!response.ok) {
@@ -97,7 +96,7 @@ const Timeline: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
         <Navbar />
         <div className="flex items-center justify-center min-h-screen">
           <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
@@ -108,7 +107,7 @@ const Timeline: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gray-50">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
         <Navbar />
         <div className="container mx-auto px-4 pt-20 text-center">
           <p className="text-gray-500">{error}</p>
@@ -123,10 +122,10 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navbar />
       
-      <main className="container mx-auto px-4 pt-20 pb-24">
+      <main className="container mx-auto px-4 pt-28 pb-24">
         {Object.entries(moments).length === 0 ? (
           <div className="text-center mt-12">
             <p className="text-gray-500">No moments yet. Create your first one!</p>
@@ -136,17 +135,23 @@ const Timeline: React.FC = () => {
             .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
             .map(([month, { display, moments: monthMoments }]) => (
             <section key={month} className="mb-16">
-              <h2 className="text-xl font-semibold text-gray-400 mb-8">{display}</h2>
-              <div className="flex flex-col gap-6">
+              <h2 className="text-xl font-semibold text-gray-600 mb-8">{display}</h2>
+              <div className="grid gap-6">
                 {monthMoments.map(moment => (
-                  <Link to={`/board/${moment.id}`} key={moment.id} className="block">
+                  <Link 
+                    to={`/board/${moment.id}`} 
+                    key={moment.id} 
+                    className="block transform transition hover:-translate-y-1 duration-300"
+                  >
                     <MomentBoardCard 
                       title={moment.title || undefined}
                       date={moment.date_start}
+                      dateEnd={moment.date_end || undefined}
                       description={moment.description || undefined}
                       isOwner={moment.is_owner}
                       participantCount={moment.participant_count || 0}
-                      newCardCount={moment.moment_cards?.count || 0}
+                      unseenCardCount={moment.unseen_card_count || 0}
+                      totalCardCount={moment.total_card_count || 0}
                     />
                   </Link>
                 ))}

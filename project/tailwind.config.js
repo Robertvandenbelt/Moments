@@ -27,6 +27,10 @@ export default {
           400: '#9CA3AF',
           500: '#6B7280',
         },
+        whatsapp: {
+          light: '#e8ffd7',  // WhatsApp message background
+          DEFAULT: '#25D366', // WhatsApp brand color
+        }
       },
       borderRadius: {
         xl: '1rem',

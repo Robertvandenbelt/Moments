@@ -65,7 +65,7 @@ export const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({
       try {
         // Upload to Supabase Storage
         const fileExt = preview.file.name.split('.').pop();
-        const fileName = `${uuidv4()}.${fileExt}`;
+        const fileName = `${momentBoardId}_${uuidv4()}.${fileExt}`;
         const filePath = `PhotoCards/Originals/${fileName}`;
 
         console.log('Attempting upload with:', {

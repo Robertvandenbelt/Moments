@@ -30,6 +30,8 @@ export type MomentBoard = {
   moment_cards: { count: number } | null;
   is_owner: boolean;
   participant_count: number;
+  total_card_count: number;
+  unseen_card_count?: number;
 };
 
 export type GroupedMoments = {

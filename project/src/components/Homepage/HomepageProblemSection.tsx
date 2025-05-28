@@ -7,10 +7,10 @@ const ProblemSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Shared memories shouldn't live in your chat history.
+            Shared memories shouldn't live in your chat history
           </h2>
           <p className="text-xl text-gray-600 leading-relaxed">
-            People juggle WhatsApp groups, Google Photos, and chaotic cloud folders. Moments brings peace to the mess — one shared board at a time.
+          Juggling WhatsApp, Photos, and mystery folders? Let Moments tidy up—with shared boards that actually make sense.
           </p>
         </div>
         
@@ -27,15 +27,15 @@ const ProblemSection = () => {
             <div className="mt-4 bg-gray-100 p-3 rounded-lg">
               <div className="flex items-start space-x-2 mb-2">
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"></div>
-                <div className="bg-gray-200 rounded-lg p-2 text-sm">Remember this moment from last year?</div>
+                <div className="bg-gray-200 rounded-lg p-2 text-sm">Remember that awesome thing we did last year?</div>
               </div>
               <div className="flex items-start space-x-2 mb-2 justify-end">
-                <div className="bg-blue-100 rounded-lg p-2 text-sm">Which photo was that?</div>
+                <div className="bg-blue-100 rounded-lg p-2 text-sm">Didn't we take a photo?</div>
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"></div>
               </div>
               <div className="flex items-start space-x-2">
                 <div className="w-8 h-8 rounded-full bg-gray-300 flex-shrink-0"></div>
-                <div className="bg-gray-200 rounded-lg p-2 text-sm">I can't find it anymore 😕</div>
+                <div className="bg-gray-200 rounded-lg p-2 text-sm">I've looked everywhere - can't find it 😕</div>
               </div>
             </div>
           </div>

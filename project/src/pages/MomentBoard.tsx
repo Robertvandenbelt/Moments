@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2 } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
@@ -10,7 +10,10 @@ import MomentCardViewer from '../components/MomentCardViewer';
 import ConfirmDialog from '../components/ConfirmDialog';
 import PhotoUploadSheet from '../components/PhotoUploadSheet';
 import TextUploadSheet from '../components/TextUploadSheet';
+import DeleteConfirmationDialog from '../components/DeleteConfirmationDialog';
 import { addTextCard, deleteMomentCard } from '../services/momentCard';
+import JSZip from 'jszip';
+import { MomentCard } from '../lib/types';
 
 type MomentBoardData = {
   board: {
@@ -33,6 +36,7 @@ type MomentBoardData = {
     uploaded_by: string;
     created_at: string;
     type: 'photo' | 'text';
+    description: string | null;
     uploader_initial: string;
     is_favorited: boolean;
     is_own_card: boolean;
@@ -55,8 +59,37 @@ const MomentBoard: React.FC = () => {
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [showTextUpload, setShowTextUpload] = useState(false);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [isDownloading, setIsDownloading] = useState(false);
+  const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
+  const [cardToDelete, setCardToDelete] = useState<string | null>(null);
 
   useEffect(() => {
+    const updateMomentView = async () => {
+      if (!id) return;
+
+      try {
+        const { data: { session } } = await supabase.auth.getSession();
+        if (!session?.access_token) {
+          throw new Error('No session');
+        }
+
+        const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/update-moment-view', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${session.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ moment_board_id: id })
+        });
+
+        if (!response.ok) {
+          console.error('Failed to update moment view:', response.statusText);
+        }
+      } catch (err) {
+        console.error('Error updating moment view:', err);
+      }
+    };
+
     const fetchBoardData = async () => {
       if (!id) return;
 
@@ -65,6 +98,9 @@ const MomentBoard: React.FC = () => {
         if (!session?.access_token) {
           throw new Error('No session');
         }
+
+        // Update the view timestamp first
+        await updateMomentView();
 
         const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/get-moment-board-data', {
           method: 'POST',
@@ -93,6 +129,36 @@ const MomentBoard: React.FC = () => {
     fetchBoardData();
   }, [id]);
 
+  useEffect(() => {
+    const updateViewTimestamp = async () => {
+      if (!id || !user) return;
+
+      try {
+        const { error } = await supabase
+          .from('moment_views')
+          .upsert({
+            user_id: user.id,
+            moment_board_id: id,
+            last_viewed: new Date().toISOString()
+          });
+
+        if (error) {
+          console.error('Error updating view timestamp:', error);
+        }
+      } catch (err) {
+        console.error('Failed to update view timestamp:', err);
+      }
+    };
+
+    // Set a delay of 3 seconds before updating the view timestamp
+    const timer = setTimeout(() => {
+      updateViewTimestamp();
+    }, 3000);
+
+    // Cleanup the timer if component unmounts before the delay
+    return () => clearTimeout(timer);
+  }, [id, user]);
+
   const displayedCards = data ? (showFavoritesOnly ? data.cards.filter((card) => card.is_favorited) : data.cards) : [];
   useEffect(() => {
     if (selectedCardIndex !== null) {
@@ -108,7 +174,7 @@ const MomentBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gray-100 flex items-center justify-center">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 flex items-center justify-center">
         <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
       </div>
     );
@@ -116,7 +182,7 @@ const MomentBoard: React.FC = () => {
 
   if (error || !data) {
     return (
-      <div className="min-h-screen bg-gray-100">
+      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
         <div className="p-6">
           <Link to="/timeline" className="inline-block text-gray-900 hover:text-gray-700 transition-colors">
             <ArrowLeft size={32} />
@@ -190,6 +256,12 @@ const MomentBoard: React.FC = () => {
     }
   };
 
+  const handleDeleteClick = async (cardId: string): Promise<void> => {
+    setCardToDelete(cardId);
+    // Return a resolved promise since this is an async function
+    return Promise.resolve();
+  };
+
   const handleDelete = async (cardId: string) => {
     try {
       await deleteMomentCard(cardId);
@@ -213,6 +285,8 @@ const MomentBoard: React.FC = () => {
     } catch (err) {
       console.error('Error deleting card:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete card');
+    } finally {
+      setCardToDelete(null); // Clear the cardToDelete state
     }
   };
 
@@ -294,8 +368,99 @@ const MomentBoard: React.FC = () => {
     }
   };
 
+  const handleDownloadFavorites = async () => {
+    if (!data) return;
+
+    try {
+      setIsDownloading(true);
+      // Create a new ZIP file
+      const zip = new JSZip();
+      const favoritePhotos = data.cards.filter(card => card.is_favorited && card.type === 'photo');
+
+      // Download each photo and add it to the ZIP
+      await Promise.all(favoritePhotos.map(async (card) => {
+        if (!card.media_url) return;
+
+        try {
+          const filename = card.media_url.split('/').pop();
+          if (!filename) return;
+
+          const response = await fetch(card.media_url);
+          const blob = await response.blob();
+          zip.file(filename, blob);
+        } catch (error) {
+          console.error(`Failed to download photo: ${card.media_url}`, error);
+        }
+      }));
+
+      // Generate the ZIP file
+      const zipBlob = await zip.generateAsync({ type: 'blob' });
+      
+      // Create a download link and trigger the download
+      const url = window.URL.createObjectURL(zipBlob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = `favorites-${data.board.title || data.board.id}.zip`;
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+    } catch (err) {
+      console.error('Error downloading favorites:', err);
+      // You might want to show an error message to the user here
+    } finally {
+      setIsDownloading(false);
+    }
+  };
+
+  const handleLeaveMoment = async () => {
+    if (!id) return;
+
+    try {
+      // Add this line to debug the environment variable
+      console.log('Anon key available:', !!import.meta.env.VITE_SUPABASE_ANON_KEY);
+
+      const { data: { session } } = await supabase.auth.getSession();
+      if (!session?.access_token) {
+        throw new Error('No session');
+      }
+
+      const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/leave-moment-board', {
+        method: 'POST',
+        headers: {
+          'Authorization': `Bearer ${session.access_token}`,
+          'Content-Type': 'application/json',
+          'apikey': import.meta.env.VITE_SUPABASE_ANON_KEY
+        },
+        body: JSON.stringify({ moment_board_id: id })
+      });
+
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => null);
+        if (errorData?.error) {
+          throw new Error(errorData.error);
+        } else if (response.status === 403) {
+          throw new Error('You do not have permission to leave this moment board');
+        } else if (response.status === 404) {
+          throw new Error('Moment board not found');
+        } else {
+          throw new Error('Failed to leave moment board');
+        }
+      }
+
+      // Close dialogs and navigate back to timeline
+      setShowLeaveConfirm(false);
+      setIsBottomSheetOpen(false);
+      navigate('/timeline');
+    } catch (err) {
+      console.error('Error leaving moment board:', err);
+      setError(err instanceof Error ? err.message : 'Failed to leave moment board');
+      setShowLeaveConfirm(false); // Close the confirm dialog on error
+    }
+  };
+
   return (
-    <div className="min-h-screen bg-gray-100 relative">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
       <div className="p-6 flex justify-between items-center">
         <Link to="/timeline" className="text-gray-900 hover:text-gray-700 transition-colors">
           <ArrowLeft size={32} />
@@ -309,12 +474,12 @@ const MomentBoard: React.FC = () => {
       </div>
 
       <div className="px-6">
-        <h1 className="text-3xl font-bold text-gray-900">
+        <h1 className="text-xl font-semibold text-gray-900">
           {board.title || formatDate(board.date_start)}
         </h1>
         
         {board.title && (
-          <p className="text-gray-500 mt-2 text-lg">
+          <p className="text-gray-600 text-sm mt-2">
             {formatDate(board.date_start)}
             {board.date_end && ` - ${formatDate(board.date_end)}`}
           </p>
@@ -326,7 +491,7 @@ const MomentBoard: React.FC = () => {
           </p>
         )}
 
-        <p className="text-gray-500 mt-6 text-sm">
+        <p className="text-gray-400 mt-6 text-sm">
           {board.role === 'owner' 
             ? "Created by you"
             : `Created by ${board.owner_display_name}`
@@ -360,42 +525,44 @@ const MomentBoard: React.FC = () => {
         </div>
 
         {/* Grid of cards */}
-        <div className="mt-4 grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4 pb-6">
-          {displayedCards.map((card: import('../lib/types').MomentCard, index: number) => (
-            card.type === 'photo' ? (
-              <PhotoCard
-                key={card.id}
-                card={card}
-                onFavorite={handleFavorite}
-                onClick={() => setSelectedCardIndex(index)}
-                canDelete={board.role === 'owner' || card.is_own_card}
-                onDelete={handleDelete}
-              />
-            ) : (
-              <TextCard
-                key={card.id}
-                card={card}
-                onFavorite={handleFavorite}
-                onClick={() => setSelectedCardIndex(index)}
-                canDelete={board.role === 'owner' || card.is_own_card}
-                onDelete={handleDelete}
-              />
-            )
-          ))}
+        <div className="mt-8 px-6 pb-24">
+          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+            {displayedCards.map((card, index) => (
+              card.type === 'photo' ? (
+                <PhotoCard
+                  key={card.id}
+                  card={card}
+                  onFavorite={handleFavorite}
+                  onClick={() => setSelectedCardIndex(index)}
+                  canDelete={card.is_own_card || board.role === 'owner'}
+                  onDelete={handleDeleteClick}
+                />
+              ) : (
+                <TextCard
+                  key={card.id}
+                  card={card}
+                  onFavorite={handleFavorite}
+                  onClick={() => setSelectedCardIndex(index)}
+                  canDelete={card.is_own_card || board.role === 'owner'}
+                  onDelete={handleDeleteClick}
+                />
+              )
+            ))}
+          </div>
         </div>
       </div>
 
-      {/* Card viewer modal */}
+      {/* Card viewer */}
       {selectedCardIndex !== null && (
         <MomentCardViewer
           cards={displayedCards}
           currentCardIndex={selectedCardIndex}
           onClose={() => setSelectedCardIndex(null)}
-          onNext={() => setSelectedCardIndex(prev => Math.min((prev || 0) + 1, displayedCards.length - 1))}
-          onPrevious={() => setSelectedCardIndex(prev => Math.max((prev || 0) - 1, 0))}
+          onNext={() => setSelectedCardIndex(prev => prev !== null ? Math.min(prev + 1, displayedCards.length - 1) : null)}
+          onPrevious={() => setSelectedCardIndex(prev => prev !== null ? Math.max(prev - 1, 0) : null)}
           onFavorite={handleFavorite}
-          canDelete={board.role === 'owner' || displayedCards[selectedCardIndex].is_own_card}
-          onDelete={handleDelete}
+          canDelete={true}
+          onDelete={handleDeleteClick}
         />
       )}
 
@@ -435,7 +602,7 @@ const MomentBoard: React.FC = () => {
                 </>
               ) : (
                 <button 
-                  onClick={() => console.log('Leave Moment')}
+                  onClick={() => setShowLeaveConfirm(true)}
                   className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
                 >
                   <LogOut size={20} />
@@ -459,8 +626,20 @@ const MomentBoard: React.FC = () => {
         isDestructive={true}
       />
 
+      {/* Leave Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showLeaveConfirm}
+        title="Leave Moment"
+        message="Are you sure you want to leave this moment? You will no longer have access to view or add content."
+        confirmLabel="Leave"
+        cancelLabel="Cancel"
+        onConfirm={handleLeaveMoment}
+        onCancel={() => setShowLeaveConfirm(false)}
+        isDestructive={true}
+      />
+
       {/* FAB and Menu */}
-      <div className="fixed bottom-6 right-6 flex flex-col items-end">
+      <div className="fixed bottom-6 right-6">
         {/* FAB Menu */}
         {isFabMenuOpen && (
           <>
@@ -477,7 +656,7 @@ const MomentBoard: React.FC = () => {
                   setIsFabMenuOpen(false);
                   setShowPhotoUpload(true);
                 }}
-                className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+                className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Camera size={24} className="text-teal-500" />
               </button>
@@ -488,7 +667,7 @@ const MomentBoard: React.FC = () => {
                   setIsFabMenuOpen(false);
                   setShowTextUpload(true);
                 }}
-                className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+                className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
               >
                 <Type size={24} className="text-teal-500" />
               </button>
@@ -500,7 +679,7 @@ const MomentBoard: React.FC = () => {
                     setIsFabMenuOpen(false);
                     navigate(`/share/${id}`);
                   }}
-                  className="w-12 h-12 bg-teal-100/50 rounded-full shadow-card hover:bg-teal-100/70 transition-colors flex items-center justify-center"
+                  className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
                 >
                   <Share2 size={24} className="text-teal-500" />
                 </button>
@@ -509,7 +688,29 @@ const MomentBoard: React.FC = () => {
           </>
         )}
 
-        {/* Main FAB */}
+        {/* Download FAB - only visible when showing favorites */}
+        {showFavoritesOnly && displayedCards.length > 0 && (
+          <div className="absolute right-[4.5rem] bottom-0 animate-slide-left">
+            <button 
+              onClick={() => handleDownloadFavorites()}
+              disabled={isDownloading}
+              className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-colors ${
+                isDownloading 
+                  ? 'bg-orange-400 cursor-not-allowed' 
+                  : 'bg-orange-500 hover:bg-orange-600'
+              }`}
+              aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
+            >
+              {isDownloading ? (
+                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
+              ) : (
+                <Download size={28} />
+              )}
+            </button>
+          </div>
+        )}
+
+        {/* Add Content FAB */}
         <button 
           onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
           className="fab z-50"
@@ -539,6 +740,13 @@ const MomentBoard: React.FC = () => {
           isSubmitting={isSubmitting}
         />
       )}
+
+      {/* Delete confirmation dialog */}
+      <DeleteConfirmationDialog
+        isOpen={cardToDelete !== null}
+        onConfirm={() => cardToDelete && handleDelete(cardToDelete)}
+        onCancel={() => setCardToDelete(null)}
+      />
     </div>
   );
 };

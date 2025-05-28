@@ -1,35 +1,10 @@
 import React from 'react';
-import { PlusCircle, Share, Heart } from 'lucide-react';
+import { Image } from 'lucide-react';
+import StepCard from './StepCard';
 
-const StepCard = ({ 
-  icon: Icon, 
-  title, 
-  description, 
-  visual 
-}: { 
-  icon: React.ElementType;
-  title: string;
-  description: string;
-  visual: React.ReactNode;
-}) => {
-  return (
-    <div className="bg-white rounded-xl p-6 shadow-md transform transition hover:-translate-y-1 duration-300">
-      <div className="rounded-full bg-orange-100 p-3 w-fit mb-4">
-        <Icon className="h-6 w-6 text-orange-500" />
-      </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600 mb-6">{description}</p>
-      <div className="bg-gray-50 rounded-lg p-4">
-        {visual}
-      </div>
-    </div>
-  );
-};
-
-const HowItWorksSection = () => {
+const HomepageHowItWorksSection = () => {
   const steps = [
     {
-      icon: PlusCircle,
       title: "Create a Moment",
       description: "Start by giving your moment a name and date. Perfect for birthdays, trips, or any special occasion.",
       visual: (
@@ -52,11 +27,10 @@ const HowItWorksSection = () => {
       )
     },
     {
-      icon: Share,
       title: "Share with Friends",
       description: "Invite friends to join and contribute. No account needed to start adding photos and memories!",
       visual: (
-        <div className="bg-[#e8ffd7] rounded-lg p-4">
+        <div className="bg-whatsapp-light rounded-lg p-4">
           <div className="flex justify-between mb-2">
             <button className="text-black" tabIndex={-1} aria-label="Close">✕</button>
           </div>
@@ -76,7 +50,7 @@ const HowItWorksSection = () => {
                 </div>
               </div>
             </div>
-            <button className="w-full py-3 bg-[#25D366] text-white rounded-full font-medium">
+            <button className="w-full py-3 bg-whatsapp text-white rounded-full font-medium">
               Share via WhatsApp
             </button>
           </div>
@@ -84,66 +58,136 @@ const HowItWorksSection = () => {
       )
     },
     {
-      icon: Heart,
       title: "Create Together",
       description: "Add photos and text cards to build your memory board together. Like your favorites to highlight the best moments.",
       visual: (
-        <div className="space-y-4">
-          <div className="text-left">
-            <h3 className="font-semibold text-gray-900 text-lg">Sarah's Birthday</h3>
-            <p className="text-gray-500 text-sm">27 May, 2025</p>
+        <div className="bg-white rounded-2xl p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">Sarah's Birthday</h3>
+              <p className="text-sm text-gray-500">27 May, 2025</p>
+            </div>
+            <div className="flex justify-center gap-2 mb-4">
+              <button className="px-4 py-2 bg-teal-500 text-white rounded-full text-sm font-medium">
+                All cards
+              </button>
+              <button className="px-4 py-2 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200 flex items-center gap-2">
+                Favorites
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="space-y-3">
+                <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                  <div className="relative flex-1 bg-gradient-to-br from-teal-500 to-teal-400 p-6 flex items-center justify-center">
+                    <p className="text-white text-lg font-medium text-center">
+                      "Best birthday ever! Thanks everyone for making it so special! 🎉"
+                    </p>
+                  </div>
+                  <div className="px-3 py-2 border-t border-black/10 flex justify-between items-center bg-white">
+                    <span className="text-gray-600 text-sm font-medium truncate">Sarah</span>
+                    <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-orange-500">
+                      ♥
+                    </button>
+                  </div>
+                </div>
+                <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                  <div className="relative aspect-square bg-gray-100">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Image className="h-8 w-8 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 border-t border-gray-100 flex justify-between items-center bg-white">
+                    <span className="text-gray-600 text-sm font-medium truncate">Emma</span>
+                    <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-orange-500">
+                      ♥
+                    </button>
+                  </div>
+                </div>
+              </div>
+              <div className="space-y-3">
+                <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                  <div className="relative aspect-square bg-gray-100">
+                    <div className="w-full h-full flex items-center justify-center">
+                      <Image className="h-8 w-8 text-gray-400" />
+                    </div>
+                  </div>
+                  <div className="px-3 py-2 border-t border-gray-100 flex justify-between items-center bg-white">
+                    <span className="text-gray-600 text-sm font-medium truncate">Michael</span>
+                    <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+                      ♥
+                    </button>
+                  </div>
+                </div>
+                <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                  <div className="relative flex-1 bg-gradient-to-br from-teal-500 to-teal-400 p-6 flex items-center justify-center">
+                    <p className="text-white text-lg font-medium text-center">
+                      "The cake was amazing! Recipe please! 🎂"
+                    </p>
+                  </div>
+                  <div className="px-3 py-2 border-t border-black/10 flex justify-between items-center bg-white">
+                    <span className="text-gray-600 text-sm font-medium truncate">Emma</span>
+                    <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-gray-400 hover:text-gray-600">
+                      ♥
+                    </button>
+                  </div>
+                </div>
+              </div>
+            </div>
           </div>
-          <div className="grid grid-cols-2 gap-3">
-            <div className="space-y-3">
-              {/* Text Card */}
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                <p className="text-gray-700 text-sm">"Best birthday ever! Thanks everyone for making it so special! 🎉"</p>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Sarah</span>
-                  <button className="text-orange-500">♥</button>
+        </div>
+      )
+    },
+    {
+      title: "Favorite and Download",
+      description: "Favorite the cards you like the most and revisit them whenever you like. Or download them in the original quality.",
+      visual: (
+        <div className="bg-white rounded-2xl p-6">
+          <div className="space-y-4">
+            <div>
+              <h3 className="font-semibold text-gray-900">Sarah's Birthday</h3>
+              <p className="text-sm text-gray-500">27 May, 2025</p>
+            </div>
+            <div className="flex justify-center gap-2">
+              <button className="px-4 py-2 bg-white text-gray-700 rounded-full text-sm font-medium border border-gray-200">
+                All cards
+              </button>
+              <button className="px-4 py-2 bg-teal-500 text-white rounded-full text-sm font-medium flex items-center gap-2">
+                Favorites
+              </button>
+            </div>
+            <div className="grid grid-cols-2 gap-3">
+              <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                <div className="relative flex-1 bg-gradient-to-br from-teal-500 to-teal-400 p-6 flex items-center justify-center">
+                  <p className="text-white text-lg font-medium text-center">
+                    "Best birthday ever! Thanks everyone for making it so special! 🎉"
+                  </p>
+                </div>
+                <div className="px-3 py-2 border-t border-black/10 flex justify-between items-center bg-white">
+                  <span className="text-gray-600 text-sm font-medium truncate">Sarah</span>
+                  <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-orange-500">
+                    ♥
+                  </button>
                 </div>
               </div>
-              {/* Photo Card */}
-              <div className="aspect-square rounded-lg shadow-sm relative overflow-hidden">
-                <img 
-                  src="https://images.pexels.com/photos/1405528/pexels-photo-1405528.jpeg" 
-                  alt="Birthday cake with candles" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/50 to-transparent">
-                  <button className="text-white float-right">♥</button>
+              <div className="relative rounded-xl overflow-hidden shadow-sm group">
+                <div className="relative aspect-square bg-gray-100">
+                  <div className="w-full h-full flex items-center justify-center">
+                    <Image className="h-8 w-8 text-gray-400" />
+                  </div>
+                </div>
+                <div className="px-3 py-2 border-t border-gray-100 flex justify-between items-center bg-white">
+                  <span className="text-gray-600 text-sm font-medium truncate">Emma</span>
+                  <button className="p-1.5 rounded-full hover:bg-gray-100 transition-colors text-orange-500">
+                    ♥
+                  </button>
                 </div>
               </div>
             </div>
-            <div className="space-y-3">
-              {/* Photo Card */}
-              <div className="aspect-square rounded-lg shadow-sm relative overflow-hidden">
-                <img 
-                  src="https://images.pexels.com/photos/2072181/pexels-photo-2072181.jpeg" 
-                  alt="Friends celebrating with balloons" 
-                  className="w-full h-full object-cover"
-                />
-                <div className="absolute bottom-0 left-0 right-0 p-2 bg-gradient-to-t from-black/50 to-transparent">
-                  <button className="text-white float-right">♥</button>
-                </div>
-              </div>
-              {/* Text Card */}
-              <div className="bg-white rounded-lg p-3 shadow-sm border border-gray-100">
-                <p className="text-gray-700 text-sm">"The cake was amazing! Recipe please! 🎂"</p>
-                <div className="mt-2 flex justify-between items-center">
-                  <span className="text-xs text-gray-500">Emma</span>
-                  <button className="text-orange-500">♥</button>
-                </div>
-              </div>
+            <div className="flex justify-end">
+              <button className="px-4 py-2 bg-orange-500 text-white rounded-full text-sm font-medium hover:bg-orange-600 transition-colors">
+                Download all
+              </button>
             </div>
-          </div>
-          <div className="flex justify-between items-center pt-2">
-            <div className="flex -space-x-2">
-              {[1, 2, 3].map((i) => (
-                <div key={i} className="w-6 h-6 rounded-full bg-gray-200 border-2 border-white"></div>
-              ))}
-            </div>
-            <span className="text-xs text-gray-500">4 cards</span>
           </div>
         </div>
       )
@@ -158,18 +202,18 @@ const HowItWorksSection = () => {
             How It Works
           </h2>
           <p className="text-xl text-gray-600">
-            Three simple steps to capture moments that matter.
+            Four simple steps to capture moments that matter.
           </p>
         </div>
         
-        <div className="grid grid-cols-1 md:grid-cols-3 gap-6 md:gap-8">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-12 md:gap-16 max-w-6xl mx-auto">
           {steps.map((step, index) => (
             <StepCard 
               key={index}
-              icon={step.icon}
               title={step.title}
               description={step.description}
               visual={step.visual}
+              stepNumber={index + 1}
             />
           ))}
         </div>
@@ -178,4 +222,4 @@ const HowItWorksSection = () => {
   );
 };
 
-export default HowItWorksSection;
+export default HomepageHowItWorksSection;

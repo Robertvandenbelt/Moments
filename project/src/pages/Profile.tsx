@@ -66,25 +66,25 @@ const Profile: React.FC = () => {
             <ProfileStat 
               count={stats.privateCount} 
               label="private moments" 
-              description="You created and nobody joined" 
+              description="Moments you created that no one else joined" 
               type="private" 
             />
             <ProfileStat 
               count={stats.sharedCount} 
               label="shared moments" 
-              description="You created and others joined" 
+              description="Moments you created that others joined" 
               type="shared" 
             />
             <ProfileStat 
               count={stats.joinedCount} 
               label="joined moments" 
-              description="Somebody else created and you joined" 
+              description="Moments created by others that you joined" 
               type="joined" 
             />
             <ProfileStat 
               count={stats.cardsAdded} 
               label="cards added" 
-              description="Photo or text cards you added to your own or others moments" 
+              description="Photo or text cards you contributed to your own or others moments"
               type="cards" 
             />
           </div>

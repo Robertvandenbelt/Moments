@@ -20,7 +20,9 @@ const Login: React.FC = () => {
           Your private space for shared memories
         </p>
       </div>
-      <LoginForm />
+      <div className="w-full max-w-md">
+        <LoginForm />
+      </div>
     </div>
   );
 };

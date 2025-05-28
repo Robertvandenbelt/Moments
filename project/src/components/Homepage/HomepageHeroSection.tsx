@@ -9,7 +9,7 @@ const HomepageHeroSection = () => {
         <div className="flex flex-col items-center text-center">
           <div className="max-w-3xl">
             <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
-              Create private Memory boards with friends.
+            Your private space for shared memories
             </h1>
             <p className="text-xl text-white/80 leading-relaxed mb-10">
               Moments is the simplest, most joyful way to capture and share memories together. Perfect for birthdays, trips and spontaneous get-togethers.
