@@ -1,0 +1,73 @@
+name: CI/CD
+
+on:
+  push:
+    branches: [ main ]
+  pull_request:
+    branches: [ main ]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd project
+          npm ci
+
+      - name: Type check
+        run: |
+          cd project
+          npx tsc --noEmit
+
+      - name: Lint
+        run: |
+          cd project
+          npm run lint
+
+      - name: Build
+        run: |
+          cd project
+          npm run build
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+      - name: Cache build output
+        uses: actions/cache@v4
+        with:
+          path: project/dist
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+  deploy:
+    needs: build
+    if: github.ref == 'refs/heads/main' # Only deploy on main branch
+    runs-on: ubuntu-latest
+    
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Restore cached build
+        uses: actions/cache@v4
+        with:
+          path: project/dist
+          key: ${{ runner.os }}-build-${{ github.sha }}
+
+      - name: Deploy to Vercel
+        uses: amondnet/vercel-action@v25
+        with:
+          vercel-token: ${{ secrets.VERCEL_TOKEN }}
+          vercel-org-id: ${{ secrets.VERCEL_ORG_ID }}
+          vercel-project-id: ${{ secrets.VERCEL_PROJECT_ID }}
+          working-directory: project
+          vercel-args: '--prod' 

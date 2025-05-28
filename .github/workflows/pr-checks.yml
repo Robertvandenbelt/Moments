@@ -1,0 +1,54 @@
+name: Pull Request Checks
+
+on:
+  pull_request:
+    types: [opened, synchronize, reopened]
+
+jobs:
+  analyze:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      security-events: write
+      pull-requests: write
+
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Setup Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+
+      - name: Install dependencies
+        run: |
+          cd project
+          npm ci
+
+      - name: Run ESLint
+        run: |
+          cd project
+          npx eslint . --format json --output-file eslint-results.json
+
+      - name: Annotate Code Linting Results
+        uses: ataylorme/eslint-annotate-action@v2
+        with:
+          repo-token: "${{ secrets.GITHUB_TOKEN }}"
+          report-json: "project/eslint-results.json"
+
+      - name: Check Build Size
+        run: |
+          cd project
+          npm run build
+          echo "Checking bundle sizes..."
+          ls -lh dist/assets/*.js | awk '{print $5, $9}'
+        env:
+          VITE_SUPABASE_URL: ${{ secrets.VITE_SUPABASE_URL }}
+          VITE_SUPABASE_ANON_KEY: ${{ secrets.VITE_SUPABASE_ANON_KEY }}
+          VITE_SENTRY_DSN: ${{ secrets.VITE_SENTRY_DSN }}
+
+      - name: Check for Known Vulnerabilities
+        run: |
+          cd project
+          npm audit --production # Only check production dependencies 
