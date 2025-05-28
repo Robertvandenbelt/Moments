@@ -23,7 +23,6 @@ const MAX_FILE_SIZE = 10 * 1024 * 1024; // 10MB
 const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onClose, onSuccess }) => {
   const [previews, setPreviews] = useState<UploadPreview[]>([]);
   const [isUploading, setIsUploading] = useState(false);
-  const [error, setError] = useState<string | null>(null);
 
   const onDrop = useCallback((acceptedFiles: File[]) => {
     if (previews.length + acceptedFiles.length > MAX_FILES) {
@@ -53,7 +52,6 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
   const handleUpload = async () => {
     if (previews.length === 0) return;
     setIsUploading(true);
-    setError(null);
 
     try {
       const { data: { user } } = await supabase.auth.getUser();
@@ -128,7 +126,6 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
       onClose();
     } catch (err) {
       console.error('Upload error:', err);
-      setError(err instanceof Error ? err.message : 'Failed to upload photos');
     } finally {
       setIsUploading(false);
     }
