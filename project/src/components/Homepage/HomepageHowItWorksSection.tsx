@@ -84,10 +84,12 @@ const HomepageHowItWorksSection = () => {
             <div className="grid grid-cols-2 gap-3">
               {/* Text Card */}
               <div className="relative rounded-xl overflow-hidden shadow-sm group">
-                <div className="relative flex-1 bg-gradient-to-br from-teal-500 to-lime-300 p-6 flex items-center justify-center">
-                  <p className="text-white text-lg font-medium text-center">
-                    "Best birthday ever! Thanks everyone for making it so special! 🎉"
-                  </p>
+                <div className="relative aspect-square bg-gradient-to-br from-teal-500 to-lime-300">
+                  <div className="absolute inset-0 flex items-center justify-center p-6">
+                    <p className="text-white text-lg font-medium text-center">
+                      "Best birthday ever! 🎉"
+                    </p>
+                  </div>
                 </div>
                 <div className="px-3 py-2 border-t border-black/10 flex justify-between items-center bg-white">
                   <span className="text-gray-600 text-sm font-medium truncate">Sarah</span>
