@@ -46,22 +46,19 @@ const HomepageTestimonialsSection: React.FC = () => {
       quote: "We used Moments for my dad's birthday — it's like a private memory book we all made together.",
       name: "Elena",
       location: "Amsterdam",
-      rating: 5,
-      image: "https://images.pexels.com/photos/1239291/pexels-photo-1239291.jpeg"
+      rating: 5
     },
     {
       quote: "Our family reunion has never been so well documented. Everyone contributed their favorite photos to our shared Moment.",
       name: "Marcus",
       location: "Berlin",
-      rating: 5,
-      image: "https://images.pexels.com/photos/220453/pexels-photo-220453.jpeg"
+      rating: 5
     },
     {
       quote: "After our road trip, we created a Moment to capture all the highlights. It's so much better than scrolling through my camera roll.",
       name: "Sophie",
       location: "Paris",
-      rating: 4,
-      image: "https://images.pexels.com/photos/774909/pexels-photo-774909.jpeg"
+      rating: 4
     }
   ];
 
@@ -84,7 +81,6 @@ const HomepageTestimonialsSection: React.FC = () => {
               name={testimonial.name}
               location={testimonial.location}
               rating={testimonial.rating}
-              image={testimonial.image}
             />
           ))}
         </div>
