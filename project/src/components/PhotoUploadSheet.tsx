@@ -56,76 +56,68 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
     try {
       const { data: { user } } = await supabase.auth.getUser();
       if (!user) throw new Error('Not logged in');
+      const session = await supabase.auth.getSession();
+      const accessToken = session.data?.session?.access_token;
 
       for (const preview of previews) {
         const fileExt = preview.file.name.split('.').pop();
         const fileName = `${Date.now()}.${fileExt}`;
-        const filePath = `${momentBoardId}/${fileName}`;
+        const filePath = `PhotoCards/Originals/${fileName}`;
 
-        // Upload to Supabase Storage
+        // Upload to Supabase Storage (momentcards bucket)
         const { error: uploadError } = await supabase.storage
-          .from('photos')
+          .from('momentcards')
           .upload(filePath, preview.file, {
             cacheControl: '3600',
             upsert: false
           });
 
-        if (uploadError) throw uploadError;
+        if (uploadError) {
+          console.error('Storage upload error:', uploadError);
+          alert('Failed to upload photo to storage.');
+          continue;
+        }
 
         // Get the public URL
         const { data: { publicUrl } } = supabase.storage
-          .from('photos')
+          .from('momentcards')
           .getPublicUrl(filePath);
 
-        // Create the card in the database
-        const { data: card, error: cardError } = await supabase
-          .from('moment_cards')
-          .insert({
+        // Call the Edge function to create the card, with auth token
+        console.log('Invoking add-photo-card Edge function with:', {
+          moment_board_id: momentBoardId,
+          media_url: publicUrl
+        });
+        const { data, error } = await supabase.functions.invoke('add-photo-card', {
+          body: {
             moment_board_id: momentBoardId,
-            media_url: publicUrl,
-            uploaded_by: user.id,
-            type: 'photo',
-            uploader_display_name: user.user_metadata?.full_name || 'You'
-          })
-          .select(`
-            id,
-            moment_board_id,
-            media_url,
-            optimized_url,
-            description,
-            uploaded_by,
-            created_at,
-            type
-          `)
-          .single();
-
-        if (cardError) throw cardError;
-        if (!card) throw new Error('Failed to create card');
-
-        // Enrich the card with additional fields
-        const enrichedCard: MomentCard = {
-          ...card,
-          uploader_initial: user.email?.[0].toUpperCase() || 'U',
-          is_favorited: false,
-          is_own_card: true,
-          uploader_display_name: user.user_metadata?.full_name || 'You',
-          optimized_url: card.optimized_url || card.media_url,
-          description: card.description || ''
-        };
-
-        // Call the Edge function to process the photo
-        const { error: processError } = await supabase.functions.invoke('add-photo-card', {
-          body: { cardId: card.id }
+            media_url: publicUrl
+          },
+          headers: {
+            Authorization: `Bearer ${accessToken}`
+          }
         });
 
-        if (processError) throw processError;
+        console.log('Edge function response:', { data, error });
 
-        onSuccess(enrichedCard);
+        if (error) {
+          console.error('Edge function error:', error);
+          alert('Failed to create photo card.');
+          continue;
+        }
+        if (!data || !data.id) {
+          console.error('Edge function did not return a valid card:', data);
+          alert('Photo card was not created.');
+          continue;
+        }
+
+        onSuccess(data);
       }
 
       onClose();
     } catch (err) {
       console.error('Upload error:', err);
+      alert('An error occurred during upload.');
     } finally {
       setIsUploading(false);
     }

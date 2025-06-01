@@ -33,7 +33,7 @@ const HomepageHowItWorksSection = () => {
     {
       icon: PlusCircle,
       title: "Create and share with friends",
-      description: "Start by giving your moment a name and date, then invite friends to join and contribute. No account needed!",
+      description: "Start by giving your moment a name and date, then invite friends to join and contribute.",
       visual: (
         <div className="bg-[#e8ffd7] rounded-lg p-4">
           <div className="flex justify-between mb-2">
@@ -86,9 +86,9 @@ const HomepageHowItWorksSection = () => {
               <div className="relative rounded-xl overflow-hidden shadow-sm group">
                 <div className="relative aspect-square bg-gradient-to-br from-teal-500 to-lime-300">
                   <div className="absolute inset-0 flex items-center justify-center p-6">
-                    <p className="text-white text-lg font-medium text-center">
-                      "Best birthday ever! 🎉"
-                    </p>
+                  <p className="text-white text-base sm:text-lg md:text-xl lg:text-2xl font-bold text-center">
+  "Best birthday ever! 🎉"
+</p>
                   </div>
                 </div>
                 <div className="px-3 py-2 border-t border-black/10 flex justify-between items-center bg-white">

@@ -49,6 +49,7 @@ const MomentBoard: React.FC = () => {
   const { user } = useAuth();
   const navigate = useNavigate();
   const [data, setData] = useState<MomentBoardData | null>(null);
+  const [momentCards, setMomentCards] = useState<MomentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
@@ -89,6 +90,7 @@ const MomentBoard: React.FC = () => {
 
         const responseData = await response.json();
         setData(responseData);
+        setMomentCards(responseData.cards);
       } catch (err) {
         console.error('Error fetching board:', err);
         setError(err instanceof Error ? err.message : 'Failed to load board');
@@ -131,8 +133,8 @@ const MomentBoard: React.FC = () => {
   }, [id, user]);
 
   const displayedCards = useMemo(() => {
-    return data ? (showFavoritesOnly ? data.cards.filter((card) => card.is_favorited) : data.cards) : [];
-  }, [data, showFavoritesOnly]);
+    return showFavoritesOnly ? momentCards.filter((card) => card.is_favorited) : momentCards;
+  }, [momentCards, showFavoritesOnly]);
 
   useEffect(() => {
     if (selectedCardIndex !== null) {
@@ -307,13 +309,7 @@ const MomentBoard: React.FC = () => {
   };
 
   const handlePhotoUploadSuccess = (newCard: MomentCard) => {
-    setData(prev => {
-      if (!prev) return prev;
-      return {
-        ...prev,
-        cards: [...prev.cards, newCard]
-      };
-    });
+    setMomentCards(prev => [newCard, ...prev]);
   };
 
   const handleTextCardCreate = async (text: string) => {
