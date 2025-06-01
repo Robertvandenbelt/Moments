@@ -122,7 +122,7 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 max-w-full overflow-x-hidden">
       <Navbar />
       
       <main
@@ -140,11 +140,11 @@ const Timeline: React.FC = () => {
             <section key={month} className="mb-16">
               <h2 className="text-xl font-semibold text-gray-600 mb-8">{display}</h2>
               <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {monthMoments.map(moment => (
+                {monthMoments.map((moment, idx) => (
                   <Link 
                     to={`/board/${moment.id}`} 
                     key={moment.id} 
-                    className="block transform transition hover:-translate-y-1 duration-300"
+                    className={`block transform transition hover:-translate-y-1 duration-300${idx === monthMoments.length - 1 ? ' mb-32' : ''}`}
                   >
                     <MomentBoardCard 
                       title={moment.title || undefined}
@@ -166,7 +166,7 @@ const Timeline: React.FC = () => {
 
       <button 
         onClick={handleCreateClick}
-        className="fab"
+        className="fixed bottom-4 right-4 z-50 bg-teal-500 text-white rounded-full p-4 shadow-lg"
         aria-label="Add new moment"
       >
         <Plus size={28} />
