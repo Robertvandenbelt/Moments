@@ -7,7 +7,7 @@ const ProblemSection = () => {
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
           <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
-            Shared memories shouldn't live in your chat history.
+            Shared memories shouldn't live in your chat history
           </h2>
           <p className="text-xl text-gray-600 leading-relaxed">
             People juggle WhatsApp groups, Google Photos, and chaotic cloud folders. Moments brings peace to the mess — one shared board at a time.
@@ -70,7 +70,7 @@ const ProblemSection = () => {
             <div className="rounded-full bg-teal-100 p-3 w-fit mb-4">
               <Sparkles className="h-6 w-6 text-teal-500" />
             </div>
-            <h3 className="text-xl font-semibold mb-2">Moments Boards</h3>
+            <h3 className="text-xl font-semibold mb-2">Introducing Moments</h3>
             <p className="text-gray-600 mb-6">
               Clean, organized boards dedicated to each special memory you share together.
             </p>
