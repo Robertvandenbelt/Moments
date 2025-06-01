@@ -65,6 +65,13 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
         const filePath = `PhotoCards/Originals/${fileName}`;
 
         // Upload to Supabase Storage (momentcards bucket)
+        console.log('Attempting to upload to storage:', {
+          bucket: 'momentcards',
+          path: filePath,
+          fileSize: preview.file.size,
+          fileType: preview.file.type
+        });
+
         const { error: uploadError } = await supabase.storage
           .from('momentcards')
           .upload(filePath, preview.file, {
@@ -73,10 +80,18 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
           });
 
         if (uploadError) {
-          console.error('Storage upload error:', uploadError);
-          alert('Failed to upload photo to storage.');
+          console.error('Storage upload error details:', {
+            error: uploadError,
+            message: uploadError.message,
+            statusCode: uploadError.statusCode,
+            name: uploadError.name,
+            details: uploadError.details
+          });
+          alert(`Failed to upload photo to storage: ${uploadError.message}`);
           continue;
         }
+
+        console.log('Successfully uploaded to storage:', filePath);
 
         // Get the public URL
         const { data: { publicUrl } } = supabase.storage

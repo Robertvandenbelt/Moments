@@ -125,7 +125,10 @@ const Timeline: React.FC = () => {
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       <Navbar />
       
-      <main className="container mx-auto px-4 pt-28 pb-24">
+      <main
+        className="container mx-auto px-4 pt-28 pb-32"
+        style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}
+      >
         {Object.entries(moments).length === 0 ? (
           <div className="text-center mt-12">
             <p className="text-gray-500">No moments yet. Create your first one!</p>
