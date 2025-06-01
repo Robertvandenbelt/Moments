@@ -139,7 +139,7 @@ const Timeline: React.FC = () => {
             .map(([month, { display, moments: monthMoments }]) => (
             <section key={month} className="mb-16">
               <h2 className="text-xl font-semibold text-gray-600 mb-8">{display}</h2>
-              <div className="grid gap-6">
+              <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
                 {monthMoments.map(moment => (
                   <Link 
                     to={`/board/${moment.id}`} 
