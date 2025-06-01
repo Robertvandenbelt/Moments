@@ -122,7 +122,7 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
       <Navbar />
       
       <main
@@ -164,13 +164,15 @@ const Timeline: React.FC = () => {
         )}
       </main>
 
-      <button 
-        onClick={handleCreateClick}
-        className="fixed bottom-4 right-4 z-50 bg-teal-500 text-white rounded-full p-4 shadow-lg"
-        aria-label="Add new moment"
-      >
-        <Plus size={28} />
-      </button>
+      <div className="fixed bottom-6 right-6 z-50">
+        <button
+          onClick={handleCreateClick}
+          className="bg-teal-500 text-white rounded-full p-4 shadow-lg"
+          aria-label="Add new moment"
+        >
+          <Plus size={28} />
+        </button>
+      </div>
     </div>
   );
 };
