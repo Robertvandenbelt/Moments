@@ -138,7 +138,7 @@ const Timeline: React.FC = () => {
             .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
             .map(([month, { display, moments: monthMoments }]) => (
             <section key={month} className="mb-8">
-              <div className="border-b border-gray-200 pb-3 mb-4">
+              <div className="pb-3 mb-4">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">{display}</h2>
               </div>
               <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
