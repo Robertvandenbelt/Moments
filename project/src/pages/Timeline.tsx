@@ -122,7 +122,7 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-orange-50 relative max-w-full overflow-x-hidden">
       <Navbar />
       
       <main

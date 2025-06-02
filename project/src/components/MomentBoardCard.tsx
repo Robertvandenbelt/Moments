@@ -63,14 +63,16 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
 
           <div className="flex items-center gap-2">
             {totalCardCount > 0 && (
-              <div className="text-gray-400 text-xs sm:text-sm">
-                {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
+              <>
+                <span className="text-orange-600 font-bold text-sm">
+                  {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
+                </span>
                 {unseenCardCount > 0 && (
-                  <span className="text-orange-500 font-medium ml-1">
-                    (+{unseenCardCount} new)
+                  <span className="inline-block bg-orange-500 text-white font-bold px-2 py-0.5 rounded-full text-xs ml-1">
+                    +{unseenCardCount} new
                   </span>
                 )}
-              </div>
+              </>
             )}
           </div>
         </div>
