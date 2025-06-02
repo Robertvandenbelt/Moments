@@ -275,6 +275,7 @@ const MomentBoard: React.FC = () => {
         throw new Error('No session');
       }
 
+      console.log('Sending delete request for moment board:', id);
       const response = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/delete-moment-board', {
         method: 'POST',
         headers: {
@@ -284,16 +285,41 @@ const MomentBoard: React.FC = () => {
         body: JSON.stringify({ moment_board_id: id })
       });
 
+      console.log('Delete response status:', response.status);
+      const responseData = await response.json().catch(() => null);
+      console.log('Delete response data:', responseData);
+
       if (!response.ok) {
-        const errorData = await response.json().catch(() => null);
-        if (errorData?.error) {
-          throw new Error(errorData.error);
+        if (responseData?.error) {
+          throw new Error(responseData.error);
         } else if (response.status === 403) {
           throw new Error('You do not have permission to delete this moment board');
         } else if (response.status === 404) {
           throw new Error('Moment board not found');
         } else {
-          throw new Error('Failed to delete moment board');
+          throw new Error(`Failed to delete moment board: ${response.status} ${response.statusText}`);
+        }
+      }
+
+      // Verify the deletion was successful
+      if (responseData.deleted_cards === 0) {
+        // Double check if the board still exists
+        const { data: { session: checkSession } } = await supabase.auth.getSession();
+        if (!checkSession?.access_token) {
+          throw new Error('No session for verification');
+        }
+
+        const verifyResponse = await fetch('https://ekwpzlzdjbfzjdtdfafk.supabase.co/functions/v1/get-moment-board-data', {
+          method: 'POST',
+          headers: {
+            'Authorization': `Bearer ${checkSession.access_token}`,
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({ moment_board_id: id })
+        });
+
+        if (verifyResponse.ok) {
+          throw new Error('Moment board still exists after deletion attempt');
         }
       }
 
