@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download } from 'lucide-react';
+import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format, parseISO } from 'date-fns';
 import { useAuth } from '../context/AuthContext';
@@ -522,26 +522,104 @@ const MomentBoard: React.FC = () => {
 
         {/* Grid of cards */}
         <div className="mt-8 px-6 pb-24">
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 gap-6">
             {displayedCards.map((card, index) => (
               card.type === 'photo' ? (
-                <PhotoCard
-                  key={card.id}
-                  card={card}
-                  onFavorite={handleFavorite}
+                <div 
+                  key={card.id} 
+                  className="group relative bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer"
                   onClick={() => setSelectedCardIndex(index)}
-                  canDelete={card.is_own_card || board.role === 'owner'}
-                  onDelete={handleDeleteClick}
-                />
+                >
+                  <div className="aspect-square">
+                    <img
+                      src={card.media_url ? `${card.media_url}?width=500&height=500&resize=cover&quality=80` : ''}
+                      alt=""
+                      className="h-full w-full object-cover"
+                    />
+                    {card.is_own_card || board.role === 'owner' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(card.id);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{card.uploader_display_name}</p>
+                        <p className="text-xs text-gray-500">
+                          {format(parseISO(card.created_at), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFavorite(card.id);
+                        }}
+                        className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
+                          card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+                        }`}
+                      >
+                        <Heart 
+                          size={18} 
+                          className={card.is_favorited ? 'fill-current' : ''} 
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               ) : (
-                <TextCard
-                  key={card.id}
-                  card={card}
-                  onFavorite={handleFavorite}
+                <div 
+                  key={card.id} 
+                  className="group relative bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer"
                   onClick={() => setSelectedCardIndex(index)}
-                  canDelete={card.is_own_card || board.role === 'owner'}
-                  onDelete={handleDeleteClick}
-                />
+                >
+                  <div className="aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-6 flex items-center justify-center">
+                    <p className="text-white text-lg font-medium line-clamp-6 text-center">
+                      {card.description}
+                    </p>
+                    {card.is_own_card || board.role === 'owner' && (
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleDeleteClick(card.id);
+                        }}
+                        className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors opacity-0 group-hover:opacity-100"
+                      >
+                        <Trash2 size={16} />
+                      </button>
+                    )}
+                  </div>
+                  <div className="p-4">
+                    <div className="flex items-center justify-between">
+                      <div>
+                        <p className="text-sm font-medium text-gray-900">{card.uploader_display_name}</p>
+                        <p className="text-xs text-gray-500">
+                          {format(parseISO(card.created_at), 'MMM d, yyyy')}
+                        </p>
+                      </div>
+                      <button
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          handleFavorite(card.id);
+                        }}
+                        className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
+                          card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+                        }`}
+                      >
+                        <Heart 
+                          size={18} 
+                          className={card.is_favorited ? 'fill-current' : ''} 
+                        />
+                      </button>
+                    </div>
+                  </div>
+                </div>
               )
             ))}
           </div>

@@ -2,6 +2,7 @@ import React, { useEffect } from 'react';
 import { X, Heart, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
 import { MomentCardViewerProps } from '../lib/types';
 import { MomentCard } from '../lib/types';
+import { format, parseISO } from 'date-fns';
 
 // Helper function to get image URL
 const getImageUrl = (card: MomentCard) => {
@@ -67,92 +68,98 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   };
 
   return (
-    <div className="fixed inset-0 z-50">
-      {/* Backdrop */}
-      <div 
-        className="absolute inset-0 bg-black/90 backdrop-blur-sm transition-opacity duration-300"
-        onClick={onClose}
-      />
+    <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
+      {/* Background backdrop */}
+      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
 
-      {/* Content */}
-      <div className="relative h-full flex items-center justify-center p-4">
-        {/* Close button */}
-        <button
-          onClick={onClose}
-          className="absolute top-4 right-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-        >
-          <X size={24} />
-        </button>
-
-        {/* Navigation buttons */}
-        {!isFirst && (
-          <button
-            onClick={onPrevious}
-            className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-          >
-            <ChevronLeft size={32} />
-          </button>
-        )}
-
-        {!isLast && (
-          <button
-            onClick={onNext}
-            className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-          >
-            <ChevronRight size={32} />
-          </button>
-        )}
-
-        {/* Delete button */}
-        {canDelete && (
-          <button
-            onClick={handleDelete}
-            className="absolute top-4 left-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors"
-          >
-            <Trash2 size={24} />
-          </button>
-        )}
-
-        {/* Main content */}
-        <div className="w-full max-w-5xl mx-auto bg-white rounded-xl shadow-2xl overflow-hidden flex flex-col">
-          <div className="relative flex-1 min-h-0">
-            <div className="bg-black w-full h-full flex items-center justify-center" style={{ height: 'calc(85vh - 64px)' }}>
-              {currentCard.type === 'photo' ? (
-                <div className="relative w-full h-full flex items-center justify-center p-4">
-                  <img
-                    src={`https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${currentCard.media_url?.split('/').pop()}?width=1200&height=1200&resize=contain&quality=80`}
-                    alt=""
-                    className="max-w-full max-h-full w-auto h-auto object-contain"
-                    loading="eager"
-                    style={{ maxHeight: '100%' }}
-                  />
-                </div>
-              ) : (
-                <div className="w-full h-full bg-gradient-to-br from-teal-500 to-lime-300 p-12 flex items-center justify-center">
-                  <p className="text-white text-2xl font-medium text-center">
-                    {currentCard.description}
-                  </p>
-                </div>
-              )}
-            </div>
-          </div>
-
-          {/* Metadata footer */}
-          <div className="shrink-0 px-6 py-4 border-t border-gray-200 flex justify-between items-center bg-white">
-            <span className="text-gray-900 text-lg font-medium">
-              {currentCard.uploader_display_name}
-            </span>
+      <div className="fixed inset-0 z-10 overflow-y-auto">
+        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
+          <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
+            {/* Close button */}
             <button
-              onClick={handleFavorite}
-              className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${
-                currentCard.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
-              }`}
+              onClick={onClose}
+              className="absolute right-4 top-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
             >
-              <Heart 
-                size={24} 
-                className={currentCard.is_favorited ? 'fill-current' : ''} 
-              />
+              <X size={24} />
             </button>
+
+            {/* Navigation buttons */}
+            {!isFirst && (
+              <button
+                onClick={onPrevious}
+                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronLeft size={32} />
+              </button>
+            )}
+
+            {!isLast && (
+              <button
+                onClick={onNext}
+                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
+              >
+                <ChevronRight size={32} />
+              </button>
+            )}
+
+            {/* Delete button */}
+            {canDelete && (
+              <button
+                onClick={handleDelete}
+                className="absolute top-4 left-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors"
+              >
+                <Trash2 size={24} />
+              </button>
+            )}
+
+            {/* Main content */}
+            <div className="bg-white">
+              <div className="relative">
+                {currentCard.type === 'photo' ? (
+                  <div className="relative aspect-square bg-black">
+                    {getImageUrl(currentCard) && (
+                      <img
+                        src={getImageUrl(currentCard)!}
+                        alt=""
+                        className="max-w-full max-h-full w-auto h-auto object-contain mx-auto"
+                        loading="eager"
+                      />
+                    )}
+                  </div>
+                ) : (
+                  <div className="relative aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-12 flex items-center justify-center">
+                    <p className="text-white text-2xl font-medium text-center">
+                      {currentCard.description}
+                    </p>
+                  </div>
+                )}
+              </div>
+
+              {/* Footer */}
+              <div className="px-4 py-3 sm:px-6 bg-gray-50 border-t border-gray-200">
+                <div className="flex items-center justify-between">
+                  <div>
+                    <p className="text-sm font-medium text-gray-900">
+                      {currentCard.uploader_display_name}
+                    </p>
+                    <p className="text-xs text-gray-500">
+                      {format(parseISO(currentCard.created_at), 'MMMM d, yyyy')}
+                    </p>
+                  </div>
+                  <button
+                    onClick={handleFavorite}
+                    className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${
+                      currentCard.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+                    }`}
+                  >
+                    <Heart 
+                      size={24} 
+                      className={currentCard.is_favorited ? 'fill-current' : ''} 
+                    />
+                  </button>
+                </div>
+              </div>
+            </div>
           </div>
         </div>
       </div>
