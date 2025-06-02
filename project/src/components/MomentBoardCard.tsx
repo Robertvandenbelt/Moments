@@ -35,40 +35,44 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
     `${participantCount + 1} participants`;  // +1 to include the owner
 
   return (
-    <article className="bg-white rounded-xl w-full p-4 sm:p-6 shadow-md transform transition hover:-translate-y-1 duration-300">
-      <div className="min-w-0">
-        <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-2 truncate">
-          {mainHeading}
-        </h3>
-        {title && dateDisplay && (
-          <p className="text-gray-600 text-xs sm:text-sm">
-            {dateDisplay}
+    <article className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300">
+      <div className="p-4 sm:p-6">
+        <div className="min-w-0">
+          <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-2 truncate">
+            {mainHeading}
+          </h3>
+          {title && dateDisplay && (
+            <p className="text-gray-600 text-xs sm:text-sm">
+              {dateDisplay}
+            </p>
+          )}
+        </div>
+        
+        {description && (
+          <p className="text-gray-600 mt-3 line-clamp-2 text-sm sm:text-base">
+            {description}
           </p>
         )}
       </div>
       
-      {description && (
-        <p className="text-gray-600 mt-3 line-clamp-2 text-sm sm:text-base">
-          {description}
-        </p>
-      )}
-      
-      <div className="mt-6 flex justify-between items-center">
-        <div className="text-gray-400 text-xs sm:text-sm">
-          {participantText}
-        </div>
+      <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200">
+        <div className="flex justify-between items-center">
+          <div className="text-gray-400 text-xs sm:text-sm">
+            {participantText}
+          </div>
 
-        <div className="flex items-center gap-2">
-          {totalCardCount > 0 && (
-            <div className="text-gray-400 text-xs sm:text-sm">
-              {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
-              {unseenCardCount > 0 && (
-                <span className="text-orange-500 font-medium ml-1">
-                  (+{unseenCardCount} new)
-                </span>
-              )}
-            </div>
-          )}
+          <div className="flex items-center gap-2">
+            {totalCardCount > 0 && (
+              <div className="text-gray-400 text-xs sm:text-sm">
+                {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
+                {unseenCardCount > 0 && (
+                  <span className="text-orange-500 font-medium ml-1">
+                    (+{unseenCardCount} new)
+                  </span>
+                )}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </article>

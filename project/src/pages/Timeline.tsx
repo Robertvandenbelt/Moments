@@ -137,28 +137,30 @@ const Timeline: React.FC = () => {
           Object.entries(moments)
             .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
             .map(([month, { display, moments: monthMoments }]) => (
-            <section key={month} className="mb-16">
-              <h2 className="text-xl font-semibold text-gray-600 mb-8">{display}</h2>
-              <div className="grid gap-6 sm:grid-cols-2 md:grid-cols-3 lg:grid-cols-4">
-                {monthMoments.map((moment, idx) => (
-                  <Link 
-                    to={`/board/${moment.id}`} 
-                    key={moment.id} 
-                    className={`block transform transition hover:-translate-y-1 duration-300${idx === monthMoments.length - 1 ? ' mb-32' : ''}`}
-                  >
-                    <MomentBoardCard 
-                      title={moment.title || undefined}
-                      date={moment.date_start}
-                      dateEnd={moment.date_end || undefined}
-                      description={moment.description || undefined}
-                      isOwner={moment.is_owner}
-                      participantCount={moment.participant_count || 0}
-                      unseenCardCount={moment.unseen_card_count || 0}
-                      totalCardCount={moment.total_card_count || 0}
-                    />
-                  </Link>
-                ))}
+            <section key={month} className="mb-8">
+              <div className="border-b border-gray-200 pb-3 mb-4">
+                <h2 className="text-base font-semibold leading-7 text-gray-900">{display}</h2>
               </div>
+              <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
+                {monthMoments.map((moment, idx) => (
+                  <li key={moment.id} className="overflow-hidden rounded-lg bg-white shadow">
+                    <Link 
+                      to={`/board/${moment.id}`} 
+                      className="block transform transition hover:-translate-y-1 duration-300"
+                    >
+                      <MomentBoardCard 
+                        title={moment.title || undefined}
+                        date={moment.date_start}
+                        dateEnd={moment.date_end || undefined}
+                        description={moment.description || undefined}
+                        participantCount={moment.participant_count || 0}
+                        unseenCardCount={moment.unseen_card_count || 0}
+                        totalCardCount={moment.total_card_count || 0}
+                      />
+                    </Link>
+                  </li>
+                ))}
+              </ul>
             </section>
           ))
         )}
