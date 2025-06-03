@@ -1,8 +1,16 @@
-import React, { useEffect } from 'react';
-import { X, Heart, ChevronLeft, ChevronRight, Trash2 } from 'lucide-react';
-import { MomentCardViewerProps } from '../lib/types';
-import { MomentCard } from '../lib/types';
+import React from 'react';
+import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
+import { MomentCard } from '../lib/types';
+
+type MomentCardViewerProps = {
+  card: MomentCard;
+  onClose: () => void;
+  onPrevious?: () => void;
+  onNext?: () => void;
+  hasPrevious?: boolean;
+  hasNext?: boolean;
+};
 
 // Helper function to get image URL
 const getImageUrl = (card: MomentCard) => {
@@ -11,61 +19,25 @@ const getImageUrl = (card: MomentCard) => {
   return `https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/${filename}?width=1200&height=1200&resize=contain&quality=80`;
 };
 
-// Preload an image
-const preloadImage = (url: string) => {
-  const img = new Image();
-  img.src = url;
-};
-
 const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
-  cards,
-  currentCardIndex,
+  card,
   onClose,
-  onNext,
   onPrevious,
-  onFavorite,
-  canDelete,
-  onDelete
+  onNext,
+  hasPrevious = false,
+  hasNext = false
 }) => {
-  const currentCard = cards[currentCardIndex];
-  const isFirst = currentCardIndex === 0;
-  const isLast = currentCardIndex === cards.length - 1;
-
-  // Preload adjacent images
-  useEffect(() => {
-    if (!isFirst) {
-      const prevUrl = getImageUrl(cards[currentCardIndex - 1]);
-      if (prevUrl) preloadImage(prevUrl);
-    }
-    if (!isLast) {
-      const nextUrl = getImageUrl(cards[currentCardIndex + 1]);
-      if (nextUrl) preloadImage(nextUrl);
-    }
-  }, [currentCardIndex, cards, isFirst, isLast]);
-
   // Handle keyboard navigation
-  useEffect(() => {
+  React.useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.key === 'Escape') onClose();
-      if (e.key === 'ArrowLeft' && !isFirst) onPrevious();
-      if (e.key === 'ArrowRight' && !isLast) onNext();
+      if (e.key === 'ArrowLeft' && onPrevious && hasPrevious) onPrevious();
+      if (e.key === 'ArrowRight' && onNext && hasNext) onNext();
     };
 
     window.addEventListener('keydown', handleKeyDown);
     return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [onClose, onPrevious, onNext, isFirst, isLast]);
-
-  const handleFavorite = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    await onFavorite(currentCard.id);
-  };
-
-  const handleDelete = async (e: React.MouseEvent) => {
-    e.stopPropagation();
-    if (onDelete) {
-      await onDelete(currentCard.id);
-    }
-  };
+  }, [onClose, onPrevious, onNext, hasPrevious, hasNext]);
 
   return (
     <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
@@ -84,42 +56,37 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
             </button>
 
             {/* Navigation buttons */}
-            {!isFirst && (
+            {hasPrevious && onPrevious && (
               <button
-                onClick={onPrevious}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onPrevious();
+                }}
                 className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
               >
-                <ChevronLeft size={32} />
+                <ChevronLeft size={24} />
               </button>
             )}
-
-            {!isLast && (
+            {hasNext && onNext && (
               <button
-                onClick={onNext}
+                onClick={(e) => {
+                  e.stopPropagation();
+                  onNext();
+                }}
                 className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
               >
-                <ChevronRight size={32} />
-              </button>
-            )}
-
-            {/* Delete button */}
-            {canDelete && (
-              <button
-                onClick={handleDelete}
-                className="absolute top-4 left-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors"
-              >
-                <Trash2 size={24} />
+                <ChevronRight size={24} />
               </button>
             )}
 
             {/* Main content */}
             <div className="bg-white">
               <div className="relative">
-                {currentCard.type === 'photo' ? (
+                {card.type === 'photo' ? (
                   <div className="relative aspect-square bg-black">
-                    {getImageUrl(currentCard) && (
+                    {getImageUrl(card) && (
                       <img
-                        src={getImageUrl(currentCard)!}
+                        src={getImageUrl(card)!}
                         alt=""
                         className="max-w-full max-h-full w-auto h-auto object-contain mx-auto"
                         loading="eager"
@@ -129,7 +96,7 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
                 ) : (
                   <div className="relative aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-12 flex items-center justify-center">
                     <p className="text-white text-2xl font-medium text-center">
-                      {currentCard.description}
+                      {card.description}
                     </p>
                   </div>
                 )}
@@ -137,26 +104,13 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
 
               {/* Footer */}
               <div className="px-4 py-3 sm:px-6 bg-gray-50 border-t border-gray-200">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-900">
-                      {currentCard.uploader_display_name}
-                    </p>
-                    <p className="text-xs text-gray-500">
-                      {format(parseISO(currentCard.created_at), 'MMMM d, yyyy')}
-                    </p>
-                  </div>
-                  <button
-                    onClick={handleFavorite}
-                    className={`p-2 rounded-full hover:bg-gray-100 transition-colors ${
-                      currentCard.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
-                    }`}
-                  >
-                    <Heart 
-                      size={24} 
-                      className={currentCard.is_favorited ? 'fill-current' : ''} 
-                    />
-                  </button>
+                <div>
+                  <p className="text-sm font-medium text-gray-900">
+                    {card.uploader_display_name}
+                  </p>
+                  <p className="text-xs text-gray-500">
+                    {format(parseISO(card.created_at), 'MMMM d, yyyy')}
+                  </p>
                 </div>
               </div>
             </div>

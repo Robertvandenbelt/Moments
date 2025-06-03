@@ -457,51 +457,74 @@ const MomentBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
-      <div className="p-6 flex justify-between items-center">
-        <Link to="/timeline" className="text-gray-900 hover:text-gray-700 transition-colors">
-          <ArrowLeft size={32} />
-        </Link>
-        <button 
-          onClick={() => setIsBottomSheetOpen(true)}
-          className="text-gray-900 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-200"
-        >
-          <MoreVertical size={24} />
-        </button>
-      </div>
+      <div className="container mx-auto px-4 pt-6">
+        {/* Board Info Card */}
+        <article className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden">
+          {/* Card Header */}
+          <div className="p-4 flex justify-between items-center">
+            <Link 
+              to="/timeline" 
+              className="text-gray-900 hover:text-gray-700 transition-colors rounded-full p-2 hover:bg-gray-50"
+            >
+              <ArrowLeft size={24} />
+            </Link>
+            <button 
+              onClick={() => setIsBottomSheetOpen(true)}
+              className="text-gray-900 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-50"
+            >
+              <MoreVertical size={24} />
+            </button>
+          </div>
 
-      <div className="px-6">
-        <h1 className="text-xl font-semibold text-gray-900">
-          {board.title || formatDate(board.date_start)}
-        </h1>
-        
-        {board.title && (
-          <p className="text-gray-600 text-sm mt-2">
-            {formatDate(board.date_start)}
-            {board.date_end && ` - ${formatDate(board.date_end)}`}
-          </p>
-        )}
+          {/* Card Content */}
+          <div className="px-6">
+            <div className="space-y-4 pb-4">
+              {/* Title & Date Section */}
+              <div>
+                <h1 className="text-2xl font-semibold text-gray-900">
+                  {board.title || formatDate(board.date_start)}
+                </h1>
+                {board.title && (
+                  <p className="text-gray-600 text-sm mt-1">
+                    {formatDate(board.date_start)}
+                    {board.date_end && ` - ${formatDate(board.date_end)}`}
+                  </p>
+                )}
+              </div>
 
-        {board.description && (
-          <p className="text-gray-600 mt-4">
-            {board.description}
-          </p>
-        )}
+              {/* Description Section - if exists */}
+              {board.description && (
+                <p className="text-gray-600 text-base">
+                  {board.description}
+                </p>
+              )}
+            </div>
 
-        <p className="text-gray-400 mt-6 text-sm">
-          {board.role === 'owner' 
-            ? "Created by you"
-            : `Created by ${board.owner_display_name}`
-          }
-        </p>
+            {/* Stats & Creator Info */}
+            <div className="p-4 sm:p-6 bg-gray-50 -mx-6 border-t border-gray-100">
+              <div className="flex justify-between items-center">
+                <p className="text-gray-400 text-xs sm:text-sm">
+                  {board.role === 'owner' 
+                    ? "Created by you"
+                    : `Created by ${board.owner_display_name}`
+                  }
+                </p>
+                <span className="text-orange-600 text-sm">
+                  {board.card_count} {board.card_count === 1 ? 'card' : 'cards'}
+                </span>
+              </div>
+            </div>
+          </div>
+        </article>
 
         {/* View toggle */}
         <div className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1">
+          <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
             <button
               onClick={() => setShowFavoritesOnly(false)}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 !showFavoritesOnly
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-orange-500 text-white'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -511,7 +534,7 @@ const MomentBoard: React.FC = () => {
               onClick={() => setShowFavoritesOnly(true)}
               className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
                 showFavoritesOnly
-                  ? 'bg-teal-500 text-white'
+                  ? 'bg-orange-500 text-white'
                   : 'text-gray-500 hover:text-gray-700'
               }`}
             >
@@ -521,7 +544,7 @@ const MomentBoard: React.FC = () => {
         </div>
 
         {/* Grid of cards */}
-        <div className="container mx-auto px-4 pt-8 pb-24">
+        <div className="pt-8 pb-24">
           <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
             {displayedCards.map((card, index) => (
               <article 
@@ -537,17 +560,6 @@ const MomentBoard: React.FC = () => {
                         alt=""
                         className="h-full w-full object-cover"
                       />
-                      {(card.is_own_card || board.role === 'owner') && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(card.id);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
                     </div>
                   </>
                 ) : (
@@ -556,17 +568,6 @@ const MomentBoard: React.FC = () => {
                       <p className="text-white text-lg font-medium line-clamp-6 text-center">
                         {card.description}
                       </p>
-                      {(card.is_own_card || board.role === 'owner') && (
-                        <button
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            handleDeleteClick(card.id);
-                          }}
-                          className="absolute top-2 right-2 p-1.5 rounded-full bg-black/30 text-white hover:bg-red-500 hover:bg-opacity-70 transition-colors opacity-0 group-hover:opacity-100"
-                        >
-                          <Trash2 size={16} />
-                        </button>
-                      )}
                     </div>
                   </>
                 )}
@@ -603,14 +604,12 @@ const MomentBoard: React.FC = () => {
       {/* Card viewer */}
       {selectedCardIndex !== null && (
         <MomentCardViewer
-          cards={displayedCards}
-          currentCardIndex={selectedCardIndex}
+          card={displayedCards[selectedCardIndex]}
           onClose={() => setSelectedCardIndex(null)}
-          onNext={() => setSelectedCardIndex(prev => prev !== null ? Math.min(prev + 1, displayedCards.length - 1) : null)}
-          onPrevious={() => setSelectedCardIndex(prev => prev !== null ? Math.max(prev - 1, 0) : null)}
-          onFavorite={handleFavorite}
-          canDelete={true}
-          onDelete={handleDeleteClick}
+          onPrevious={() => setSelectedCardIndex(prev => prev !== null ? Math.max(0, prev - 1) : null)}
+          onNext={() => setSelectedCardIndex(prev => prev !== null ? Math.min(displayedCards.length - 1, prev + 1) : null)}
+          hasPrevious={selectedCardIndex > 0}
+          hasNext={selectedCardIndex < displayedCards.length - 1}
         />
       )}
 
