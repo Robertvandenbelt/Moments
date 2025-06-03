@@ -51,8 +51,21 @@ export default {
       },
       animation: {
         'slide-up': 'slide-up 0.3s ease-out'
-      }
+      },
+      textShadow: {
+        'stroke-orange': '-1px -1px 0 #f97316, 1px -1px 0 #f97316, -1px 1px 0 #f97316, 1px 1px 0 #f97316',
+      },
     },
   },
-  plugins: [],
+  plugins: [
+    function({ addUtilities }) {
+      addUtilities({
+        '.text-stroke-orange': {
+          '-webkit-text-stroke': '2px #f97316',
+          'text-stroke': '2px #f97316',
+          'paint-order': 'stroke fill',
+        },
+      });
+    },
+  ],
 };

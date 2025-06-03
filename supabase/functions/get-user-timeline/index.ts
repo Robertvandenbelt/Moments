@@ -71,7 +71,9 @@ Deno.serve(async (req) => {
   const result = (boards ?? []).map((b) => {
     const latestCard = b.latest_card_at ? DateTime.fromISO(b.latest_card_at) : null;
     const unseenCardCount = lastTimelineSeen && latestCard && latestCard > lastTimelineSeen ? b.card_count : 0;
-    const activityMonth = latestCard ? latestCard.toFormat('yyyy-MM') : null;
+    const activityMonth = latestCard ? 
+      latestCard.toFormat('yyyy-MM') : 
+      (b.created_at ? DateTime.fromISO(b.created_at).toFormat('yyyy-MM') : null);
 
     return {
       id: b.id,

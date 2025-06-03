@@ -34,7 +34,7 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
 
   const participantText = participantCount === 0 ? 
     'Just you' : 
-    `${participantCount + 1} participants`;  // +1 to include the owner
+    `${participantCount} participants`;
 
   return (
     <article className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300">

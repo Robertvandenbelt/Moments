@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { Heart, Trash2 } from 'lucide-react';
 import { MomentCardProps } from '../lib/types';
+import { format, parseISO } from 'date-fns';
 
 // Helper function to get image URL with dimensions
 const getImageUrl = (mediaUrl: string, width: number, height: number = width) => {
@@ -31,48 +32,26 @@ const PhotoCard: React.FC<MomentCardProps> = ({
   };
 
   return (
-    <div 
+    <article 
       onClick={onClick}
-      className="relative h-full rounded-xl overflow-hidden bg-white group cursor-pointer transition duration-300 hover:shadow-xl ring-1 ring-black/5 shadow-sm flex flex-col"
+      className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer group"
     >
-      {/* Photo container */}
-      <div className="relative aspect-square">
+      <div className="aspect-square bg-gray-100">
         {/* Loading skeleton */}
         {isLoading && (
           <div className="absolute inset-0 bg-gray-100 animate-pulse" />
         )}
 
         {card.media_url && (
-          <picture>
-            {/* Small screens */}
-            <source
-              media="(max-width: 640px)"
-              srcSet={getImageUrl(card.media_url, 300)}
-            />
-            {/* Medium screens */}
-            <source
-              media="(max-width: 1024px)"
-              srcSet={getImageUrl(card.media_url, 400)}
-            />
-            {/* Large screens */}
-            <source
-              media="(min-width: 1025px)"
-              srcSet={getImageUrl(card.media_url, 500)}
-            />
-            {/* Fallback */}
-            <img 
-              src={getImageUrl(card.media_url, 400)}
-              alt=""
-              className={`h-full w-full object-cover transition-transform duration-300 group-hover:scale-105 ${
-                isLoading ? 'opacity-0' : 'opacity-100'
-              }`}
-              loading="lazy"
-              onLoad={() => setIsLoading(false)}
-            />
-          </picture>
+          <img
+            src={`${card.media_url}?width=500&height=500&resize=cover&quality=80`}
+            alt=""
+            className="h-full w-full object-cover"
+            loading="lazy"
+            onLoad={() => setIsLoading(false)}
+          />
         )}
 
-        {/* Delete button - visible on hover */}
         {canDelete && (
           <button
             onClick={handleDelete}
@@ -83,24 +62,28 @@ const PhotoCard: React.FC<MomentCardProps> = ({
         )}
       </div>
 
-      {/* Metadata footer */}
-      <div className="px-3 py-2 border-t border-gray-100 flex justify-between items-center bg-white/80">
-        <span className="text-gray-600 text-sm font-medium truncate">
-          {card.uploader_display_name}
-        </span>
-        <button
-          onClick={handleFavorite}
-          className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
-            card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
-          }`}
-        >
-          <Heart 
-            size={18} 
-            className={card.is_favorited ? 'fill-current' : ''} 
-          />
-        </button>
+      <div className="p-4 sm:p-6 bg-white border-t border-gray-100">
+        <div className="flex items-center justify-between">
+          <div>
+            <p className="text-sm sm:text-base font-medium text-gray-900">{card.uploader_display_name}</p>
+            <p className="text-xs sm:text-sm text-gray-500">
+              {format(parseISO(card.created_at), 'MMM d, yyyy')}
+            </p>
+          </div>
+          <button
+            onClick={handleFavorite}
+            className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
+              card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+            }`}
+          >
+            <Heart 
+              size={18} 
+              className={card.is_favorited ? 'fill-current' : ''} 
+            />
+          </button>
+        </div>
       </div>
-    </div>
+    </article>
   );
 };
 
