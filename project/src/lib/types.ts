@@ -24,14 +24,16 @@ export type MomentBoard = {
   description: string | null;
   date_start: string;
   date_end: string | null;
-  is_public_preview: boolean;
   created_by: string;
-  created_at: string;
-  moment_cards: { count: number } | null;
   is_owner: boolean;
   participant_count: number;
   total_card_count: number;
-  unseen_card_count?: number;
+  unseen_card_count: number;
+  access_type: string;
+  preview_photo_url?: string;
+  moment_cards?: {
+    count: number;
+  };
 };
 
 export type GroupedMoments = {

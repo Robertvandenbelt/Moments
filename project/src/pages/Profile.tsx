@@ -60,27 +60,33 @@ const Profile: React.FC = () => {
         <p className="text-white text-sm">{user?.email}</p>
       </div>
 
-      <div className="max-w-md mx-auto">
-        <div className="bg-white rounded-2xl p-6 shadow-card">
-          <div className="space-y-4">
+      <div className="max-w-4xl mx-auto">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
             <ProfileStat 
               count={stats.privateCount} 
               label="private moments" 
               description="Moments you created that no one else joined" 
               type="private" 
             />
+          </div>
+          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
             <ProfileStat 
               count={stats.sharedCount} 
               label="shared moments" 
               description="Moments you created that others joined" 
               type="shared" 
             />
+          </div>
+          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
             <ProfileStat 
               count={stats.joinedCount} 
               label="joined moments" 
               description="Moments created by others that you joined" 
               type="joined" 
             />
+          </div>
+          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
             <ProfileStat 
               count={stats.cardsAdded} 
               label="cards added" 

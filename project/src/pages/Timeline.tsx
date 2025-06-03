@@ -141,26 +141,22 @@ const Timeline: React.FC = () => {
               <div className="pb-3 mb-4">
                 <h2 className="text-base font-semibold leading-7 text-gray-900">{display}</h2>
               </div>
-              <ul className="grid grid-cols-1 gap-6 sm:grid-cols-2 lg:grid-cols-3 xl:grid-cols-4 items-start">
-                {monthMoments.map((moment, idx) => (
-                  <li key={moment.id} className="overflow-hidden rounded-lg bg-white shadow">
-                    <Link 
-                      to={`/board/${moment.id}`} 
-                      className="block transform transition hover:-translate-y-1 duration-300"
-                    >
-                      <MomentBoardCard 
-                        title={moment.title || undefined}
-                        date={moment.date_start}
-                        dateEnd={moment.date_end || undefined}
-                        description={moment.description || undefined}
-                        participantCount={moment.participant_count || 0}
-                        unseenCardCount={moment.unseen_card_count || 0}
-                        totalCardCount={moment.total_card_count || 0}
-                      />
-                    </Link>
-                  </li>
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+                {monthMoments.map((moment) => (
+                  <Link key={moment.id} to={`/board/${moment.id}`}>
+                    <MomentBoardCard
+                      title={moment.title || undefined}
+                      date={moment.date_start}
+                      dateEnd={moment.date_end || undefined}
+                      description={moment.description || undefined}
+                      participantCount={moment.participant_count}
+                      unseenCardCount={moment.unseen_card_count}
+                      totalCardCount={moment.total_card_count}
+                      previewPhotoUrl={moment.preview_photo_url}
+                    />
+                  </Link>
                 ))}
-              </ul>
+              </div>
             </section>
           ))
         )}

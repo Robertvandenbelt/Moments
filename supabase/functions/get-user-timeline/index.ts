@@ -85,7 +85,8 @@ Deno.serve(async (req) => {
       total_card_count: b.card_count,
       unseen_card_count: unseenCardCount,
       access_type: b.access_type,
-      activity_month: activityMonth
+      activity_month: activityMonth,
+      preview_photo_url: b.preview_photo_url
     };
   });
 

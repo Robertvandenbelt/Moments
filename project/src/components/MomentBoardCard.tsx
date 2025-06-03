@@ -9,6 +9,7 @@ type MomentBoardCardProps = {
   participantCount: number;
   unseenCardCount?: number;
   totalCardCount: number;
+  previewPhotoUrl?: string;
 };
 
 const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
@@ -18,7 +19,8 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
   description,
   participantCount,
   unseenCardCount = 0,
-  totalCardCount = 0
+  totalCardCount = 0,
+  previewPhotoUrl
 }) => {
   const mainHeading = title || date || 'Untitled Moment';
 
@@ -36,6 +38,16 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
 
   return (
     <article className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300">
+      {previewPhotoUrl && (
+        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+          <img 
+            src={previewPhotoUrl} 
+            alt=""
+            className="w-full h-full object-cover"
+            loading="lazy"
+          />
+        </div>
+      )}
       <div className="p-4 sm:p-6">
         <div className="min-w-0">
           <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-2 truncate">
@@ -64,7 +76,7 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
           <div className="flex items-center gap-2">
             {totalCardCount > 0 && (
               <>
-                <span className="text-orange-600 font-bold text-sm">
+                <span className="text-orange-600 text-sm">
                   {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
                 </span>
                 {unseenCardCount > 0 && (
