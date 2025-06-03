@@ -36,7 +36,13 @@ BEGIN
       MAX(mc.created_at) as latest_card,
       -- Get the URL of the most recent photo card as preview
       (
-        SELECT media_url 
+        SELECT 
+          CASE 
+            WHEN mc2.media_url IS NOT NULL THEN 
+              'https://ekwpzlzdjbfzjdtdfafk.supabase.co/storage/v1/render/image/public/momentcards/PhotoCards/Originals/' || 
+              split_part(mc2.media_url, '/', -1)
+            ELSE NULL 
+          END
         FROM moment_cards mc2 
         WHERE mc2.moment_board_id = mc.moment_board_id 
           AND mc2.type = 'photo' 

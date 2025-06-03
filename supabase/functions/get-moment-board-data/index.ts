@@ -71,11 +71,23 @@ Deno.serve(async (req) => {
 
     const { data: profile } = await supabase.from('profiles').select('display_name').eq('id', board.created_by).single();
     const { data: participants } = await supabase.from('profiles').select('id, display_name').in('id', shares?.map((s) => s.user_id) || []);
-    const { data: cards } = await supabase.from('moment_cards').select('id, moment_board_id, media_url, uploaded_by, created_at, type, description').eq('moment_board_id', moment_board_id).order('created_at', {
-      ascending: true
-    });
+    const { data: cards } = await supabase
+      .from('moment_cards')
+      .select('id, moment_board_id, media_url, uploaded_by, created_at, type, description')
+      .eq('moment_board_id', moment_board_id)
+      .order('created_at', { ascending: true });
 
-    const { data: favorites } = await supabase.from('favorites').select('moment_card_id').eq('user_id', user.id);
+    // Get the most recent photo card's URL for preview
+    const previewPhotoUrl = cards
+      ?.filter(card => card.type === 'photo' && card.media_url)
+      .sort((a, b) => new Date(b.created_at).getTime() - new Date(a.created_at).getTime())
+      [0]?.media_url || null;
+
+    const { data: favorites } = await supabase
+      .from('favorites')
+      .select('moment_card_id')
+      .eq('user_id', user.id);
+
     const { data: allProfiles } = await supabase.from('profiles').select('id, display_name');
     const profileMap = Object.fromEntries((allProfiles || []).map((p) => [
       p.id,
@@ -97,7 +109,8 @@ Deno.serve(async (req) => {
         owner_display_name: profile?.display_name,
         role: isOwner ? 'owner' : 'participant',
         participant_count: shares?.length || 0,
-        card_count: cards?.length || 0
+        card_count: cards?.length || 0,
+        preview_photo_url: previewPhotoUrl
       },
       cards: enrichedCards
     }), {

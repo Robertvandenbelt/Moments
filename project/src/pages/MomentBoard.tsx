@@ -183,24 +183,36 @@ const MomentBoard: React.FC = () => {
       return;
     }
 
-    try {
-      const card = data.cards.find(c => c.id === cardId);
-      if (!card) {
-        console.error('Card not found:', cardId);
-        return;
-      }
+    const card = data.cards.find(c => c.id === cardId);
+    if (!card) {
+      console.error('Card not found:', cardId);
+      return;
+    }
 
+    // Optimistically update both UI states
+    setData(prev => {
+      if (!prev) return prev;
+      return {
+        ...prev,
+        cards: prev.cards.map(c => 
+          c.id === cardId 
+            ? { ...c, is_favorited: !c.is_favorited }
+            : c
+        )
+      };
+    });
+
+    setMomentCards(prev => 
+      prev.map(c => 
+        c.id === cardId 
+          ? { ...c, is_favorited: !c.is_favorited }
+          : c
+      )
+    );
+
+    try {
       let result;
-      if (card.is_favorited) {
-        // Remove from favorites
-        result = await supabase
-          .from('favorites')
-          .delete()
-          .match({
-            user_id: user.id,
-            moment_card_id: cardId
-          });
-      } else {
+      if (!card.is_favorited) { // Note: we use the original state here
         // Add to favorites
         result = await supabase
           .from('favorites')
@@ -208,25 +220,40 @@ const MomentBoard: React.FC = () => {
             user_id: user.id,
             moment_card_id: cardId
           });
+      } else {
+        // Remove from favorites
+        result = await supabase
+          .from('favorites')
+          .delete()
+          .eq('user_id', user.id)
+          .eq('moment_card_id', cardId);
       }
 
       if (result.error) {
         console.error('Supabase operation failed:', result.error);
-        throw result.error;
-      }
+        // Revert both UI states on error
+        setData(prev => {
+          if (!prev) return prev;
+          return {
+            ...prev,
+            cards: prev.cards.map(c => 
+              c.id === cardId 
+                ? { ...c, is_favorited: card.is_favorited }
+                : c
+            )
+          };
+        });
 
-      // Update local state
-      setData(prev => {
-        if (!prev) return prev;
-        return {
-          ...prev,
-          cards: prev.cards.map(c => 
+        setMomentCards(prev => 
+          prev.map(c => 
             c.id === cardId 
-              ? { ...c, is_favorited: !c.is_favorited }
+              ? { ...c, is_favorited: card.is_favorited }
               : c
           )
-        };
-      });
+        );
+        
+        throw result.error;
+      }
     } catch (err) {
       console.error('Error in handleFavorite:', err);
     }

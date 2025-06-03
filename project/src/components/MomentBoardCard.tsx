@@ -12,6 +12,12 @@ type MomentBoardCardProps = {
   previewPhotoUrl?: string;
 };
 
+// Helper function to get transformed image URL
+const getImageUrl = (mediaUrl: string | undefined) => {
+  if (!mediaUrl) return '';
+  return `${mediaUrl}?width=800&height=450&resize=cover&quality=80`;
+};
+
 const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
   title,
   date,
@@ -41,7 +47,7 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
       {previewPhotoUrl && (
         <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
           <img 
-            src={previewPhotoUrl} 
+            src={getImageUrl(previewPhotoUrl)}
             alt=""
             className="w-full h-full object-cover"
             loading="lazy"
