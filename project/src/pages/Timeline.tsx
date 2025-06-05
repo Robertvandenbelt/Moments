@@ -4,7 +4,8 @@ import MomentBoardCard from '../components/MomentBoardCard';
 import { Plus } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { MomentBoard } from '../lib/types';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
 import 'material-symbols/outlined.css';
 
 type GroupedMoments = {
@@ -135,14 +136,14 @@ const Timeline: React.FC = () => {
           {/* Centered Logo */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
-              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-on-surface">
+              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight" style={{ color: '#E27D60' }}>
                 m
                 <span 
                   className="material-symbols-outlined mx-[1px]"
                   style={{ 
                     fontSize: '28px',
                     fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24",
-                    color: '#E27D60'
+                    color: '#5A7742'
                   }}
                 >
                   photo_camera
