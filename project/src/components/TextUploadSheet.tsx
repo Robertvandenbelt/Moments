@@ -22,43 +22,47 @@ const TextUploadSheet: React.FC<TextUploadSheetProps> = ({ onClose, onSubmit, is
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black bg-opacity-25 z-40"
+        className="fixed inset-0 bg-black/25 z-40"
         onClick={onClose}
       />
 
       {/* Sheet */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 z-50 animate-slide-up">
-        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-        
-        <div className="flex justify-between items-center mb-4">
-          <h2 className="text-xl font-semibold text-gray-900">Add text memory</h2>
+      <div className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl p-0 z-50 shadow-xl animate-slide-up border-t border-outline-variant">
+        {/* Top App Bar */}
+        <div className="flex items-center justify-between px-6 h-16 border-b border-outline-variant bg-surface rounded-t-2xl">
+          <h2 className="text-title-large font-roboto-flex text-on-surface">Add text memory</h2>
           <button 
             onClick={onClose}
-            className="text-gray-500 hover:text-gray-700 p-2 rounded-full hover:bg-gray-100 transition-colors"
+            className="relative p-3 rounded-full hover:bg-surface-container-highest transition-colors"
+            aria-label="Close"
           >
-            <X size={24} />
+            <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 24 }}>
+              close
+            </span>
           </button>
         </div>
 
-        <form onSubmit={handleSubmit}>
-          <textarea
-            value={text}
-            onChange={(e) => setText(e.target.value.slice(0, charLimit))}
-            placeholder="What's the story behind this moment?"
-            className="w-full h-40 p-3 border border-gray-200 rounded-lg resize-none focus:outline-none focus:ring-2 focus:ring-teal-500 focus:border-transparent"
-            disabled={isSubmitting}
-          />
-          
-          <div className="flex justify-between items-center mt-2 mb-4">
-            <span className="text-sm text-gray-500">
-              {text.length} / {charLimit} characters
-            </span>
+        <form onSubmit={handleSubmit} className="px-6 pt-4 pb-6">
+          <div className="mb-4">
+            <textarea
+              value={text}
+              onChange={(e) => setText(e.target.value.slice(0, charLimit))}
+              placeholder="What's the story behind this moment?"
+              className="w-full h-40 px-4 py-3 border border-outline-variant rounded-xl bg-surface text-on-surface text-body-large font-roboto-flex resize-none focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition"
+              disabled={isSubmitting}
+              maxLength={charLimit}
+            />
+            <div className="flex justify-between items-center mt-2">
+              <span className="text-label-medium text-on-surface-variant">
+                {text.length} / {charLimit} characters
+              </span>
+            </div>
           </div>
 
           <button
             type="submit"
             disabled={!text.trim() || isSubmitting}
-            className="w-full bg-teal-500 text-white py-3 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 rounded-full bg-primary text-on-primary text-label-large font-roboto-flex font-medium shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 active:bg-primary/80"
           >
             {isSubmitting ? 'Creating...' : 'Create text card'}
           </button>

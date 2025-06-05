@@ -1,11 +1,11 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import Navbar from '../components/Navbar';
 import MomentBoardCard from '../components/MomentBoardCard';
 import { Plus } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { MomentBoard } from '../lib/types';
 import { format, parseISO } from 'date-fns';
+import 'material-symbols/outlined.css';
 
 type GroupedMoments = {
   [key: string]: {
@@ -96,10 +96,17 @@ const Timeline: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
-        <Navbar />
-        <div className="flex items-center justify-center min-h-screen">
-          <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="relative w-12 h-12">
+          {/* Track */}
+          <div className="absolute inset-0 rounded-full border-4 border-surface-container-highest" />
+          {/* Progress */}
+          <div className="absolute inset-0 rounded-full border-4 border-primary animate-spin" 
+            style={{
+              borderRightColor: 'transparent',
+              borderTopColor: 'transparent'
+            }}
+          />
         </div>
       </div>
     );
@@ -108,7 +115,6 @@ const Timeline: React.FC = () => {
   if (error) {
     return (
       <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
-        <Navbar />
         <div className="container mx-auto px-4 pt-20 text-center">
           <p className="text-gray-500">{error}</p>
         </div>
@@ -123,10 +129,54 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-orange-50 relative max-w-full overflow-x-hidden">
-      <Navbar />
+      {/* M3 Top App Bar */}
+      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant">
+        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
+              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-on-surface">
+                m
+                <span 
+                  className="material-symbols-outlined mx-[1px]"
+                  style={{ 
+                    fontSize: '28px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24",
+                    color: '#E27D60'
+                  }}
+                >
+                  photo_camera
+                </span>
+                ments
+              </div>
+            </div>
+          </div>
+
+          {/* Invisible placeholder for left alignment */}
+          <div className="w-10 h-10 md:w-12 md:h-12" />
+
+          {/* Right section - Settings */}
+          <Link 
+            to="/profile" 
+            className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+            aria-label="Settings"
+          >
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <span 
+              className="material-symbols-outlined text-on-surface"
+              style={{ 
+                fontSize: '24px',
+                fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+              }}
+            >
+              settings
+            </span>
+          </Link>
+        </div>
+      </div>
       
       <main
-        className="container mx-auto px-4 pt-28 pb-32"
+        className="container mx-auto px-4 pt-8 pb-32"
         style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {Object.entries(moments).length === 0 ? (
@@ -165,10 +215,13 @@ const Timeline: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleCreateClick}
-          className="bg-primary-action text-white rounded-full p-4 shadow-lg"
+          className="relative flex items-center justify-center w-14 h-14 rounded-full shadow-lg bg-[#E27D60] text-white transition-colors hover:bg-[#d96c4f] active:bg-[#c85d41] focus:outline-none focus:ring-2 focus:ring-[#E27D60]/40"
           aria-label="Add new moment"
+          style={{ boxShadow: '0px 3px 8px rgba(0,0,0,0.15)' }}
         >
           <Plus size={28} />
+          {/* State layer */}
+          <span className="absolute inset-0 rounded-full bg-on-primary opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200 pointer-events-none" />
         </button>
       </div>
     </div>

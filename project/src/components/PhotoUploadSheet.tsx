@@ -83,9 +83,7 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
           console.error('Storage upload error details:', {
             error: uploadError,
             message: uploadError.message,
-            statusCode: uploadError.statusCode,
-            name: uploadError.name,
-            details: uploadError.details
+            name: uploadError.name
           });
           alert(`Failed to upload photo to storage: ${uploadError.message}`);
           continue;
@@ -149,36 +147,39 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
     <>
       {/* Backdrop */}
       <div 
-        className="fixed inset-0 bg-black/50 z-40"
+        className="fixed inset-0 bg-black/25 z-40"
         onClick={onClose}
       />
       
       {/* Bottom Sheet */}
-      <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 z-50 animate-slide-up">
-        <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-        
-        <div className="max-w-lg mx-auto">
-          <div className="flex justify-between items-center mb-6">
-            <h2 className="text-xl font-semibold text-gray-900">Add photos</h2>
-            <button 
-              onClick={onClose}
-              className="p-2 hover:bg-gray-100 rounded-full transition-colors"
-            >
-              <X size={24} className="text-gray-500" />
-            </button>
-          </div>
-
+      <div className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl p-0 z-50 shadow-xl animate-slide-up border-t border-outline-variant">
+        {/* Top App Bar */}
+        <div className="flex items-center justify-between px-6 h-16 border-b border-outline-variant bg-surface rounded-t-2xl">
+          <h2 className="text-title-large font-roboto-flex text-on-surface">Add photos</h2>
+          <button 
+            onClick={onClose}
+            className="relative p-3 rounded-full hover:bg-surface-container-highest transition-colors"
+            aria-label="Close"
+          >
+            <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 24 }}>
+              close
+            </span>
+          </button>
+        </div>
+        <div className="max-w-lg mx-auto px-6 pt-4 pb-6">
           {/* Dropzone */}
           <div
             {...getRootProps()}
-            className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors
-              ${isDragActive ? 'border-teal-500 bg-teal-50' : 'border-gray-300 hover:border-teal-500'}
+            className={`border-2 border-dashed rounded-xl p-6 text-center mb-4 transition-colors bg-surface-container-low border-outline-variant
+              ${isDragActive ? 'border-primary bg-primary-container' : 'hover:border-primary'}
               ${isUploading || previews.length >= MAX_FILES ? 'opacity-50 cursor-not-allowed' : 'cursor-pointer'}
             `}
           >
             <input {...getInputProps()} />
-            <Camera size={32} className="mx-auto mb-2 text-gray-400" />
-            <p className="text-gray-600">
+            <span className="material-symbols-outlined mx-auto mb-2 text-on-surface-variant" style={{ fontSize: 32 }}>
+              photo_camera
+            </span>
+            <p className="text-body-large font-roboto-flex text-on-surface">
               {isDragActive ? (
                 'Drop photos here...'
               ) : previews.length >= MAX_FILES ? (
@@ -187,7 +188,7 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
                 <>
                   Drag & drop photos here, or click to select
                   <br />
-                  <span className="text-sm text-gray-500">
+                  <span className="text-label-medium text-on-surface-variant">
                     Maximum {MAX_FILES} photos, up to 10MB each (JPEG/PNG)
                   </span>
                 </>
@@ -203,16 +204,17 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
                   <img
                     src={preview.preview}
                     alt="Preview"
-                    className="w-full h-full object-cover rounded-lg"
+                    className="w-full h-full object-cover rounded-xl border border-outline-variant bg-surface-container-low"
                   />
                   <button
                     onClick={() => {
                       URL.revokeObjectURL(preview.preview);
                       setPreviews(prev => prev.filter(p => p.id !== preview.id));
                     }}
-                    className="absolute top-1 right-1 w-6 h-6 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                    className="absolute top-1 right-1 w-7 h-7 bg-black/50 text-white rounded-full flex items-center justify-center hover:bg-black/70 transition-colors"
+                    aria-label="Remove photo"
                   >
-                    <X size={16} />
+                    <span className="material-symbols-outlined" style={{ fontSize: 18 }}>close</span>
                   </button>
                 </div>
               ))}
@@ -223,7 +225,7 @@ const PhotoUploadSheet: React.FC<PhotoUploadSheetProps> = ({ momentBoardId, onCl
           <button
             onClick={handleUpload}
             disabled={previews.length === 0 || isUploading}
-            className="w-full bg-teal-500 text-white py-3 rounded-full font-medium disabled:opacity-50 disabled:cursor-not-allowed"
+            className="w-full h-12 rounded-full bg-primary text-on-primary text-label-large font-roboto-flex font-medium shadow-md transition-colors disabled:opacity-50 disabled:cursor-not-allowed hover:bg-primary/90 active:bg-primary/80"
           >
             {isUploading ? 'Uploading...' : 'Upload photos'}
           </button>

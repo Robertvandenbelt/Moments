@@ -1,6 +1,10 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import { ArrowLeft, Calendar, ArrowRight } from 'lucide-react';
+import { ArrowLeft, ArrowRight } from 'lucide-react';
+import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
+import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
+import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
+import { format } from 'date-fns';
 import MomentBoardSnippet from '../components/MomentBoardSnippet';
 import { createMomentBoard } from '../services/supabase';
 
@@ -8,16 +12,19 @@ const CreateMomentBoard: React.FC = () => {
   const navigate = useNavigate();
   const [step, setStep] = useState(1);
   const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
-  const [formData, setFormData] = useState({
+  const [formData, setFormData] = useState<{
+    title: string;
+    dateRange: [Date | null, Date | null];
+    description: string;
+  }>({
     title: '',
-    dateStart: today,
-    dateEnd: today,
+    dateRange: [new Date(), new Date()],
     description: ''
   });
   const [loading, setLoading] = useState(false);
 
   const handleNext = () => {
-    if (formData.dateStart) {
+    if (formData.dateRange[0]) {
       setStep(2);
     }
   };
@@ -31,8 +38,8 @@ const CreateMomentBoard: React.FC = () => {
     try {
       const board = await createMomentBoard({
         title: formData.title || undefined,
-        date_start: formData.dateStart,
-        date_end: formData.dateEnd || undefined,
+        date_start: formData.dateRange[0] ? formData.dateRange[0].toISOString().split('T')[0] : '',
+        date_end: formData.dateRange[1] ? formData.dateRange[1].toISOString().split('T')[0] : '',
         description: formData.description || undefined
       });
       navigate(`/share/${board.id}`);
@@ -43,105 +50,79 @@ const CreateMomentBoard: React.FC = () => {
     }
   };
 
-  const handleDateChange = (e: React.ChangeEvent<HTMLInputElement>, field: 'dateStart' | 'dateEnd') => {
-    const newDate = e.target.value;
-    setFormData(prev => {
-      // If start date is after end date, update end date
-      if (field === 'dateStart' && newDate > prev.dateEnd) {
-        return { ...prev, [field]: newDate, dateEnd: newDate };
-      }
-      // If end date is before start date, update start date
-      if (field === 'dateEnd' && newDate < prev.dateStart) {
-        return { ...prev, [field]: newDate, dateStart: newDate };
-      }
-      return { ...prev, [field]: newDate };
-    });
+  const handleDateRangeChange = (newRange: [Date | null, Date | null]) => {
+    setFormData(prev => ({ ...prev, dateRange: newRange }));
   };
 
   return (
-    <div className="min-h-screen bg-primary px-8 pt-8 pb-24">
+    <div className="min-h-screen" style={{ background: '#DCE9D7' }}>
       {step === 1 ? (
-        <div className="max-w-md mx-auto">
-          <Link to="/timeline" className="text-white">
-            <ArrowLeft size={32} />
-          </Link>
-
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mt-10 mb-8">
-            When is the moment?
-          </h1>
-          <p className="text-white text-lg mb-10">Step 1 of 2 - date and title</p>
-
+        <LocalizationProvider dateAdapter={AdapterDateFns}>
+        <div className="max-w-md mx-auto px-4 pt-8">
+          <h1 className="text-headline-small font-roboto-flex text-on-surface mb-2">When is the moment?</h1>
+          <p className="text-body-large font-roboto-flex text-on-surface-variant mb-8">Step 1 of 2 – date and title</p>
           <div className="space-y-6">
             <div>
-              <label className="block text-white text-lg mb-4">
-                Start date
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={formData.dateStart}
-                  onChange={(e) => handleDateChange(e, 'dateStart')}
-                  className="w-full px-4 py-4 rounded-xl bg-white text-base pr-12"
-                />
-                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
-              </div>
+              <label className="block text-title-medium font-roboto-flex text-on-surface mb-2">Date or date range</label>
+              <DateRangePicker
+                value={formData.dateRange as [Date | null, Date | null]}
+                onChange={handleDateRangeChange}
+                format="yyyy-MM-dd"
+                slotProps={{
+                  textField: {
+                    fullWidth: true,
+                    variant: 'outlined',
+                    className: 'w-full rounded-xl border border-outline-variant bg-surface text-on-surface text-body-large font-roboto-flex',
+                    InputProps: { style: { borderRadius: '0.75rem' } },
+                  },
+                  popper: {
+                    sx: { zIndex: 1300 },
+                  },
+                }}
+              />
             </div>
-
             <div>
-              <label className="block text-white text-lg mb-4">
-                End date (optional)
-              </label>
-              <div className="relative">
-                <input
-                  type="date"
-                  value={formData.dateEnd}
-                  onChange={(e) => handleDateChange(e, 'dateEnd')}
-                  min={formData.dateStart}
-                  className="w-full px-4 py-4 rounded-xl bg-white text-base pr-12"
-                />
-                <Calendar className="absolute right-4 top-1/2 -translate-y-1/2 text-gray-400" size={24} />
-              </div>
-            </div>
-
-            <div>
-              <label className="block text-white text-lg mb-4">
-                Title (optional)
-              </label>
+              <label className="block text-title-medium font-roboto-flex text-on-surface mb-2">Title (optional)</label>
               <input
                 type="text"
                 value={formData.title}
                 onChange={(e) => setFormData(prev => ({ ...prev, title: e.target.value }))}
                 placeholder="e.g. Sarah's birthday, Summer BBQ"
                 maxLength={50}
-                className="w-full px-4 py-4 rounded-xl bg-white text-base"
+                className="w-full px-4 py-4 rounded-xl border border-outline-variant bg-surface text-on-surface text-body-large font-roboto-flex focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               />
-              <div className="text-right mt-2 text-white/80 text-sm">
+              <div className="text-right mt-2 text-label-medium text-on-surface-variant">
                 {formData.title.length} / 50
               </div>
             </div>
           </div>
-
-          <button
-            onClick={handleNext}
-            disabled={!formData.dateStart}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-primary-action rounded-full flex items-center justify-center text-white shadow-fab disabled:opacity-50 disabled:cursor-not-allowed"
-            aria-label="Next"
-          >
-            <ArrowRight size={24} />
-          </button>
+          <div className="fixed max-w-md mx-auto inset-x-0 bottom-8 px-8 flex gap-4">
+            <Link
+              to="/timeline"
+              className="flex-1 bg-surface-container-highest text-on-surface py-4 rounded-full text-base font-medium border border-outline-variant hover:bg-surface-container-highest/80 flex items-center justify-center transition-colors"
+            >
+              Cancel
+            </Link>
+            <button
+              onClick={handleNext}
+              disabled={!formData.dateRange[0]}
+              className="flex-1 bg-primary text-on-primary py-4 rounded-full text-base font-medium shadow-md transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
+              aria-label="Next"
+            >
+              Next
+            </button>
+          </div>
         </div>
+        </LocalizationProvider>
       ) : (
-        <div className="max-w-md mx-auto">
-          <h1 className="text-3xl sm:text-4xl font-bold text-white mt-10 mb-8">
-            Add a description
-          </h1>
-          <p className="text-white text-lg mb-10">Step 2 of 2 - add a description</p>
-
-          <div className="bg-white rounded-2xl overflow-hidden">
+        <div className="max-w-md mx-auto px-4 pt-8">
+          <h1 className="text-headline-small font-roboto-flex text-on-surface mb-2">Add a description</h1>
+          <p className="text-body-large font-roboto-flex text-on-surface-variant mb-8">Step 2 of 2 – add a description</p>
+          <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant">
             <MomentBoardSnippet
               title={formData.title}
-              dateStart={formData.dateStart}
-              dateEnd={formData.dateEnd}
+              dateStart={formData.dateRange[0] ? formData.dateRange[0].toISOString().split('T')[0] : ''}
+              dateEnd={formData.dateRange[1] ? formData.dateRange[1].toISOString().split('T')[0] : ''}
               className="rounded-none"
             />
             <div className="p-4">
@@ -151,25 +132,24 @@ const CreateMomentBoard: React.FC = () => {
                 placeholder="Add an optional description. What was this moment about?"
                 maxLength={250}
                 rows={6}
-                className="w-full resize-none text-base focus:outline-none"
+                className="w-full resize-none text-body-large font-roboto-flex rounded-xl border border-outline-variant bg-surface text-on-surface px-4 py-3 focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary"
               />
             </div>
           </div>
-          <div className="text-right mt-2 text-white/80 text-sm">
+          <div className="text-right mt-2 text-label-medium text-on-surface-variant">
             {formData.description.length} / 250
           </div>
-
           <div className="fixed max-w-md mx-auto inset-x-0 bottom-8 px-8 flex gap-4">
             <button
               onClick={handleBack}
-              className="flex-1 bg-white/20 text-white py-4 rounded-full text-base font-medium"
+              className="flex-1 bg-surface-container-highest text-on-surface py-4 rounded-full text-base font-medium border border-outline-variant hover:bg-surface-container-highest/80 flex items-center justify-center transition-colors"
             >
               Back
             </button>
             <button
               onClick={handleCreate}
               disabled={loading}
-              className="flex-1 bg-primary-action text-white py-4 rounded-full text-base font-medium disabled:opacity-70"
+              className="flex-1 bg-primary text-on-primary py-4 rounded-full text-base font-medium shadow-md transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-70 flex items-center justify-center"
             >
               {loading ? 'Creating...' : 'Create moment'}
             </button>

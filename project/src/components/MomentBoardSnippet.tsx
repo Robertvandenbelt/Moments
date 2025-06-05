@@ -27,14 +27,13 @@ const MomentBoardSnippet: React.FC<MomentBoardSnippetProps> = ({
   const mainHeading = title ? title : dateRange;
   
   return (
-    <div className={`bg-white ${className}`}>
+    <div className={className}>
       <div className="p-6">
-        <h3 className="text-xl font-bold text-gray-900 mb-2">
+        <h3 className="text-title-large font-roboto-flex text-on-surface mb-1">
           {mainHeading}
         </h3>
-        {title && <p className="text-gray-500">{dateRange}</p>}
+        {title && <p className="text-body-medium font-roboto-flex text-on-surface-variant">{dateRange}</p>}
       </div>
-      <div className="h-px bg-orange-500" />
     </div>
   );
 };

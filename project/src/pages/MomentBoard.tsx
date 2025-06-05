@@ -2,7 +2,8 @@ import React, { useState, useEffect, useMemo } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
 import { useAuth } from '../context/AuthContext';
 import PhotoCard from '../components/PhotoCard';
 import TextCard from '../components/TextCard';
@@ -53,9 +54,12 @@ const MomentBoard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(true);
+  const [showOnlyMyCards, setShowOnlyMyCards] = useState(false);
+  const [showOnlyOthersCards, setShowOnlyOthersCards] = useState(false);
   const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
+  const [showDownloadConfirm, setShowDownloadConfirm] = useState(false);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
   const [showPhotoUpload, setShowPhotoUpload] = useState(false);
   const [showTextUpload, setShowTextUpload] = useState(false);
@@ -133,8 +137,18 @@ const MomentBoard: React.FC = () => {
   }, [id, user]);
 
   const displayedCards = useMemo(() => {
-    return showFavoritesOnly ? momentCards.filter((card) => card.is_favorited) : momentCards;
-  }, [momentCards, showFavoritesOnly]);
+    let filteredCards = showFavoritesOnly ? momentCards.filter((card) => card.is_favorited) : momentCards;
+    
+    if (!showFavoritesOnly) {
+      if (showOnlyMyCards) {
+        filteredCards = filteredCards.filter(card => card.is_own_card);
+      } else if (showOnlyOthersCards) {
+        filteredCards = filteredCards.filter(card => !card.is_own_card);
+      }
+    }
+    
+    return filteredCards;
+  }, [momentCards, showFavoritesOnly, showOnlyMyCards, showOnlyOthersCards]);
 
   useEffect(() => {
     if (selectedCardIndex !== null) {
@@ -150,8 +164,18 @@ const MomentBoard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 flex items-center justify-center">
-        <div className="animate-spin rounded-full h-12 w-12 border-t-4 border-b-4 border-teal"></div>
+      <div className="min-h-screen bg-surface flex items-center justify-center">
+        <div className="relative w-12 h-12">
+          {/* Track */}
+          <div className="absolute inset-0 rounded-full border-4 border-surface-container-highest" />
+          {/* Progress */}
+          <div className="absolute inset-0 rounded-full border-4 border-primary animate-spin" 
+            style={{
+              borderRightColor: 'transparent',
+              borderTopColor: 'transparent'
+            }}
+          />
+        </div>
       </div>
     );
   }
@@ -490,14 +514,14 @@ const MomentBoard: React.FC = () => {
           <div className="flex items-center gap-4">
             <Link 
               to="/timeline" 
-              className="relative p-3 rounded-full hover:bg-surface-container-highest transition-colors"
+              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
             >
               <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
               <span 
                 className="material-symbols-outlined text-on-surface"
                 style={{ 
                   fontSize: '24px',
-                  fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
                 }}
               >
                 arrow_back
@@ -505,21 +529,42 @@ const MomentBoard: React.FC = () => {
             </Link>
           </div>
 
-          <button 
-            onClick={() => setIsBottomSheetOpen(true)}
-            className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-          >
-            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-            <span 
-              className="material-symbols-outlined text-on-surface"
-              style={{ 
-                fontSize: '24px',
-                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-              }}
+          <div className="flex items-center gap-2">
+            {/* Share button for owners */}
+            {board.role === 'owner' && (
+              <button
+                onClick={() => navigate(`/share/${id}`)}
+                className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+                aria-label="Share moment"
+              >
+                <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                <span
+                  className="material-symbols-outlined text-on-surface"
+                  style={{
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  share
+                </span>
+              </button>
+            )}
+            <button 
+              onClick={() => setIsBottomSheetOpen(true)}
+              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
             >
-              more_vert
-            </span>
-          </button>
+              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+              <span 
+                className="material-symbols-outlined text-on-surface"
+                style={{ 
+                  fontSize: '24px',
+                  fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+                }}
+              >
+                more_vert
+              </span>
+            </button>
+          </div>
         </div>
       </div>
 
@@ -576,34 +621,12 @@ const MomentBoard: React.FC = () => {
             {/* Primary tab bar */}
             <div className="flex items-center border-b border-outline-variant">
               <button
-                onClick={() => setShowFavoritesOnly(false)}
-                className={`group relative min-w-[120px] p-3 flex items-center justify-center gap-2 transition-colors ${
-                  !showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
-                }`}
-              >
-                {/* Icon */}
-                <span 
-                  className="material-symbols-outlined"
-                  style={{ 
-                    fontSize: '24px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  grid_view
-                </span>
-                {/* Label */}
-                <span className="text-label-large font-roboto-flex">All</span>
-                {/* Active indicator */}
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
-                  !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
-                }`} />
-                {/* State layer */}
-                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
-              </button>
-
-              <button
-                onClick={() => setShowFavoritesOnly(true)}
-                className={`group relative min-w-[120px] p-3 flex items-center justify-center gap-2 transition-colors ${
+                onClick={() => {
+                  setShowFavoritesOnly(true);
+                  setShowOnlyMyCards(false);
+                  setShowOnlyOthersCards(false);
+                }}
+                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
                   showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
                 }`}
               >
@@ -626,12 +649,85 @@ const MomentBoard: React.FC = () => {
                 {/* State layer */}
                 <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
               </button>
+
+              <button
+                onClick={() => {
+                  setShowFavoritesOnly(false);
+                  setShowOnlyMyCards(false);
+                  setShowOnlyOthersCards(false);
+                }}
+                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
+                  !showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
+                }`}
+              >
+                {/* Icon */}
+                <span 
+                  className="material-symbols-outlined"
+                  style={{ 
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  grid_view
+                </span>
+                {/* Label */}
+                <span className="text-label-large font-roboto-flex">All</span>
+                {/* Active indicator */}
+                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
+                  !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
+                }`} />
+                {/* State layer */}
+                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
+              </button>
             </div>
 
-            {/* Space reserved for future secondary tabs */}
+            {/* Segmented buttons for All tab (M3 style, single-select) */}
             {!showFavoritesOnly && (
-              <div className="h-12">
-                {/* Secondary tabs will go here in the future */}
+              <div className="inline-flex mt-4 shadow-sm">
+                <button
+                  onClick={() => {
+                    setShowOnlyMyCards(false);
+                    setShowOnlyOthersCards(false);
+                  }}
+                  className={`px-4 py-2 border border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
+                    rounded-l-full
+                    ${!showOnlyMyCards && !showOnlyOthersCards
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  `}
+                  aria-pressed={!showOnlyMyCards && !showOnlyOthersCards}
+                >
+                  All cards
+                </button>
+                <button
+                  onClick={() => {
+                    setShowOnlyMyCards(true);
+                    setShowOnlyOthersCards(false);
+                  }}
+                  className={`px-4 py-2 border-t border-b border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
+                    ${showOnlyMyCards
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  `}
+                  aria-pressed={showOnlyMyCards}
+                >
+                  Your cards
+                </button>
+                <button
+                  onClick={() => {
+                    setShowOnlyMyCards(false);
+                    setShowOnlyOthersCards(true);
+                  }}
+                  className={`px-4 py-2 border border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
+                    rounded-r-full
+                    ${showOnlyOthersCards
+                      ? 'bg-primary text-on-primary border-primary'
+                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  `}
+                  aria-pressed={showOnlyOthersCards}
+                >
+                  Others cards
+                </button>
               </div>
             )}
           </div>
@@ -644,16 +740,35 @@ const MomentBoard: React.FC = () => {
             {/* Feed header with content summary */}
             <div className="mb-8 flex items-center justify-between">
               <div>
-                <h2 className="text-headline-small font-roboto-flex text-on-surface">
-                  {showFavoritesOnly ? 'Favorite cards' : 'All cards'}
-                </h2>
-                <p className="text-body-medium font-roboto-flex text-on-surface-variant">
+                <p className="text-headline-small font-roboto-flex text-on-surface">
                   {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
                 </p>
               </div>
               
               {/* Dynamic feed layout options - could be expanded later */}
               <div className="flex items-center gap-2">
+                {showFavoritesOnly && displayedCards.length > 0 && (
+                  <button
+                    onClick={() => setShowDownloadConfirm(true)}
+                    disabled={isDownloading}
+                    className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                    aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
+                  >
+                    {/* State layer */}
+                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200" />
+                    
+                    {/* Icon */}
+                    <span 
+                      className="material-symbols-outlined text-on-surface-variant relative"
+                      style={{ 
+                        fontSize: '24px',
+                        fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                      }}
+                    >
+                      {isDownloading ? 'progress_activity' : 'download'}
+                    </span>
+                  </button>
+                )}
                 <button
                   className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
                   aria-label="View options"
@@ -855,85 +970,61 @@ const MomentBoard: React.FC = () => {
         isDestructive={true}
       />
 
+      {/* Download Confirmation Dialog */}
+      <ConfirmDialog
+        isOpen={showDownloadConfirm}
+        title="Download Favorites"
+        message="This will download all your favorite cards in their original quality. Would you like to continue?"
+        confirmLabel="Download"
+        cancelLabel="Cancel"
+        onConfirm={() => {
+          setShowDownloadConfirm(false);
+          handleDownloadFavorites();
+        }}
+        onCancel={() => setShowDownloadConfirm(false)}
+      />
+
       {/* FAB and Menu */}
-      <div className="fixed bottom-6 right-6">
-        {/* FAB Menu */}
+      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
+        {/* FAB Menu (expanded) */}
         {isFabMenuOpen && (
-          <>
-            {/* Backdrop */}
-            <div 
-              className="fixed inset-0 bg-black/20 z-40"
-              onClick={() => setIsFabMenuOpen(false)}
-            />
-            
-            <div className="absolute bottom-[4.5rem] right-[0.375rem] z-50 flex flex-col gap-2 animate-slide-up">
-              {/* Add Photo Card */}
-              <button
-                onClick={() => {
-                  setIsFabMenuOpen(false);
-                  setShowPhotoUpload(true);
-                }}
-                className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
-              >
-                <Camera size={24} className="text-teal-500" />
-              </button>
-
-              {/* Add Text Card */}
-              <button
-                onClick={() => {
-                  setIsFabMenuOpen(false);
-                  setShowTextUpload(true);
-                }}
-                className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
-              >
-                <Type size={24} className="text-teal-500" />
-              </button>
-
-              {/* Share Board - Only for owners */}
-              {board.role === 'owner' && (
-                <button
-                  onClick={() => {
-                    setIsFabMenuOpen(false);
-                    navigate(`/share/${id}`);
-                  }}
-                  className="w-12 h-12 bg-white rounded-full shadow-card hover:bg-gray-50 transition-colors flex items-center justify-center"
-                >
-                  <Share2 size={24} className="text-teal-500" />
-                </button>
-              )}
-            </div>
-          </>
-        )}
-
-        {/* Download FAB - only visible when showing favorites */}
-        {showFavoritesOnly && displayedCards.length > 0 && (
-          <div className="absolute right-[4.5rem] bottom-0 animate-slide-left">
-            <button 
-              onClick={() => handleDownloadFavorites()}
-              disabled={isDownloading}
-              className={`w-14 h-14 rounded-full shadow-lg flex items-center justify-center text-white transition-colors ${
-                isDownloading 
-                  ? 'bg-orange-400 cursor-not-allowed' 
-                  : 'bg-orange-500 hover:bg-orange-600'
-              }`}
-              aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
+          <div className="flex flex-col items-end mb-4 space-y-3 animate-fade-in-up">
+            {/* Add Photo Card */}
+            <button
+              onClick={() => {
+                setIsFabMenuOpen(false);
+                setShowPhotoUpload(true);
+              }}
+              className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg" style={{ background: '#DCE9D7', color: '#234B1C' }}
+              aria-label="PhotoCard"
             >
-              {isDownloading ? (
-                <div className="w-6 h-6 border-2 border-white border-t-transparent rounded-full animate-spin" />
-              ) : (
-                <Download size={28} />
-              )}
+              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>photo_camera</span>
+            </button>
+            {/* Add Text Card */}
+            <button
+              onClick={() => {
+                setIsFabMenuOpen(false);
+                setShowTextUpload(true);
+              }}
+              className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg" style={{ background: '#DCE9D7', color: '#234B1C' }}
+              aria-label="TextCard"
+            >
+              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>edit</span>
             </button>
           </div>
         )}
-
-        {/* Add Content FAB */}
-        <button 
+        {/* Main FAB */}
+        <button
           onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-          className="fab z-50"
+          className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg bg-[#E27D60] text-white transition-transform hover:bg-[#d96c4f] active:bg-[#c85d41] z-50"
           aria-label="Add content"
         >
-          <Plus size={28} className={`transition-transform ${isFabMenuOpen ? 'rotate-45' : ''}`} />
+          <span
+            className={`material-symbols-outlined transition-transform duration-200 ${isFabMenuOpen ? 'rotate-45' : ''}`}
+            style={{ fontSize: 28 }}
+          >
+            add
+          </span>
         </button>
       </div>
 

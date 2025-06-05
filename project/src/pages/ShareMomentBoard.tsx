@@ -87,53 +87,51 @@ const ShareMomentBoard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-lime-200 to-teal-100 px-6 pt-8 pb-10">
-      <button 
-        onClick={handleClose} 
-        className="w-10 h-10 flex items-center justify-center rounded-full hover:bg-black/5 transition-colors"
-        aria-label="Close and go to board"
-      >
-        <X size={32} className="text-gray-900" />
-      </button>
+    <div className="min-h-screen bg-gradient-to-b from-lime-200 to-teal-100 px-0 pt-0 pb-10">
+      {/* Top App Bar */}
+      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant flex items-center h-16 px-4">
+        <button 
+          onClick={handleClose} 
+          className="relative p-3 rounded-full hover:bg-surface-container-highest transition-colors"
+          aria-label="Close and go to board"
+        >
+          <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 28 }}>close</span>
+        </button>
+      </div>
 
-      <div className="flex flex-col items-center justify-center min-h-[80vh] -mt-16">
-        <div className="text-center mb-12">
-          <div className="text-8xl mb-6 animate-[bounce_1s_ease-in-out]">🎉</div>
-          <h1 className="text-4xl font-bold text-gray-900 mb-4">
+      <div className="flex flex-col items-center justify-center min-h-[80vh] -mt-8 px-4">
+        <div className="text-center mb-10">
+          <div className="text-7xl mb-4 animate-[bounce_1s_ease-in-out]">🎉</div>
+          <h1 className="text-headline-medium font-roboto-flex text-on-surface mb-2">
             Your moment is live!
           </h1>
-          <p className="text-gray-600 text-lg">
+          <p className="text-title-medium font-roboto-flex text-on-surface-variant">
             Share it with your friends and family
           </p>
         </div>
 
         {board && (
-          <div className="w-full max-w-md">
-            <div className="overflow-hidden">
-              <div className="rounded-t-2xl overflow-hidden">
-                <MomentBoardSnippet
-                  title={board.title || undefined}
-                  dateStart={board.date_start}
-                  dateEnd={board.date_end || undefined}
-                  className="shadow-lg"
-                />
-              </div>
-              <div className="bg-white rounded-b-2xl shadow-lg">
-                <div className="p-4">
-                  <div className="flex items-center gap-2">
-                    <input
-                      type="text"
-                      value={shareLink}
-                      readOnly
-                      className="flex-1 bg-transparent px-3 py-2 focus:outline-none text-sm sm:text-base truncate"
-                    />
-                    <button
-                      onClick={handleCopy}
-                      className="shrink-0 px-4 py-2 bg-orange-500 text-white rounded-xl font-medium hover:bg-orange-600 transition-colors text-sm sm:text-base"
-                    >
-                      {copied ? 'Copied!' : 'Copy'}
-                    </button>
-                  </div>
+          <div className="w-full max-w-md bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant">
+            <MomentBoardSnippet
+              title={board.title || undefined}
+              dateStart={board.date_start}
+              dateEnd={board.date_end || undefined}
+            />
+            <div className="border-t border-outline-variant bg-surface-container-low">
+              <div className="p-4">
+                <div className="flex items-center gap-2">
+                  <input
+                    type="text"
+                    value={shareLink}
+                    readOnly
+                    className="flex-1 bg-surface-container-low border border-outline-variant rounded-xl px-4 py-3 text-body-medium font-roboto-flex text-on-surface focus:outline-none focus:ring-2 focus:ring-primary focus:border-primary transition truncate"
+                  />
+                  <button
+                    onClick={handleCopy}
+                    className="shrink-0 px-5 py-3 rounded-full bg-primary text-on-primary text-label-large font-roboto-flex font-medium shadow-md transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed"
+                  >
+                    {copied ? 'Copied!' : 'Copy'}
+                  </button>
                 </div>
               </div>
             </div>
@@ -142,7 +140,7 @@ const ShareMomentBoard: React.FC = () => {
 
         <button
           onClick={handleWhatsAppShare}
-          className="w-full max-w-md bg-whatsapp text-white py-4 rounded-full font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-xl mt-8"
+          className="w-full max-w-md bg-[#25D366] text-white py-4 rounded-full font-semibold shadow-lg transition-all hover:scale-105 hover:shadow-xl mt-8 text-label-large font-roboto-flex"
         >
           Share via WhatsApp
         </button>
