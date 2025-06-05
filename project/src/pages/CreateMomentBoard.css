@@ -1,0 +1,79 @@
+/* Custom styles for DayPicker in CreateMomentBoard */
+.custom-daypicker-m3 {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.custom-daypicker-m3 .rdp-months {
+  width: 100% !important;
+  margin-left: 0 !important;
+  margin-right: 0 !important;
+  display: flex;
+  justify-content: center;
+}
+.custom-daypicker-m3 .rdp-month {
+  width: 100% !important;
+  min-width: 0 !important;
+}
+.custom-daypicker-m3 .rdp-caption {
+  width: 100% !important;
+  display: flex !important;
+  flex-direction: row;
+  align-items: center;
+  justify-content: space-between !important;
+  padding-left: 0.5rem !important;
+  padding-right: 0.5rem !important;
+}
+.custom-daypicker-m3 .rdp-caption > span {
+  flex: 1 1 0%;
+  margin-right: 0.5rem;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+.custom-daypicker-m3 .rdp-table {
+  width: 100% !important;
+}
+.custom-daypicker-m3 .rdp-head_cell, .custom-daypicker-m3 .rdp-day {
+  padding-left: 0 !important;
+  padding-right: 0 !important;
+}
+.custom-daypicker-m3 .rdp-day {
+  min-width: 44px !important;
+  height: 44px !important;
+  font-size: 1rem !important;
+  margin: 2px !important;
+}
+.custom-daypicker-m3 .rdp-day_selected,
+.custom-daypicker-m3 .rdp-day_range_start,
+.custom-daypicker-m3 .rdp-day_range_end {
+  background: #E27D60 !important;
+  color: #fff !important;
+  border-radius: 50% !important;
+}
+.custom-daypicker-m3 .rdp-day_range_middle {
+  background: #E27D60 !important;
+  color: #fff !important;
+  border-radius: 0 !important;
+}
+.custom-daypicker-m3 .rdp-day:focus-visible {
+  outline: 2px solid #234B1C;
+  outline-offset: 2px;
+}
+.custom-daypicker-m3 select {
+  min-width: 60px;
+  max-width: 70px;
+  flex-shrink: 0;
+  margin-left: 0;
+  overflow-x: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.modal-calendar-container {
+  overflow-x: hidden;
+  padding-left: 0;
+  padding-right: 0;
+} 
