@@ -26,7 +26,7 @@ export default defineConfig({
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'router': ['react-router-dom'],
-          'ui': ['lucide-react', 'react-day-picker'],
+          'ui': ['lucide-react', 'react-day-picker', '@mui/x-date-pickers', '@mui/x-date-pickers-pro'],
           'storage': ['@supabase/supabase-js'],
           'sentry': ['@sentry/react', '@sentry/tracing'],
         },
