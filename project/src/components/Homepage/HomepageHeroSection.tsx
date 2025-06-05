@@ -8,21 +8,21 @@ const HomepageHeroSection = () => {
       <div className="container mx-auto px-4">
         <div className="flex flex-col items-center text-center">
           <div className="max-w-3xl">
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-white leading-tight mb-6">
+            <h1 className="text-4xl md:text-5xl lg:text-6xl font-roboto-flex font-bold text-white leading-tight mb-6">
             Your private space for shared memories
             </h1>
-            <p className="text-xl text-white/80 leading-relaxed mb-10">
+            <p className="text-xl font-roboto-flex text-white/80 leading-relaxed mb-10">
               Moments is the simplest, most joyful way to capture and share memories together. Perfect for birthdays, trips and spontaneous get-togethers.
             </p>
             <div>
               <Link 
                 to="/signup" 
-                className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-full text-lg font-medium hover:bg-orange-600 transition-colors"
+                className="inline-flex items-center px-6 py-3 bg-orange-500 text-white rounded-full text-lg font-roboto-flex font-medium hover:bg-orange-600 transition-colors"
               >
                 Get started
                 <ArrowRight className="ml-2 h-5 w-5" />
               </Link>
-              <p className="mt-6 text-white/80 text-sm">
+              <p className="mt-6 text-white/80 text-sm font-roboto-flex">
                 No public feeds. No clutter. Just your favorite memories.
               </p>
             </div>

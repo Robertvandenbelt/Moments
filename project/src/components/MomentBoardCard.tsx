@@ -1,5 +1,6 @@
 import React from 'react';
 import { format, parseISO } from 'date-fns';
+import 'material-symbols/outlined.css';
 
 type MomentBoardCardProps = {
   title?: string;
@@ -40,12 +41,17 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
 
   const participantText = participantCount === 0 ? 
     'Just you' : 
-    `${participantCount} participants`;
+    participantCount.toString();
 
   return (
-    <article className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300">
+    <article 
+      className="group relative bg-surface-container-low rounded-medium shadow-level1 hover:shadow-level2 active:shadow-level1 transition-all duration-300"
+    >
+      {/* State layer for hover/press states */}
+      <div className="absolute inset-0 rounded-medium bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-300" />
+
       {previewPhotoUrl && (
-        <div className="relative aspect-video w-full overflow-hidden bg-gray-100">
+        <div className="relative aspect-video w-full overflow-hidden bg-surface-container rounded-t-medium">
           <img 
             src={getImageUrl(previewPhotoUrl)}
             alt=""
@@ -54,45 +60,72 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
           />
         </div>
       )}
-      <div className="p-4 sm:p-6">
+
+      <div className="p-4 pb-0">
         <div className="min-w-0">
-          <h3 className="text-base sm:text-xl font-semibold text-gray-900 mb-2 truncate">
+          <h3 className="text-title-large font-roboto-flex text-on-surface mb-1 truncate">
             {mainHeading}
           </h3>
           {title && dateDisplay && (
-            <p className="text-gray-600 text-xs sm:text-sm">
+            <p className="text-body-medium font-roboto-flex text-on-surface-variant">
               {dateDisplay}
             </p>
           )}
         </div>
         
         {description && (
-          <p className="text-gray-600 mt-3 line-clamp-2 text-sm sm:text-base">
+          <p className="text-body-medium font-roboto-flex text-on-surface-variant mt-4 line-clamp-2">
             {description}
           </p>
         )}
       </div>
       
-      <div className="px-4 sm:px-6 py-3 sm:py-4 bg-gray-50 border-t border-gray-200">
-        <div className="flex justify-between items-center">
-          <div className="text-gray-400 text-xs sm:text-sm">
-            {participantText}
+      <div className="px-4 py-4 mt-4 border-t border-outline-variant">
+        <div className="flex flex-wrap items-center gap-2">
+          {/* Participants Assist Chip */}
+          <div className="inline-flex items-center h-8 px-3 rounded-lg bg-primary-container">
+            <span 
+              className="material-symbols-outlined text-on-primary-container mr-2"
+              style={{ 
+                fontSize: '20px',
+                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+              }}
+            >
+              group
+            </span>
+            <span className="text-label-medium font-roboto-flex text-on-primary-container">
+              {participantText}
+            </span>
           </div>
 
-          <div className="flex items-center gap-2">
-            {totalCardCount > 0 && (
-              <>
-                <span className="text-orange-600 text-sm">
-                  {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
+          {totalCardCount > 0 && (
+            <>
+              {/* Cards Count Assist Chip */}
+              <div className="inline-flex items-center h-8 px-3 rounded-lg bg-primary-action">
+                <span 
+                  className="material-symbols-outlined text-white mr-2"
+                  style={{ 
+                    fontSize: '20px',
+                    fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  photo_library
                 </span>
-                {unseenCardCount > 0 && (
-                  <span className="inline-block bg-orange-500 text-white font-bold px-2 py-0.5 rounded-full text-xs ml-1">
+                <span className="text-label-medium font-roboto-flex text-white">
+                  {totalCardCount}
+                </span>
+              </div>
+
+              {/* New Cards Badge Chip */}
+              {unseenCardCount > 0 && (
+                <div className="inline-flex items-center h-8 px-3 rounded-lg bg-primary-container text-on-primary-container">
+                  <span className="text-label-medium font-roboto-flex">
                     +{unseenCardCount} new
                   </span>
-                )}
-              </>
-            )}
-          </div>
+                </div>
+              )}
+            </>
+          )}
         </div>
       </div>
     </article>

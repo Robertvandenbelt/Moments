@@ -9,19 +9,22 @@ type ProfileStatProps = {
 
 const ProfileStat: React.FC<ProfileStatProps> = ({ count, label, description }) => {
   return (
-    <div className="h-full flex flex-col">
-      <div className="flex-1 p-6 bg-gradient-to-br from-orange-50 to-teal-50">
+    <div className="relative h-full rounded-medium border border-outline bg-surface-container-low">
+      {/* Card Header - Using M3 spacing and typography */}
+      <div className="p-6">
         <div className="flex flex-col items-center text-center">
-          <div className="text-3xl font-bold text-gray-900 mb-2">
+          <div className="text-display-small font-roboto-flex text-on-surface mb-1">
             {count}
           </div>
-          <h3 className="text-lg font-medium text-gray-900">
+          <h3 className="text-title-medium font-roboto-flex text-on-surface">
             {label}
           </h3>
         </div>
       </div>
-      <div className="px-6 py-4 bg-gray-50 border-t border-gray-100">
-        <p className="text-sm text-gray-500 text-center">
+
+      {/* Card Footer - Supporting text */}
+      <div className="px-6 py-4 bg-surface-container-lowest border-t border-outline/20">
+        <p className="text-body-medium text-on-surface-variant text-center">
           {description}
         </p>
       </div>

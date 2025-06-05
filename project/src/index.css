@@ -4,65 +4,66 @@
 
 @layer base {
   @font-face {
-    font-family: 'Inter';
+    font-family: 'Roboto Flex';
     font-style: normal;
     font-weight: 400;
     font-display: swap;
-    src: url('@fontsource/inter/files/inter-latin-400-normal.woff2') format('woff2');
+    src: url('@fontsource/roboto-flex/files/roboto-flex-latin-400-normal.woff2') format('woff2');
   }
   @font-face {
-    font-family: 'Inter';
+    font-family: 'Roboto Flex';
     font-style: normal;
     font-weight: 500;
     font-display: swap;
-    src: url('@fontsource/inter/files/inter-latin-500-normal.woff2') format('woff2');
+    src: url('@fontsource/roboto-flex/files/roboto-flex-latin-500-normal.woff2') format('woff2');
   }
   @font-face {
-    font-family: 'Inter';
+    font-family: 'Roboto Flex';
     font-style: normal;
     font-weight: 600;
     font-display: swap;
-    src: url('@fontsource/inter/files/inter-latin-600-normal.woff2') format('woff2');
+    src: url('@fontsource/roboto-flex/files/roboto-flex-latin-600-normal.woff2') format('woff2');
   }
   @font-face {
-    font-family: 'Inter';
+    font-family: 'Roboto Flex';
     font-style: normal;
     font-weight: 700;
     font-display: swap;
-    src: url('@fontsource/inter/files/inter-latin-700-normal.woff2') format('woff2');
+    src: url('@fontsource/roboto-flex/files/roboto-flex-latin-700-normal.woff2') format('woff2');
   }
 
   html, body {
-    @apply font-sans bg-gray-100 text-black;
+    @apply font-sans bg-surface text-on-surface;
+    font-family: "Roboto Flex Variable", system-ui, sans-serif;
   }
 
   /* Override react-day-picker styles */
   .rdp {
     --rdp-cell-size: 36px !important;
-    --rdp-accent-color: #F97316 !important;
-    --rdp-background-color: #FFF7ED !important;
+    --rdp-accent-color: var(--primary) !important;
+    --rdp-background-color: var(--primary-container) !important;
     margin: 0 !important;
   }
 }
 
 @layer components {
   .btn-primary {
-    @apply bg-orange text-white font-semibold px-4 py-2 rounded-xl shadow;
+    @apply bg-primary text-on-primary font-medium px-4 py-2 rounded-medium shadow-level2 hover:shadow-level3 transition-shadow;
   }
 
   .btn-secondary {
-    @apply bg-gray-200 text-black font-medium px-4 py-2 rounded-xl;
+    @apply bg-secondary-container text-on-secondary-container font-medium px-4 py-2 rounded-medium hover:bg-secondary/90 transition-colors;
   }
 
   .badge-highlight {
-    @apply bg-lime text-orange-500 text-sm font-medium px-2 py-1 rounded-full;
+    @apply bg-tertiary-container text-on-tertiary-container text-label-medium px-2 py-1 rounded-full;
   }
 
   .card {
-    @apply bg-white rounded-2xl shadow-card p-4;
+    @apply bg-surface-container rounded-large shadow-level1 p-4 hover:shadow-level2 transition-shadow;
   }
 
   .fab {
-    @apply fixed bottom-6 right-6 bg-teal text-white w-14 h-14 rounded-full flex items-center justify-center shadow-fab;
+    @apply fixed bottom-6 right-6 bg-primary text-on-primary w-14 h-14 rounded-full flex items-center justify-center shadow-level3 hover:shadow-level4 transition-shadow;
   }
 }

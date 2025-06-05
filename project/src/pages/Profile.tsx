@@ -41,7 +41,7 @@ const Profile: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 flex items-center justify-center">
+      <div className="min-h-screen bg-primary flex items-center justify-center">
         <div className="animate-spin rounded-full h-16 w-16 border-t-4 border-b-4 border-white"></div>
       </div>
     );
@@ -50,19 +50,14 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 px-8 pt-6 pb-10">
+    <div className="min-h-screen bg-primary px-8 pt-6 pb-10">
       <Link to="/timeline" className="text-white">
         <ArrowLeft size={32} />
       </Link>
 
-      <div className="text-center mt-6 mb-10">
-        <h1 className="text-3xl font-bold text-white">{displayName}</h1>
-        <p className="text-white text-sm">{user?.email}</p>
-      </div>
-
-      <div className="max-w-4xl mx-auto">
-        <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
+      <div className="max-w-4xl mx-auto mt-6">
+        <div className="grid grid-cols-1 md:grid-cols-2 gap-6 mb-10">
+          <div className="bg-white rounded-medium overflow-hidden">
             <ProfileStat 
               count={stats.privateCount} 
               label="private moments" 
@@ -70,7 +65,7 @@ const Profile: React.FC = () => {
               type="private" 
             />
           </div>
-          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
+          <div className="bg-white rounded-medium overflow-hidden">
             <ProfileStat 
               count={stats.sharedCount} 
               label="shared moments" 
@@ -78,7 +73,7 @@ const Profile: React.FC = () => {
               type="shared" 
             />
           </div>
-          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
+          <div className="bg-white rounded-medium overflow-hidden">
             <ProfileStat 
               count={stats.joinedCount} 
               label="joined moments" 
@@ -86,7 +81,7 @@ const Profile: React.FC = () => {
               type="joined" 
             />
           </div>
-          <div className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-lg transition duration-300">
+          <div className="bg-white rounded-medium overflow-hidden">
             <ProfileStat 
               count={stats.cardsAdded} 
               label="cards added" 
@@ -95,7 +90,13 @@ const Profile: React.FC = () => {
             />
           </div>
         </div>
-        <div className="mt-8">
+
+        <div className="text-center mb-10">
+          <h1 className="text-3xl font-bold text-on-surface">{displayName}</h1>
+          <p className="text-on-surface text-sm">{user?.email}</p>
+        </div>
+
+        <div>
           <LogoutButton />
         </div>
       </div>

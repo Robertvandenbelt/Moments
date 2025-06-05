@@ -484,146 +484,289 @@ const MomentBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
-      <div className="container mx-auto px-4 pt-6">
-        {/* Board Info Card */}
-        <article className="bg-white rounded-xl shadow-sm ring-1 ring-black/5 overflow-hidden">
-          {/* Card Header */}
-          <div className="p-4 flex justify-between items-center">
+      {/* Top app bar with navigation */}
+      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant">
+        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
+          <div className="flex items-center gap-4">
             <Link 
               to="/timeline" 
-              className="text-gray-900 hover:text-gray-700 transition-colors rounded-full p-2 hover:bg-gray-50"
+              className="relative p-3 rounded-full hover:bg-surface-container-highest transition-colors"
             >
-              <ArrowLeft size={24} />
+              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+              <span 
+                className="material-symbols-outlined text-on-surface"
+                style={{ 
+                  fontSize: '24px',
+                  fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                }}
+              >
+                arrow_back
+              </span>
             </Link>
-            <button 
-              onClick={() => setIsBottomSheetOpen(true)}
-              className="text-gray-900 hover:text-gray-700 transition-colors p-2 rounded-full hover:bg-gray-50"
-            >
-              <MoreVertical size={24} />
-            </button>
           </div>
 
-          {/* Card Content */}
-          <div className="px-6">
-            <div className="space-y-4 pb-4">
-              {/* Title & Date Section */}
-              <div>
-                <h1 className="text-2xl font-semibold text-gray-900">
-                  {board.title || formatDate(board.date_start)}
-                </h1>
-                {board.title && (
-                  <p className="text-gray-600 text-sm mt-1">
-                    {formatDate(board.date_start)}
-                    {board.date_end && ` - ${formatDate(board.date_end)}`}
-                  </p>
-                )}
-              </div>
+          <button 
+            onClick={() => setIsBottomSheetOpen(true)}
+            className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+          >
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <span 
+              className="material-symbols-outlined text-on-surface"
+              style={{ 
+                fontSize: '24px',
+                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+              }}
+            >
+              more_vert
+            </span>
+          </button>
+        </div>
+      </div>
 
-              {/* Description Section - if exists */}
-              {board.description && (
-                <p className="text-gray-600 text-base">
-                  {board.description}
+      <div className="container mx-auto px-6 pt-8">
+        {/* Page header */}
+        <div className="max-w-7xl mx-auto mb-12">
+          <div className="space-y-6">
+            {/* Title & Date Section */}
+            <div>
+              <h1 className="text-display-small font-roboto-flex text-on-surface mb-2">
+                {board.title || formatDate(board.date_start)}
+              </h1>
+              {board.title && (
+                <p className="text-title-large font-roboto-flex text-on-surface-variant">
+                  {formatDate(board.date_start)}
+                  {board.date_end && ` - ${formatDate(board.date_end)}`}
                 </p>
               )}
             </div>
 
-            {/* Stats & Creator Info */}
-            <div className="p-4 sm:p-6 bg-gray-50 -mx-6 border-t border-gray-100">
-              <div className="flex justify-between items-center">
-                <p className="text-gray-400 text-xs sm:text-sm">
+            {/* Description Section - if exists */}
+            {board.description && (
+              <p className="text-body-large font-roboto-flex text-on-surface-variant max-w-2xl">
+                {board.description}
+              </p>
+            )}
+
+            {/* Creator Info Chip */}
+            <div className="flex items-center gap-2 pt-2">
+              <div className="inline-flex items-center h-8 px-3 rounded-lg" style={{ backgroundColor: '#DCE9D7' }}>
+                <span 
+                  className="material-symbols-outlined text-on-surface-variant mr-2"
+                  style={{ 
+                    fontSize: '18px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  {board.role === 'owner' ? 'edit_square' : 'person'}
+                </span>
+                <span className="text-label-medium font-roboto-flex text-on-surface-variant">
                   {board.role === 'owner' 
                     ? "Created by you"
                     : `Created by ${board.owner_display_name}`
                   }
-                </p>
-                <span className="text-orange-600 text-sm">
-                  {board.card_count} {board.card_count === 1 ? 'card' : 'cards'}
                 </span>
               </div>
             </div>
           </div>
-        </article>
+        </div>
 
-        {/* View toggle */}
-        <div className="mt-8 flex justify-center">
-          <div className="inline-flex rounded-lg border border-gray-200 bg-white p-1 shadow-sm">
-            <button
-              onClick={() => setShowFavoritesOnly(false)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                !showFavoritesOnly
-                  ? 'bg-orange-500 text-white'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              All cards
-            </button>
-            <button
-              onClick={() => setShowFavoritesOnly(true)}
-              className={`px-4 py-2 text-sm font-medium rounded-md transition-colors ${
-                showFavoritesOnly
-                  ? 'bg-orange-500 text-white'
-                  : 'text-gray-500 hover:text-gray-700'
-              }`}
-            >
-              Favorites
-            </button>
+        {/* Primary tabs */}
+        <div className="mt-8">
+          <div className="max-w-2xl mx-auto">
+            {/* Primary tab bar */}
+            <div className="flex items-center border-b border-outline-variant">
+              <button
+                onClick={() => setShowFavoritesOnly(false)}
+                className={`group relative min-w-[120px] p-3 flex items-center justify-center gap-2 transition-colors ${
+                  !showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
+                }`}
+              >
+                {/* Icon */}
+                <span 
+                  className="material-symbols-outlined"
+                  style={{ 
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  grid_view
+                </span>
+                {/* Label */}
+                <span className="text-label-large font-roboto-flex">All</span>
+                {/* Active indicator */}
+                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
+                  !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
+                }`} />
+                {/* State layer */}
+                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
+              </button>
+
+              <button
+                onClick={() => setShowFavoritesOnly(true)}
+                className={`group relative min-w-[120px] p-3 flex items-center justify-center gap-2 transition-colors ${
+                  showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
+                }`}
+              >
+                {/* Icon */}
+                <span 
+                  className="material-symbols-outlined"
+                  style={{ 
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  favorite
+                </span>
+                {/* Label */}
+                <span className="text-label-large font-roboto-flex">Favorites</span>
+                {/* Active indicator */}
+                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
+                  showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
+                }`} />
+                {/* State layer */}
+                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
+              </button>
+            </div>
+
+            {/* Space reserved for future secondary tabs */}
+            {!showFavoritesOnly && (
+              <div className="h-12">
+                {/* Secondary tabs will go here in the future */}
+              </div>
+            )}
           </div>
         </div>
 
-        {/* Grid of cards */}
-        <div className="pt-8 pb-24">
-          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-            {displayedCards.map((card, index) => (
-              <article 
-                key={card.id}
-                onClick={() => setSelectedCardIndex(index)}
-                className="bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer group"
-              >
-                {card.type === 'photo' ? (
-                  <>
-                    <div className="aspect-square bg-gray-100">
-                      <img
-                        src={card.media_url ? `${card.media_url}?width=500&height=500&resize=cover&quality=80` : ''}
-                        alt=""
-                        className="h-full w-full object-cover"
-                      />
-                    </div>
-                  </>
-                ) : (
-                  <>
-                    <div className="aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-6 flex items-center justify-center">
-                      <p className="text-white text-lg font-medium line-clamp-6 text-center">
-                        {card.description}
-                      </p>
-                    </div>
-                  </>
-                )}
-                <div className="p-4 sm:p-6 bg-white border-t border-gray-100">
-                  <div className="flex items-center justify-between">
-                    <div>
-                      <p className="text-sm font-medium text-gray-900">{card.uploader_display_name}</p>
-                      <p className="text-xs text-gray-500">
-                        {format(parseISO(card.created_at), 'MMM d, yyyy')}
-                      </p>
-                    </div>
-                    <button
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleFavorite(card.id);
-                      }}
-                      className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
-                        card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
+        {/* Feed of cards */}
+        <div className="pt-8 pb-24 px-4 sm:px-6">
+          {/* Feed container with dynamic max-width based on viewport */}
+          <div className="max-w-7xl mx-auto">
+            {/* Feed header with content summary */}
+            <div className="mb-8 flex items-center justify-between">
+              <div>
+                <h2 className="text-headline-small font-roboto-flex text-on-surface">
+                  {showFavoritesOnly ? 'Favorite cards' : 'All cards'}
+                </h2>
+                <p className="text-body-medium font-roboto-flex text-on-surface-variant">
+                  {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
+                </p>
+              </div>
+              
+              {/* Dynamic feed layout options - could be expanded later */}
+              <div className="flex items-center gap-2">
+                <button
+                  className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                  aria-label="View options"
+                >
+                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                  <span 
+                    className="material-symbols-outlined text-on-surface-variant"
+                    style={{ 
+                      fontSize: '24px',
+                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                    }}
+                  >
+                    tune
+                  </span>
+                </button>
+              </div>
+            </div>
+
+            {/* Dynamic feed content */}
+            {displayedCards.length === 0 ? (
+              // Empty state
+              <div className="py-12 flex flex-col items-center justify-center text-center bg-surface-container-low rounded-xl">
+                <span 
+                  className="material-symbols-outlined text-on-surface-variant mb-4"
+                  style={{ 
+                    fontSize: '48px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  {showFavoritesOnly ? 'favorite' : 'photo_library'}
+                </span>
+                <p className="text-title-large font-roboto-flex text-on-surface mb-2">
+                  {showFavoritesOnly 
+                    ? 'No favorite cards yet' 
+                    : 'No cards added yet'
+                  }
+                </p>
+                <p className="text-body-medium font-roboto-flex text-on-surface-variant max-w-sm">
+                  {showFavoritesOnly
+                    ? 'Cards you mark as favorites will appear here'
+                    : 'Start adding photo or text cards to create your moment'
+                  }
+                </p>
+              </div>
+            ) : (
+              // Responsive masonry grid
+              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
+                {displayedCards.map((card, index) => {
+                  // Determine if the card should span multiple columns
+                  const isLargeCard = index % 5 === 0; // Every 5th card will be larger
+                  
+                  return (
+                    <article 
+                      key={card.id}
+                      onClick={() => setSelectedCardIndex(index)}
+                      className={`group relative bg-surface rounded-xl shadow-level1 hover:shadow-level2 active:shadow-level1 transition-all duration-300 cursor-pointer overflow-hidden ${
+                        isLargeCard ? 'md:col-span-2 lg:col-span-2' : ''
                       }`}
                     >
-                      <Heart 
-                        size={18} 
-                        className={card.is_favorited ? 'fill-current' : ''} 
-                      />
-                    </button>
-                  </div>
-                </div>
-              </article>
-            ))}
+                      {/* State layer for hover/press states */}
+                      <div className="absolute inset-0 rounded-xl bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-300" />
+                      
+                      {card.type === 'photo' ? (
+                        <div className={`${
+                          isLargeCard ? 'aspect-[21/9]' : 'aspect-[16/9]'
+                        } bg-surface-container-low`}>
+                          <img
+                            src={card.media_url ? `${card.media_url}?width=${isLargeCard ? 1200 : 800}&height=${isLargeCard ? 514 : 450}&resize=cover&quality=80` : ''}
+                            alt=""
+                            className="h-full w-full object-cover rounded-t-xl"
+                            loading="lazy"
+                          />
+                        </div>
+                      ) : (
+                        <div className={`${
+                          isLargeCard ? 'aspect-[21/9] p-12' : 'aspect-[16/9] p-8'
+                        } bg-primary-container flex items-center justify-center rounded-t-xl`}>
+                          <p className={`${
+                            isLargeCard ? 'text-headline-medium' : 'text-headline-small'
+                          } font-roboto-flex text-on-primary-container line-clamp-6 text-center`}>
+                            {card.description}
+                          </p>
+                        </div>
+                      )}
+
+                      <div className="p-4 sm:p-6 bg-surface border-t border-outline-variant">
+                        <div className="flex items-center justify-between">
+                          <div>
+                            <p className="text-title-medium font-roboto-flex text-on-surface">{card.uploader_display_name}</p>
+                            <p className="text-body-medium font-roboto-flex text-on-surface-variant">
+                              {format(parseISO(card.created_at), 'MMM d, yyyy')}
+                            </p>
+                          </div>
+                          <button
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              handleFavorite(card.id);
+                            }}
+                            className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                          >
+                            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                            <Heart 
+                              size={20} 
+                              className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
+                            />
+                          </button>
+                        </div>
+                      </div>
+                    </article>
+                  );
+                })}
+              </div>
+            )}
           </div>
         </div>
       </div>

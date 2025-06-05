@@ -142,7 +142,7 @@ const ShareMomentBoard: React.FC = () => {
 
         <button
           onClick={handleWhatsAppShare}
-          className="w-full max-w-md bg-[#25D366] text-white py-4 rounded-full font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-xl mt-8"
+          className="w-full max-w-md bg-whatsapp text-white py-4 rounded-full font-semibold shadow-lg transform transition-all hover:scale-105 hover:shadow-xl mt-8"
         >
           Share via WhatsApp
         </button>

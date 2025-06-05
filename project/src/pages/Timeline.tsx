@@ -139,7 +139,7 @@ const Timeline: React.FC = () => {
             .map(([month, { display, moments: monthMoments }]) => (
             <section key={month} className="mb-8">
               <div className="pb-3 mb-4">
-                <h2 className="text-base font-semibold leading-7 text-gray-900">{display}</h2>
+                <h2 className="text-headline-small font-roboto-flex font-medium text-on-surface">{display}</h2>
               </div>
               <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
                 {monthMoments.map((moment) => (
@@ -165,7 +165,7 @@ const Timeline: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleCreateClick}
-          className="bg-teal-500 text-white rounded-full p-4 shadow-lg"
+          className="bg-primary-action text-white rounded-full p-4 shadow-lg"
           aria-label="Add new moment"
         >
           <Plus size={28} />

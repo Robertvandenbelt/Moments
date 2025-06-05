@@ -45,14 +45,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ isJoin }) => {
   return (
     <div className="w-full">
       {error && (
-        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4">
+        <div className="bg-red-100 border border-red-400 text-red-700 px-4 py-3 rounded-xl mb-4 font-roboto-flex">
           {error}
         </div>
       )}
       
       <form onSubmit={handleSubmit} className="space-y-6">
         <div>
-          <label htmlFor="email" className={`block text-base font-medium ${textColorClass} mb-2`}>
+          <label htmlFor="email" className={`block text-base font-roboto-flex font-medium ${textColorClass} mb-2`}>
             Email address
           </label>
           <input
@@ -62,12 +62,12 @@ const LoginForm: React.FC<LoginFormProps> = ({ isJoin }) => {
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Enter your email"
-            className="w-full px-4 py-3 rounded-xl bg-white text-gray-800 border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-roboto-flex border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
         
         <div>
-          <label htmlFor="password" className={`block text-base font-medium ${textColorClass} mb-2`}>
+          <label htmlFor="password" className={`block text-base font-roboto-flex font-medium ${textColorClass} mb-2`}>
             Password
           </label>
           <input
@@ -77,14 +77,14 @@ const LoginForm: React.FC<LoginFormProps> = ({ isJoin }) => {
             value={password}
             onChange={(e) => setPassword(e.target.value)}
             placeholder="Enter your password"
-            className="w-full px-4 py-3 rounded-xl bg-white text-gray-800 border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
+            className="w-full px-4 py-3 rounded-xl bg-white text-gray-800 font-roboto-flex border border-gray-200 placeholder-gray-400 focus:outline-none focus:ring-2 focus:ring-orange-500"
           />
         </div>
         
         <button
           type="submit"
           disabled={loading}
-          className="w-full bg-orange-500 hover:bg-orange-600 transition-colors text-white text-base font-medium py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-70"
+          className="w-full bg-orange-500 hover:bg-orange-600 transition-colors text-white text-base font-roboto-flex font-medium py-3 px-4 rounded-full focus:outline-none focus:ring-2 focus:ring-orange-500 focus:ring-offset-2 disabled:opacity-70"
         >
           {loading ? 'Signing in...' : 'Sign in'}
         </button>
@@ -92,7 +92,7 @@ const LoginForm: React.FC<LoginFormProps> = ({ isJoin }) => {
       
       {!isJoin && (
         <div className="mt-8 text-center">
-          <Link to="/signup" className="text-white hover:text-orange-200 text-lg transition-colors">
+          <Link to="/signup" className="text-white hover:text-orange-200 text-lg font-roboto-flex transition-colors">
             Or create a new account
           </Link>
         </div>

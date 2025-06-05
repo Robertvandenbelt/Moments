@@ -34,12 +34,15 @@ const TextCard: React.FC<MomentCardProps> = ({
   return (
     <article 
       onClick={onClick}
-      className={`bg-white rounded-xl w-full shadow-sm ring-1 ring-black/5 overflow-hidden hover:shadow-xl transition duration-300 cursor-pointer group ${
+      className={`group relative bg-surface w-full rounded-xl shadow-level1 hover:shadow-level2 active:shadow-level1 transition-all duration-300 cursor-pointer overflow-hidden ${
         isDeleting ? 'opacity-50 pointer-events-none' : ''
       }`}
     >
-      <div className="aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-6 flex items-center justify-center">
-        <p className="text-white text-lg font-medium line-clamp-6 text-center">
+      {/* State layer for hover/press states */}
+      <div className="absolute inset-0 rounded-xl bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-300" />
+
+      <div className="aspect-[16/9] bg-primary-container p-8 flex items-center justify-center relative">
+        <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center">
           {card.description}
         </p>
 
@@ -47,32 +50,35 @@ const TextCard: React.FC<MomentCardProps> = ({
           <button
             onClick={handleDelete}
             disabled={isDeleting}
-            className={`absolute top-2 right-2 p-1.5 rounded-full bg-black/30 text-white 
-              ${isDeleting ? 'opacity-50 cursor-not-allowed' : 'hover:bg-red-500 hover:bg-opacity-70'} 
-              transition-colors opacity-0 group-hover:opacity-100`}
+            className={`absolute top-2 right-2 p-2 rounded-full bg-surface-container-highest hover:bg-surface-container-highest/90 transition-colors ${
+              isDeleting ? 'opacity-50 cursor-not-allowed' : ''
+            }`}
           >
-            <Trash2 size={16} />
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <Trash2 
+              size={20} 
+              className="relative text-on-surface-variant"
+            />
           </button>
         )}
       </div>
 
-      <div className="p-4 sm:p-6 bg-white border-t border-gray-100">
+      <div className="p-4 sm:p-6 bg-surface border-t border-outline-variant">
         <div className="flex items-center justify-between">
           <div>
-            <p className="text-sm sm:text-base font-medium text-gray-900">{card.uploader_display_name}</p>
-            <p className="text-xs sm:text-sm text-gray-500">
+            <p className="text-title-medium font-roboto-flex text-on-surface">{card.uploader_display_name}</p>
+            <p className="text-body-medium font-roboto-flex text-on-surface-variant">
               {format(parseISO(card.created_at), 'MMM d, yyyy')}
             </p>
           </div>
           <button
             onClick={handleFavorite}
-            className={`p-1.5 rounded-full hover:bg-gray-100 transition-colors ${
-              card.is_favorited ? 'text-orange-500' : 'text-gray-400 hover:text-gray-600'
-            }`}
+            className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
           >
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
             <Heart 
-              size={18} 
-              className={card.is_favorited ? 'fill-current' : ''} 
+              size={20} 
+              className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
             />
           </button>
         </div>

@@ -2,6 +2,7 @@ import React from 'react';
 import { X, ChevronLeft, ChevronRight } from 'lucide-react';
 import { format, parseISO } from 'date-fns';
 import { MomentCard } from '../lib/types';
+import 'material-symbols/outlined.css';
 
 type MomentCardViewerProps = {
   card: MomentCard;
@@ -40,50 +41,91 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
   }, [onClose, onPrevious, onNext, hasPrevious, hasNext]);
 
   return (
-    <div className="relative z-50" aria-labelledby="modal-title" role="dialog" aria-modal="true">
-      {/* Background backdrop */}
-      <div className="fixed inset-0 bg-gray-500 bg-opacity-75 transition-opacity" onClick={onClose} />
+    <div 
+      className="fixed inset-0 z-50" 
+      role="dialog" 
+      aria-modal="true"
+      aria-labelledby="dialog-title"
+    >
+      {/* Scrim - M3 uses 50% opacity for dialog scrim */}
+      <div 
+        className="fixed inset-0 bg-scrim transition-opacity duration-300" 
+        onClick={onClose} 
+      />
 
+      {/* Dialog container with M3 elevation and shape */}
       <div className="fixed inset-0 z-10 overflow-y-auto">
-        <div className="flex min-h-full items-center justify-center p-4 text-center sm:p-0">
-          <div className="relative transform overflow-hidden rounded-lg bg-white text-left shadow-xl transition-all sm:my-8 sm:w-full sm:max-w-4xl">
-            {/* Close button */}
-            <button
-              onClick={onClose}
-              className="absolute right-4 top-4 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-            >
-              <X size={24} />
-            </button>
+        <div className="flex min-h-full items-center justify-center p-4 sm:p-0">
+          <div className="relative w-full max-w-4xl transform rounded-xl bg-surface shadow-level3 transition-all duration-300 sm:my-8">
+            {/* Top action bar */}
+            <div className="absolute top-0 left-0 right-0 z-10 flex justify-between p-2">
+              {/* Close button */}
+              <button
+                onClick={onClose}
+                className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+              >
+                <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                <span 
+                  className="material-symbols-outlined relative text-on-surface-variant"
+                  style={{ 
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  close
+                </span>
+              </button>
+            </div>
 
             {/* Navigation buttons */}
-            {hasPrevious && onPrevious && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onPrevious();
-                }}
-                className="absolute left-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronLeft size={24} />
-              </button>
-            )}
-            {hasNext && onNext && (
-              <button
-                onClick={(e) => {
-                  e.stopPropagation();
-                  onNext();
-                }}
-                className="absolute right-4 top-1/2 -translate-y-1/2 z-10 p-2 rounded-full bg-black/50 text-white hover:bg-black/70 transition-colors"
-              >
-                <ChevronRight size={24} />
-              </button>
-            )}
+            <div className="absolute top-1/2 left-0 right-0 z-10 flex justify-between px-4 -translate-y-1/2">
+              {hasPrevious && onPrevious && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onPrevious();
+                  }}
+                  className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
+                >
+                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                  <span 
+                    className="material-symbols-outlined relative text-on-surface"
+                    style={{ 
+                      fontSize: '24px',
+                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                    }}
+                  >
+                    arrow_back
+                  </span>
+                </button>
+              )}
+              {hasNext && onNext && (
+                <button
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    onNext();
+                  }}
+                  className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
+                >
+                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                  <span 
+                    className="material-symbols-outlined relative text-on-surface"
+                    style={{ 
+                      fontSize: '24px',
+                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                    }}
+                  >
+                    arrow_forward
+                  </span>
+                </button>
+              )}
+            </div>
 
             {/* Main content */}
-            <div className="bg-white">
+            <div className="bg-surface">
               <div className="relative">
                 {card.type === 'photo' ? (
-                  <div className="relative aspect-square bg-black">
+                  <div className="relative aspect-[4/3] bg-surface-container-lowest">
                     {getImageUrl(card) && (
                       <img
                         src={getImageUrl(card)!}
@@ -94,21 +136,21 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
                     )}
                   </div>
                 ) : (
-                  <div className="relative aspect-square bg-gradient-to-br from-teal-500 to-lime-300 p-12 flex items-center justify-center">
-                    <p className="text-white text-2xl font-medium text-center">
+                  <div className="relative aspect-[4/3] bg-primary-container p-12 flex items-center justify-center">
+                    <p className="text-headline-medium font-roboto-flex text-on-primary-container text-center">
                       {card.description}
                     </p>
                   </div>
                 )}
               </div>
 
-              {/* Footer */}
-              <div className="px-4 py-3 sm:px-6 bg-gray-50 border-t border-gray-200">
+              {/* Supporting text */}
+              <div className="px-6 py-4 bg-surface border-t border-outline-variant">
                 <div>
-                  <p className="text-sm font-medium text-gray-900">
+                  <p className="text-title-medium font-roboto-flex text-on-surface">
                     {card.uploader_display_name}
                   </p>
-                  <p className="text-xs text-gray-500">
+                  <p className="text-body-medium font-roboto-flex text-on-surface-variant">
                     {format(parseISO(card.created_at), 'MMMM d, yyyy')}
                   </p>
                 </div>

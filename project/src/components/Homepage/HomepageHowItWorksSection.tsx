@@ -19,8 +19,8 @@ const StepCard = ({
           <Icon className="h-6 w-6 text-orange-500" />
         </div>
       </div>
-      <h3 className="text-xl font-semibold mb-2">{title}</h3>
-      <p className="text-gray-600 mb-6">{description}</p>
+      <h3 className="text-xl font-roboto-flex font-semibold mb-2">{title}</h3>
+      <p className="text-gray-600 font-roboto-flex mb-6">{description}</p>
       <div className="bg-gray-50 rounded-lg p-4">
         {visual}
       </div>
@@ -43,11 +43,11 @@ const HomepageHowItWorksSection = () => {
             <div className="mb-4">
               <span role="img" aria-label="celebration" className="text-4xl">🎉</span>
             </div>
-            <h3 className="text-2xl font-bold mb-2 text-black">Your moment is live!</h3>
-            <p className="text-gray-600 mb-6">Share it with your friends and family</p>
+            <h3 className="text-2xl font-roboto-flex font-bold mb-2 text-black">Your moment is live!</h3>
+            <p className="text-gray-600 font-roboto-flex mb-6">Share it with your friends and family</p>
             <div className="bg-white rounded-xl p-4 shadow-sm mb-4">
-              <h4 className="font-semibold text-gray-900">Sarah's birthday</h4>
-              <p className="text-gray-500 text-sm">27 May, 2025 - 27 May, 2025</p>
+              <h4 className="font-roboto-flex font-semibold text-gray-900">Sarah's birthday</h4>
+              <p className="text-gray-500 font-roboto-flex text-sm">27 May, 2025 - 27 May, 2025</p>
               <div className="mt-4 pt-4 border-t">
                 <div className="flex items-center justify-between">
                   <span className="text-gray-600 text-sm truncate flex-1">http://getmoments.net/join/195293b3-8277-4a...</span>
@@ -55,7 +55,7 @@ const HomepageHowItWorksSection = () => {
                 </div>
               </div>
             </div>
-            <button className="w-full py-3 bg-[#25D366] text-white rounded-full font-medium">
+            <button className="w-full py-3 bg-whatsapp text-white rounded-full font-roboto-flex font-medium">
               Share via WhatsApp
             </button>
           </div>
@@ -129,10 +129,10 @@ const HomepageHowItWorksSection = () => {
     <section className="py-16 bg-gray-50" id="how-it-works">
       <div className="container mx-auto px-4">
         <div className="max-w-3xl mx-auto text-center mb-12">
-          <h2 className="text-3xl md:text-4xl font-bold text-gray-900 mb-4">
+          <h2 className="text-3xl md:text-4xl font-roboto-flex font-bold text-gray-900 mb-4">
             How It Works
           </h2>
-          <p className="text-xl text-gray-600">
+          <p className="text-xl font-roboto-flex text-gray-600">
             Create and share memories in two simple steps.
           </p>
         </div>

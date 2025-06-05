@@ -59,7 +59,7 @@ const CreateMomentBoard: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-b from-teal-500 to-teal-600 px-8 pt-8 pb-24">
+    <div className="min-h-screen bg-primary px-8 pt-8 pb-24">
       {step === 1 ? (
         <div className="max-w-md mx-auto">
           <Link to="/timeline" className="text-white">
@@ -124,7 +124,7 @@ const CreateMomentBoard: React.FC = () => {
           <button
             onClick={handleNext}
             disabled={!formData.dateStart}
-            className="fixed bottom-6 right-6 w-14 h-14 bg-orange-500 rounded-full flex items-center justify-center text-white shadow-fab disabled:opacity-50 disabled:cursor-not-allowed"
+            className="fixed bottom-6 right-6 w-14 h-14 bg-primary-action rounded-full flex items-center justify-center text-white shadow-fab disabled:opacity-50 disabled:cursor-not-allowed"
             aria-label="Next"
           >
             <ArrowRight size={24} />
@@ -169,7 +169,7 @@ const CreateMomentBoard: React.FC = () => {
             <button
               onClick={handleCreate}
               disabled={loading}
-              className="flex-1 bg-orange-500 text-white py-4 rounded-full text-base font-medium disabled:opacity-70"
+              className="flex-1 bg-primary-action text-white py-4 rounded-full text-base font-medium disabled:opacity-70"
             >
               {loading ? 'Creating...' : 'Create moment'}
             </button>
