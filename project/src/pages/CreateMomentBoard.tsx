@@ -1,11 +1,11 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { LocalizationProvider, AdapterDateFns } from '@mui/x-date-pickers';
-import { DateRangePicker } from '@mui/x-date-pickers-pro';
+import { DayPicker, DateRange } from 'react-day-picker';
 import { format } from 'date-fns';
 import MomentBoardSnippet from '../components/MomentBoardSnippet';
 import { createMomentBoard } from '../services/supabase';
+import 'react-day-picker/dist/style.css';
 
 const CreateMomentBoard: React.FC = () => {
   const navigate = useNavigate();
@@ -13,17 +13,17 @@ const CreateMomentBoard: React.FC = () => {
   const today = new Date().toISOString().split('T')[0]; // Format: YYYY-MM-DD
   const [formData, setFormData] = useState<{
     title: string;
-    dateRange: [Date | null, Date | null];
+    dateRange: DateRange | undefined;
     description: string;
   }>({
     title: '',
-    dateRange: [new Date(), new Date()],
+    dateRange: { from: new Date(), to: new Date() },
     description: ''
   });
   const [loading, setLoading] = useState(false);
 
   const handleNext = () => {
-    if (formData.dateRange[0]) {
+    if (formData.dateRange?.from) {
       setStep(2);
     }
   };
@@ -37,8 +37,8 @@ const CreateMomentBoard: React.FC = () => {
     try {
       const board = await createMomentBoard({
         title: formData.title || undefined,
-        date_start: formData.dateRange[0] ? formData.dateRange[0].toISOString().split('T')[0] : '',
-        date_end: formData.dateRange[1] ? formData.dateRange[1].toISOString().split('T')[0] : '',
+        date_start: formData.dateRange?.from ? formData.dateRange.from.toISOString().split('T')[0] : '',
+        date_end: formData.dateRange?.to ? formData.dateRange.to.toISOString().split('T')[0] : '',
         description: formData.description || undefined
       });
       navigate(`/share/${board.id}`);
@@ -49,36 +49,28 @@ const CreateMomentBoard: React.FC = () => {
     }
   };
 
-  const handleDateRangeChange = (newRange: [Date | null, Date | null]) => {
+  const handleDateRangeChange = (newRange: DateRange | undefined) => {
     setFormData(prev => ({ ...prev, dateRange: newRange }));
   };
 
   return (
     <div className="min-h-screen" style={{ background: '#DCE9D7' }}>
       {step === 1 ? (
-        <LocalizationProvider dateAdapter={AdapterDateFns}>
         <div className="max-w-md mx-auto px-4 pt-8">
           <h1 className="text-headline-small font-roboto-flex text-on-surface mb-2">When is the moment?</h1>
           <p className="text-body-large font-roboto-flex text-on-surface-variant mb-8">Step 1 of 2 – date and title</p>
           <div className="space-y-6">
             <div>
               <label className="block text-title-medium font-roboto-flex text-on-surface mb-2">Date or date range</label>
-              <DateRangePicker
-                value={formData.dateRange as [Date | null, Date | null]}
-                onChange={handleDateRangeChange}
-                format="yyyy-MM-dd"
-                slotProps={{
-                  textField: {
-                    fullWidth: true,
-                    variant: 'outlined',
-                    className: 'w-full rounded-xl border border-outline-variant bg-surface text-on-surface text-body-large font-roboto-flex',
-                    InputProps: { style: { borderRadius: '0.75rem' } },
-                  },
-                  popper: {
-                    sx: { zIndex: 1300 },
-                  },
-                }}
-              />
+              <div className="bg-surface rounded-xl border border-outline-variant p-4">
+                <DayPicker
+                  mode="range"
+                  selected={formData.dateRange}
+                  onSelect={handleDateRangeChange}
+                  numberOfMonths={2}
+                  className="!font-roboto-flex [&_.rdp-caption]:text-on-surface [&_.rdp-day]:text-on-surface [&_.rdp-head_cell]:text-on-surface [&_.rdp-cell]:text-on-surface [&_.rdp-nav_button]:text-on-surface [&_.rdp-selected]:bg-primary [&_.rdp-selected]:text-on-primary [&_.rdp-today]:text-primary"
+                />
+              </div>
             </div>
             <div>
               <label className="block text-title-medium font-roboto-flex text-on-surface mb-2">Title (optional)</label>
@@ -104,7 +96,7 @@ const CreateMomentBoard: React.FC = () => {
             </Link>
             <button
               onClick={handleNext}
-              disabled={!formData.dateRange[0]}
+              disabled={!formData.dateRange?.from}
               className="flex-1 bg-primary text-on-primary py-4 rounded-full text-base font-medium shadow-md transition-colors hover:bg-primary/90 active:bg-primary/80 disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center"
               aria-label="Next"
             >
@@ -112,7 +104,6 @@ const CreateMomentBoard: React.FC = () => {
             </button>
           </div>
         </div>
-        </LocalizationProvider>
       ) : (
         <div className="max-w-md mx-auto px-4 pt-8">
           <h1 className="text-headline-small font-roboto-flex text-on-surface mb-2">Add a description</h1>
@@ -120,8 +111,8 @@ const CreateMomentBoard: React.FC = () => {
           <div className="bg-surface-container-low rounded-2xl overflow-hidden border border-outline-variant">
             <MomentBoardSnippet
               title={formData.title}
-              dateStart={formData.dateRange[0] ? formData.dateRange[0].toISOString().split('T')[0] : ''}
-              dateEnd={formData.dateRange[1] ? formData.dateRange[1].toISOString().split('T')[0] : ''}
+              dateStart={formData.dateRange?.from ? formData.dateRange.from.toISOString().split('T')[0] : ''}
+              dateEnd={formData.dateRange?.to ? formData.dateRange.to.toISOString().split('T')[0] : ''}
               className="rounded-none"
             />
             <div className="p-4">
