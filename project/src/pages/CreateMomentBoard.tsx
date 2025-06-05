@@ -1,9 +1,8 @@
 import React, { useState } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
 import { ArrowLeft, ArrowRight } from 'lucide-react';
-import { LocalizationProvider } from '@mui/x-date-pickers/LocalizationProvider';
-import { AdapterDateFns } from '@mui/x-date-pickers/AdapterDateFns';
-import { DateRangePicker } from '@mui/x-date-pickers-pro/DateRangePicker';
+import { LocalizationProvider, AdapterDateFns } from '@mui/x-date-pickers';
+import { DateRangePicker } from '@mui/x-date-pickers-pro';
 import { format } from 'date-fns';
 import MomentBoardSnippet from '../components/MomentBoardSnippet';
 import { createMomentBoard } from '../services/supabase';
