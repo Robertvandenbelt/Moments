@@ -22,11 +22,18 @@ export default defineConfig({
   },
   build: {
     rollupOptions: {
+      external: [
+        '@mui/x-date-pickers',
+        '@mui/x-date-pickers-pro',
+        '@mui/x-date-pickers/LocalizationProvider',
+        '@mui/x-date-pickers/AdapterDateFns',
+        '@mui/x-date-pickers-pro/DateRangePicker'
+      ],
       output: {
         manualChunks: {
           'react-vendor': ['react', 'react-dom'],
           'router': ['react-router-dom'],
-          'ui': ['lucide-react', 'react-day-picker', '@mui/x-date-pickers', '@mui/x-date-pickers-pro'],
+          'ui': ['lucide-react', 'react-day-picker'],
           'storage': ['@supabase/supabase-js'],
           'sentry': ['@sentry/react', '@sentry/tracing'],
         },
