@@ -1,5 +1,6 @@
 import React from 'react';
-import { format, parseISO } from 'date-fns';
+import { format } from 'date-fns';
+import { parseISO } from 'date-fns/parseISO';
 import 'material-symbols/outlined.css';
 
 type MomentBoardCardProps = {
@@ -31,8 +32,8 @@ const MomentBoardCard: React.FC<MomentBoardCardProps> = ({
 }) => {
   const mainHeading = title || date || 'Untitled Moment';
 
-  const formatDate = (dateString: string) => {
-    return format(parseISO(dateString), 'MMMM d, yyyy');
+  const formatDate = (date: string) => {
+    return format(parseISO(date), 'MMMM d, yyyy');
   };
 
   const dateDisplay = date ? (
