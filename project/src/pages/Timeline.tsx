@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useNavigate, Link } from 'react-router-dom';
-import MomentBoardCard from '../components/MomentBoardCard';
+import MomentListItem from '../components/MomentListItem';
 import { Plus } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { MomentBoard } from '../lib/types';
@@ -185,31 +185,33 @@ const Timeline: React.FC = () => {
             <p className="text-gray-500">No moments yet. Create your first one!</p>
           </div>
         ) : (
-          Object.entries(moments)
-            .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
-            .map(([month, { display, moments: monthMoments }]) => (
-            <section key={month} className="mb-8">
-              <div className="pb-3 mb-4">
-                <h2 className="text-headline-small font-roboto-flex font-medium text-on-surface">{display}</h2>
-              </div>
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                {monthMoments.map((moment) => (
-                  <Link key={moment.id} to={`/board/${moment.id}`}>
-                    <MomentBoardCard
-                      title={moment.title || undefined}
-                      date={moment.date_start}
-                      dateEnd={moment.date_end || undefined}
-                      description={moment.description || undefined}
-                      participantCount={moment.participant_count}
-                      unseenCardCount={moment.unseen_card_count}
-                      totalCardCount={moment.total_card_count}
-                      previewPhotoUrl={moment.preview_photo_url}
-                    />
-                  </Link>
-                ))}
-              </div>
-            </section>
-          ))
+          <div className="grid grid-cols-1 lg:grid-cols-2 xl:grid-cols-3 gap-8">
+            {Object.entries(moments)
+              .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
+              .map(([month, { display, moments: monthMoments }]) => (
+              <section key={month} className="mb-8">
+                <div className="px-4 pb-3 mb-2">
+                  <h2 className="text-headline-small font-roboto-flex font-medium text-on-surface">{display}</h2>
+                </div>
+                <div className="bg-surface rounded-lg overflow-hidden">
+                  {monthMoments.map((moment, index) => (
+                    <Link key={moment.id} to={`/board/${moment.id}`}>
+                      <MomentListItem
+                        title={moment.title || undefined}
+                        date={moment.date_start}
+                        dateEnd={moment.date_end || undefined}
+                        participantCount={Number(moment.participant_count)}
+                        unseenCardCount={moment.unseen_card_count}
+                        totalCardCount={moment.total_card_count}
+                        previewPhotoUrl={moment.preview_photo_url}
+                        isLast={index === monthMoments.length - 1}
+                      />
+                    </Link>
+                  ))}
+                </div>
+              </section>
+            ))}
+          </div>
         )}
       </main>
 

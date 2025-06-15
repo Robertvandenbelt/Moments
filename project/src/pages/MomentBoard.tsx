@@ -683,19 +683,17 @@ const MomentBoard: React.FC = () => {
 
             {/* Segmented buttons for All tab (M3 style, single-select) */}
             {!showFavoritesOnly && (
-              <div className="inline-flex mt-4 shadow-sm">
+              <div className="flex mt-4 gap-2">
                 <button
                   onClick={() => {
                     setShowOnlyMyCards(false);
                     setShowOnlyOthersCards(false);
                   }}
-                  className={`px-4 py-2 border border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
-                    rounded-l-full
-                    ${!showOnlyMyCards && !showOnlyOthersCards
-                      ? 'bg-primary text-on-primary border-primary'
-                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
+                    ${!showOnlyMyCards && !showOnlyOthersCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
                   `}
                   aria-pressed={!showOnlyMyCards && !showOnlyOthersCards}
+                  style={{ minWidth: 100, textAlign: 'left' }}
                 >
                   All cards
                 </button>
@@ -704,12 +702,11 @@ const MomentBoard: React.FC = () => {
                     setShowOnlyMyCards(true);
                     setShowOnlyOthersCards(false);
                   }}
-                  className={`px-4 py-2 border-t border-b border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
-                    ${showOnlyMyCards
-                      ? 'bg-primary text-on-primary border-primary'
-                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
+                    ${showOnlyMyCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
                   `}
                   aria-pressed={showOnlyMyCards}
+                  style={{ minWidth: 100, textAlign: 'left' }}
                 >
                   Your cards
                 </button>
@@ -718,13 +715,11 @@ const MomentBoard: React.FC = () => {
                     setShowOnlyMyCards(false);
                     setShowOnlyOthersCards(true);
                   }}
-                  className={`px-4 py-2 border border-outline-variant focus:z-10 focus:outline-none text-label-large font-roboto-flex
-                    rounded-r-full
-                    ${showOnlyOthersCards
-                      ? 'bg-primary text-on-primary border-primary'
-                      : 'bg-surface text-on-surface hover:bg-surface-container-highest'}
+                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
+                    ${showOnlyOthersCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
                   `}
                   aria-pressed={showOnlyOthersCards}
+                  style={{ minWidth: 100, textAlign: 'left' }}
                 >
                   Others cards
                 </button>
