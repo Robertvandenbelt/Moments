@@ -672,6 +672,9 @@ const MomentBoard: React.FC = () => {
                 </span>
                 {/* Label */}
                 <span className="text-label-large font-roboto-flex">All</span>
+                <span className="ml-2 text-label-medium font-roboto-flex bg-primary-container text-on-primary-container rounded-full px-2 py-0.5 align-middle">
+                  {momentCards.length}
+                </span>
                 {/* Active indicator */}
                 <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
                   !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
