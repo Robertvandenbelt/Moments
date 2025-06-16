@@ -60,13 +60,14 @@ const Profile: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-orange-50">
-      {/* M3 Top App Bar */}
-      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant">
+      {/* M3 Medium App Bar */}
+      <div className="sticky top-0 z-20 bg-gray-100 backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
+          {/* Left: Back Arrow, Headline & Subtitle (side by side) */}
           <div className="flex items-center gap-4">
             <Link 
               to="/timeline" 
-              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors h-12 w-12 flex items-center justify-center"
             >
               <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
               <span 
@@ -79,21 +80,22 @@ const Profile: React.FC = () => {
                 arrow_back
               </span>
             </Link>
+            <div className="flex flex-col justify-center">
+              <span className="text-xl sm:text-2xl font-roboto-flex font-normal text-on-surface leading-tight">
+                {displayName}
+              </span>
+              <span className="text-sm sm:text-base font-roboto-flex font-normal text-on-surface-variant leading-snug">
+                {user?.email}
+              </span>
+            </div>
           </div>
-
-          {/* Invisible placeholder for right alignment */}
+          {/* Right: Placeholder for symmetry */}
           <div className="w-10 h-10" />
         </div>
       </div>
 
       <div className="px-4 pt-6 pb-10">
         <div className="max-w-2xl mx-auto">
-          {/* Profile Header */}
-          <div className="text-center mb-8">
-            <h1 className="text-display-small font-roboto-flex text-on-surface mb-2">{displayName}</h1>
-            <p className="text-body-large font-roboto-flex text-on-surface-variant">{user?.email}</p>
-          </div>
-
           {/* Stats List */}
           <ul className="divide-y divide-outline-variant bg-surface rounded-xl shadow-level1 mb-8">
             {/* Private Moments */}

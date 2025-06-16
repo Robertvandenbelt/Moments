@@ -131,7 +131,7 @@ const Timeline: React.FC = () => {
   return (
     <div className="min-h-screen bg-orange-50 relative max-w-full overflow-x-hidden">
       {/* M3 Top App Bar */}
-      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant">
+      <div className="sticky top-0 z-20 bg-gray-100 backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
           {/* Centered Logo */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">

@@ -77,48 +77,52 @@ const MomentCardViewer: React.FC<MomentCardViewerProps> = ({
               </button>
             </div>
 
-            {/* Navigation buttons */}
-            <div className="absolute top-1/2 left-0 right-0 z-10 flex justify-between px-4 -translate-y-1/2">
-              {hasPrevious && onPrevious && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onPrevious();
-                  }}
-                  className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
-                >
-                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                  <span 
-                    className="material-symbols-outlined relative text-on-surface"
-                    style={{ 
-                      fontSize: '24px',
-                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+            {/* Navigation buttons (fixed left/right) */}
+            <div className="absolute top-1/2 left-0 right-0 z-10 flex justify-between px-4 -translate-y-1/2 pointer-events-none">
+              <div className="pointer-events-auto">
+                {hasPrevious && onPrevious && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onPrevious();
                     }}
+                    className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
                   >
-                    arrow_back
-                  </span>
-                </button>
-              )}
-              {hasNext && onNext && (
-                <button
-                  onClick={(e) => {
-                    e.stopPropagation();
-                    onNext();
-                  }}
-                  className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
-                >
-                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                  <span 
-                    className="material-symbols-outlined relative text-on-surface"
-                    style={{ 
-                      fontSize: '24px',
-                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                    <span 
+                      className="material-symbols-outlined relative text-on-surface"
+                      style={{ 
+                        fontSize: '24px',
+                        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                      }}
+                    >
+                      arrow_back
+                    </span>
+                  </button>
+                )}
+              </div>
+              <div className="pointer-events-auto">
+                {hasNext && onNext && (
+                  <button
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      onNext();
                     }}
+                    className="relative p-3 rounded-full bg-surface-container-highest transition-colors"
                   >
-                    arrow_forward
-                  </span>
-                </button>
-              )}
+                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                    <span 
+                      className="material-symbols-outlined relative text-on-surface"
+                      style={{ 
+                        fontSize: '24px',
+                        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                      }}
+                    >
+                      arrow_forward
+                    </span>
+                  </button>
+                )}
+              </div>
             </div>
 
             {/* Main content */}

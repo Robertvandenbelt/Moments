@@ -834,7 +834,11 @@ const MomentBoard: React.FC = () => {
                           isLargeCard ? 'aspect-[21/9]' : 'aspect-[16/9]'
                         } bg-surface-container-low`}>
                           <img
-                            src={card.media_url ? `${card.media_url}?width=${isLargeCard ? 1200 : 800}&height=${isLargeCard ? 514 : 450}&resize=cover&quality=80` : ''}
+                            src={
+                              (card.optimized_url || card.media_url)
+                                ? `${card.optimized_url || card.media_url}?width=${isLargeCard ? 1200 : 800}&height=${isLargeCard ? 514 : 450}&resize=cover&quality=80`
+                                : ''
+                            }
                             alt=""
                             className="h-full w-full object-cover rounded-t-xl"
                             loading="lazy"
