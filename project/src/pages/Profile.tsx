@@ -43,9 +43,9 @@ const Profile: React.FC = () => {
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="relative w-12 h-12">
           {/* Track */}
-          <div className="absolute inset-0 rounded-full border-4 border-surface-container-highest" />
+          <div className="absolute inset-0 rounded-full border-4 border-surface-container-high" />
           {/* Progress */}
-          <div className="absolute inset-0 rounded-full border-4 border-primary animate-spin" 
+          <div className="absolute inset-0 rounded-full border-4 border-primary-500 animate-spin" 
             style={{
               borderRightColor: 'transparent',
               borderTopColor: 'transparent'
@@ -59,15 +59,15 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-orange-50">
+    <div className="min-h-screen bg-surface">
       {/* M3 Medium App Bar */}
-      <div className="sticky top-0 z-20 bg-gray-100 backdrop-blur-xl border-b border-outline-variant">
+      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
           {/* Left: Back Arrow, Headline & Subtitle (side by side) */}
           <div className="flex items-center gap-4">
             <Link 
               to="/timeline" 
-              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors h-12 w-12 flex items-center justify-center"
+              className="relative p-4 rounded-full hover:bg-surface-container-high transition-colors h-12 w-12 flex items-center justify-center"
             >
               <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
               <span 
@@ -108,7 +108,7 @@ const Profile: React.FC = () => {
                 <p className="text-title-medium font-roboto-flex text-on-surface">Private moments</p>
                 <p className="text-body-medium font-roboto-flex text-on-surface-variant truncate">Moments you created that no one else joined</p>
               </div>
-              <span className="text-title-large font-roboto-flex text-on-surface font-semibold ml-4">{stats.privateCount}</span>
+              <span className="text-title-large font-roboto-flex text-on-surface ml-4">{stats.privateCount}</span>
             </li>
             {/* Shared Moments */}
             <li className="flex items-center px-4 py-3">
@@ -120,7 +120,7 @@ const Profile: React.FC = () => {
                 <p className="text-title-medium font-roboto-flex text-on-surface">Shared moments</p>
                 <p className="text-body-medium font-roboto-flex text-on-surface-variant truncate">Moments you created that others joined</p>
               </div>
-              <span className="text-title-large font-roboto-flex text-on-surface font-semibold ml-4">{stats.sharedCount}</span>
+              <span className="text-title-large font-roboto-flex text-on-surface ml-4">{stats.sharedCount}</span>
             </li>
             {/* Joined Moments */}
             <li className="flex items-center px-4 py-3">
@@ -132,7 +132,7 @@ const Profile: React.FC = () => {
                 <p className="text-title-medium font-roboto-flex text-on-surface">Joined moments</p>
                 <p className="text-body-medium font-roboto-flex text-on-surface-variant truncate">Moments created by others that you joined</p>
               </div>
-              <span className="text-title-large font-roboto-flex text-on-surface font-semibold ml-4">{stats.joinedCount}</span>
+              <span className="text-title-large font-roboto-flex text-on-surface ml-4">{stats.joinedCount}</span>
             </li>
             {/* Cards Added */}
             <li className="flex items-center px-4 py-3">
@@ -144,7 +144,7 @@ const Profile: React.FC = () => {
                 <p className="text-title-medium font-roboto-flex text-on-surface">Cards added</p>
                 <p className="text-body-medium font-roboto-flex text-on-surface-variant truncate">Photo or text cards you contributed to your own or others moments</p>
               </div>
-              <span className="text-title-large font-roboto-flex text-on-surface font-semibold ml-4">{stats.cardsAdded}</span>
+              <span className="text-title-large font-roboto-flex text-on-surface ml-4">{stats.cardsAdded}</span>
             </li>
           </ul>
 

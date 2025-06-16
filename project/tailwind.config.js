@@ -6,77 +6,105 @@ export default {
   theme: {
     extend: {
       colors: {
-        // M3 Color System
+        // M3 Color System - Baseline
         primary: {
-          DEFAULT: '#E27D60', // Primary - coral pink
-          container: '#DCE9D7', // Minty pastel for secondary button
-          action: '#5A7742', // Leafy green for primary actions
+          50: '#E8F5E9',
+          100: '#C8E6C9',
+          200: '#A5D6A7',
+          300: '#81C784',
+          400: '#66BB6A',
+          500: '#4CAF50', // Primary base
+          600: '#43A047',
+          700: '#388E3C',
+          800: '#2E7D32',
+          900: '#1B5E20',
+          DEFAULT: '#4CAF50',
+          container: '#E8F5E9',
+          action: '#2E7D32',
         },
         secondary: {
-          DEFAULT: '#FFF7ED', // Orange-50 for backgrounds
-          container: '#DCE9D7', // Minty pastel
+          50: '#E0F2F1',
+          100: '#B2DFDB',
+          200: '#80CBC4',
+          300: '#4DB6AC',
+          400: '#26A69A',
+          500: '#009688', // Secondary base
+          600: '#00897B',
+          700: '#00796B',
+          800: '#00695C',
+          900: '#004D40',
+          DEFAULT: '#009688',
+          container: '#E0F2F1',
         },
         tertiary: {
-          DEFAULT: '#3D6374',
-          container: '#C1E8FF',
+          50: '#E3F2FD',
+          100: '#BBDEFB',
+          200: '#90CAF9',
+          300: '#64B5F6',
+          400: '#42A5F5',
+          500: '#2196F3', // Tertiary base
+          600: '#1E88E5',
+          700: '#1976D2',
+          800: '#1565C0',
+          900: '#0D47A1',
+          DEFAULT: '#2196F3',
+          container: '#E3F2FD',
         },
         error: {
-          DEFAULT: '#BA1A1A',
-          container: '#FFDAD6',
+          50: '#FFEBEE',
+          100: '#FFCDD2',
+          200: '#EF9A9A',
+          300: '#E57373',
+          400: '#EF5350',
+          500: '#F44336', // Error base
+          600: '#E53935',
+          700: '#D32F2F',
+          800: '#C62828',
+          900: '#B71C1C',
+          DEFAULT: '#F44336',
+          container: '#FFEBEE',
         },
         surface: {
-          DEFAULT: '#FCFDF7',
-          dim: '#DCE5DE',
-          bright: '#F8FAF6',
+          DEFAULT: '#FFFFFF',
+          dim: '#F5F5F5',
+          bright: '#FAFAFA',
           container: {
             lowest: '#FFFFFF',
-            low: '#F6F9F6',
-            DEFAULT: '#F0F4F1',
-            high: '#EBF3ED',
-            highest: '#E6EDE7',
+            low: '#F5F5F5',
+            DEFAULT: '#EEEEEE',
+            high: '#E0E0E0',
+            highest: '#BDBDBD',
           }
         },
         outline: {
-          DEFAULT: '#70796F',
-          variant: '#C1C9C0',
+          DEFAULT: '#9E9E9E',
+          variant: '#E0E0E0',
         },
         // Text colors for "on-" states
         'on-primary': '#FFFFFF',
-        'on-primary-container': '#002117',
+        'on-primary-container': '#1B5E20',
         'on-secondary': '#FFFFFF',
-        'on-secondary-container': '#072019',
+        'on-secondary-container': '#004D40',
         'on-tertiary': '#FFFFFF',
-        'on-tertiary-container': '#001F2A',
+        'on-tertiary-container': '#0D47A1',
         'on-error': '#FFFFFF',
-        'on-error-container': '#410002',
-        'on-surface': '#191C1A',
-        'on-surface-variant': '#404943',
-        orange: {
-          ...colors.orange,
-          50: '#FFF7ED', // Explicitly set orange-50
-          DEFAULT: '#F97316',
-          500: '#F97316',
+        'on-error-container': '#B71C1C',
+        'on-surface': '#212121',
+        'on-surface-variant': '#757575',
+        // Neutral colors for surface and background
+        neutral: {
+          50: '#FAFAFA',
+          100: '#F5F5F5',
+          200: '#EEEEEE',
+          300: '#E0E0E0',
+          400: '#BDBDBD',
+          500: '#9E9E9E',
+          600: '#757575',
+          700: '#616161',
+          800: '#424242',
+          900: '#212121',
+          DEFAULT: '#9E9E9E',
         },
-        teal: {
-          ...colors.teal,
-          DEFAULT: '#38B2AC',
-          500: '#38B2AC',
-        },
-        lime: {
-          ...colors.lime,
-          200: '#D9F99D',
-        },
-        gray: {
-          ...colors.gray,
-          100: '#F3F4F6',
-          200: '#E5E7EB',
-          400: '#9CA3AF',
-          500: '#6B7280',
-        },
-        whatsapp: {
-          light: '#e8ffd7',  // WhatsApp message background
-          DEFAULT: '#25D366', // WhatsApp brand color
-        }
       },
       // M3 Typography
       fontFamily: {
@@ -132,20 +160,7 @@ export default {
       animation: {
         'slide-up': 'slide-up 0.3s ease-out'
       },
-      textShadow: {
-        'stroke-primary': '-1px -1px 0 var(--primary), 1px -1px 0 var(--primary), -1px 1px 0 var(--primary), 1px 1px 0 var(--primary)',
-      },
     },
   },
-  plugins: [
-    function({ addUtilities }) {
-      addUtilities({
-        '.text-stroke-primary': {
-          '-webkit-text-stroke': '2px var(--primary)',
-          'text-stroke': '2px var(--primary)',
-          'paint-order': 'stroke fill',
-        },
-      });
-    },
-  ],
+  plugins: [],
 };

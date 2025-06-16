@@ -11,7 +11,6 @@ type MomentListItemProps = {
   unseenCardCount?: number;
   totalCardCount: number;
   previewPhotoUrl?: string;
-  isLast?: boolean;
 };
 
 const formatDate = (date: string) => {
@@ -26,7 +25,6 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
   unseenCardCount = 0,
   totalCardCount = 0,
   previewPhotoUrl,
-  isLast = false
 }) => {
   const mainHeading = title || (date ? formatDate(date) : 'Untitled Moment');
 
@@ -40,7 +38,7 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-4 px-4 py-4 bg-orange-50 hover:bg-surface-container-highest active:bg-surface-container-highest transition-colors">
+      <div className="flex items-center gap-4 px-4 py-4 bg-surface hover:bg-surface-container-high active:bg-surface-container-high transition-colors">
         {/* State layer for hover/press states */}
         <div className="absolute inset-0 bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
 
@@ -89,7 +87,7 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
 
           <div className="flex items-center gap-2 mt-2">
             {participantCount > 1 && (
-              <span className="inline-flex items-center h-6 px-2 rounded-full bg-primary text-on-primary text-label-small font-roboto-flex">
+              <span className="inline-flex items-center h-6 px-2 rounded-full bg-primary-500 text-on-primary text-label-small font-roboto-flex">
                 <span 
                   className="material-symbols-outlined text-on-primary mr-1"
                   style={{ 
@@ -108,17 +106,12 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
         {/* Trailing supporting text */}
         {totalCardCount > 0 && (
           <div className="flex-shrink-0 text-right">
-            <span className="text-label-medium font-roboto-flex text-on-surface-variant font-semibold">
+            <span className="text-label-medium font-roboto-flex text-on-surface-variant">
               {totalCardCount} {totalCardCount === 1 ? 'card' : 'cards'}
             </span>
           </div>
         )}
       </div>
-      
-      {/* Divider */}
-      {!isLast && (
-        <div className="h-px bg-outline-variant w-full" />
-      )}
     </div>
   );
 };

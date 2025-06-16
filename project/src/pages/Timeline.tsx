@@ -100,9 +100,9 @@ const Timeline: React.FC = () => {
       <div className="min-h-screen bg-surface flex items-center justify-center">
         <div className="relative w-12 h-12">
           {/* Track */}
-          <div className="absolute inset-0 rounded-full border-4 border-surface-container-highest" />
+          <div className="absolute inset-0 rounded-full border-4 border-surface-container-high" />
           {/* Progress */}
-          <div className="absolute inset-0 rounded-full border-4 border-primary animate-spin" 
+          <div className="absolute inset-0 rounded-full border-4 border-primary-500 animate-spin" 
             style={{
               borderRightColor: 'transparent',
               borderTopColor: 'transparent'
@@ -115,9 +115,9 @@ const Timeline: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      <div className="min-h-screen bg-surface-dim">
         <div className="container mx-auto px-4 pt-20 text-center">
-          <p className="text-gray-500">{error}</p>
+          <p className="text-on-surface-variant">{error}</p>
         </div>
       </div>
     );
@@ -129,21 +129,20 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-orange-50 relative max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-surface relative max-w-full overflow-x-hidden">
       {/* M3 Top App Bar */}
-      <div className="sticky top-0 z-20 bg-gray-100 backdrop-blur-xl border-b border-outline-variant">
+      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
           {/* Centered Logo */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
-              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight" style={{ color: '#E27D60' }}>
+              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-primary-500">
                 m
                 <span 
-                  className="material-symbols-outlined mx-[1px]"
+                  className="material-symbols-outlined mx-[1px] text-primary-700"
                   style={{ 
                     fontSize: '28px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24",
-                    color: '#5A7742'
+                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
                   }}
                 >
                   photo_camera
