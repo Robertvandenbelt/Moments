@@ -142,6 +142,17 @@ const Timeline: React.FC = () => {
       {/* M3 Top App Bar */}
       <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
+          {/* Left: Filter Button */}
+          <button
+            className="relative w-10 h-10 flex items-center justify-center hover:bg-surface-container-highest transition-colors"
+            aria-label="Filter timeline"
+            onClick={() => setFilterModalOpen(true)}
+          >
+            <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 24 }}>
+              tune
+            </span>
+          </button>
+
           {/* Centered Logo */}
           <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
             <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
@@ -161,38 +172,23 @@ const Timeline: React.FC = () => {
             </div>
           </div>
 
-          {/* Invisible placeholder for left alignment */}
-          <div className="w-10 h-10 md:w-12 md:h-12" />
-
-          {/* Right section - Filter and Settings */}
-          <div className="flex items-center gap-2">
-            {/* Filter Icon Button */}
-            <button
-              className="relative w-10 h-10 rounded-full bg-secondary-container hover:bg-secondary-container/90 flex items-center justify-center transition-colors"
-              aria-label="Filter timeline"
-              onClick={() => setFilterModalOpen(true)}
+          {/* Right: Settings Button (plain icon) */}
+          <Link 
+            to="/profile" 
+            className="relative w-10 h-10 flex items-center justify-center"
+            aria-label="Settings"
+          >
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <span 
+              className="material-symbols-outlined text-on-surface-variant relative"
+              style={{ 
+                fontSize: '24px',
+                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24"
+              }}
             >
-              <span className="material-symbols-outlined text-on-secondary-container" style={{ fontSize: 24 }}>
-                tune
-              </span>
-            </button>
-            <Link 
-              to="/profile" 
-              className="relative w-10 h-10 rounded-full bg-secondary-container hover:bg-secondary-container/90 transition-colors flex items-center justify-center"
-              aria-label="Settings"
-            >
-              <div className="absolute inset-0 rounded-full bg-on-secondary-container opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-              <span 
-                className="material-symbols-outlined text-on-secondary-container relative"
-                style={{ 
-                  fontSize: '24px',
-                  fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24"
-                }}
-              >
-                settings
-              </span>
-            </Link>
-          </div>
+              settings
+            </span>
+          </Link>
         </div>
       </div>
       

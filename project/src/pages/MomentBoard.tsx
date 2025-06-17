@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from 'react';
+import React, { useState, useEffect, useMemo, useRef } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
 import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download, Heart } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
@@ -54,10 +54,10 @@ const MomentBoard: React.FC = () => {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
-  const [showFavoritesOnly, setShowFavoritesOnly] = useState(true);
+  const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showOnlyMyCards, setShowOnlyMyCards] = useState(false);
   const [showOnlyOthersCards, setShowOnlyOthersCards] = useState(false);
-  const [isBottomSheetOpen, setIsBottomSheetOpen] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const [showDeleteConfirm, setShowDeleteConfirm] = useState(false);
   const [showDownloadConfirm, setShowDownloadConfirm] = useState(false);
   const [isFabMenuOpen, setIsFabMenuOpen] = useState(false);
@@ -68,6 +68,8 @@ const MomentBoard: React.FC = () => {
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
+  const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const menuButtonRef = useRef<HTMLButtonElement>(null);
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -377,7 +379,7 @@ const MomentBoard: React.FC = () => {
 
       // Close dialogs and navigate back to timeline
       setShowDeleteConfirm(false);
-      setIsBottomSheetOpen(false);
+      setIsMenuOpen(false);
       navigate('/timeline');
     } catch (err) {
       console.error('Error deleting moment board:', err);
@@ -498,7 +500,7 @@ const MomentBoard: React.FC = () => {
 
       // Close dialogs and navigate back to timeline
       setShowLeaveConfirm(false);
-      setIsBottomSheetOpen(false);
+      setIsMenuOpen(false);
       navigate('/timeline');
     } catch (err) {
       console.error('Error leaving moment board:', err);
@@ -515,7 +517,7 @@ const MomentBoard: React.FC = () => {
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
       {/* Top app bar with navigation */}
-      <div className="sticky top-0 z-20 bg-surface/95 backdrop-blur-xl border-b border-outline-variant">
+      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
         <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
           <div className="flex items-center gap-4">
             <Link 
@@ -536,6 +538,25 @@ const MomentBoard: React.FC = () => {
           </div>
 
           <div className="flex items-center gap-2">
+            {/* Info icon with tooltip */}
+            <div className="relative">
+              <button
+                className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+                aria-label="Show info"
+                onClick={() => setShowInfoTooltip((v) => !v)}
+                onBlur={() => setShowInfoTooltip(false)}
+              >
+                <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 24 }}>info</span>
+              </button>
+              {showInfoTooltip && (
+                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-surface-container-highest text-on-surface-variant rounded-lg px-4 py-2 shadow text-label-medium whitespace-nowrap">
+                  <span className="inline-flex items-center h-8 px-3 rounded-lg bg-surface-container-highest text-on-surface-variant text-label-medium font-roboto-flex border border-outline-variant">
+                    <span className="material-symbols-outlined text-on-surface-variant mr-2" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}>person</span>
+                    Created by {board.owner_display_name}
+                  </span>
+                </div>
+              )}
+            </div>
             {/* Share button for owners */}
             {board.role === 'owner' && (
               <button
@@ -556,8 +577,11 @@ const MomentBoard: React.FC = () => {
               </button>
             )}
             <button 
-              onClick={() => setIsBottomSheetOpen(true)}
+              ref={menuButtonRef}
+              onClick={() => setIsMenuOpen((open) => !open)}
               className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+              aria-haspopup="menu"
+              aria-expanded={isMenuOpen}
             >
               <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
               <span 
@@ -598,26 +622,7 @@ const MomentBoard: React.FC = () => {
               </p>
             )}
 
-            {/* Creator Info Chip */}
-            <div className="flex items-center gap-2 pt-2">
-              <div className="inline-flex items-center h-8 px-3 rounded-lg" style={{ backgroundColor: '#DCE9D7' }}>
-                <span 
-                  className="material-symbols-outlined text-on-surface-variant mr-2"
-                  style={{ 
-                    fontSize: '18px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  {board.role === 'owner' ? 'edit_square' : 'person'}
-                </span>
-                <span className="text-label-medium font-roboto-flex text-on-surface-variant">
-                  {board.role === 'owner' 
-                    ? "Created by you"
-                    : `Created by ${board.owner_display_name}`
-                  }
-                </span>
-              </div>
-            </div>
+            {/* Creator Info Chip removed from main content */}
           </div>
         </div>
 
@@ -626,36 +631,6 @@ const MomentBoard: React.FC = () => {
           <div className="max-w-2xl mx-auto flex justify-center">
             {/* Primary tab bar */}
             <div className="flex items-center border-b border-outline-variant">
-              <button
-                onClick={() => {
-                  setShowFavoritesOnly(true);
-                  setShowOnlyMyCards(false);
-                  setShowOnlyOthersCards(false);
-                }}
-                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
-                  showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
-                }`}
-              >
-                {/* Icon */}
-                <span 
-                  className="material-symbols-outlined"
-                  style={{ 
-                    fontSize: '24px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  favorite
-                </span>
-                {/* Label */}
-                <span className="text-label-large font-roboto-flex">Favorites</span>
-                {/* Active indicator */}
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
-                  showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
-                }`} />
-                {/* State layer */}
-                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
-              </button>
-
               <button
                 onClick={() => {
                   setShowFavoritesOnly(false);
@@ -678,12 +653,43 @@ const MomentBoard: React.FC = () => {
                 </span>
                 {/* Label */}
                 <span className="text-label-large font-roboto-flex">All</span>
-                <span className="ml-2 text-label-medium font-roboto-flex bg-primary-container text-on-primary-container rounded-full px-2 py-0.5 align-middle">
-                  {momentCards.length}
-                </span>
                 {/* Active indicator */}
                 <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
                   !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
+                }`} />
+                {/* State layer */}
+                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
+              </button>
+
+              <button
+                onClick={() => {
+                  setShowFavoritesOnly(true);
+                  setShowOnlyMyCards(false);
+                  setShowOnlyOthersCards(false);
+                }}
+                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
+                  showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
+                }`}
+              >
+                {/* Icon */}
+                <span 
+                  className="material-symbols-outlined"
+                  style={{ 
+                    fontSize: '24px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  favorite
+                </span>
+                {/* Label */}
+                <span className="text-label-large font-roboto-flex">Favorites</span>
+                {/* Card count indicator for Favorites tab */}
+                <span className="ml-2 text-label-medium font-roboto-flex bg-primary-container text-on-primary-container rounded-full px-2 py-0.5 align-middle">
+                  {momentCards.filter(card => card.is_favorited).length}
+                </span>
+                {/* Active indicator */}
+                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
+                  showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
                 }`} />
                 {/* State layer */}
                 <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
@@ -701,6 +707,8 @@ const MomentBoard: React.FC = () => {
               <div>
                 <p className="text-headline-small font-roboto-flex text-on-surface">
                   {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
+                  {(!showFavoritesOnly && showOnlyMyCards) && ' created by you'}
+                  {(!showFavoritesOnly && showOnlyOthersCards) && ' created by others'}
                 </p>
               </div>
               
@@ -777,76 +785,55 @@ const MomentBoard: React.FC = () => {
                 </p>
               </div>
             ) : (
-              // Responsive masonry grid
-              <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4 sm:gap-6">
-                {displayedCards.map((card, index) => {
-                  // Determine if the card should span multiple columns
-                  const isLargeCard = index % 5 === 0; // Every 5th card will be larger
-                  
-                  return (
-                    <article 
-                      key={card.id}
-                      onClick={() => setSelectedCardIndex(index)}
-                      className={`group relative bg-surface rounded-xl shadow-level1 hover:shadow-level2 active:shadow-level1 transition-all duration-300 cursor-pointer overflow-hidden ${
-                        isLargeCard ? 'md:col-span-2 lg:col-span-2' : ''
-                      }`}
-                    >
-                      {/* State layer for hover/press states */}
-                      <div className="absolute inset-0 rounded-xl bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-300" />
-                      
-                      {card.type === 'photo' ? (
-                        <div className={`${
-                          isLargeCard ? 'aspect-[21/9]' : 'aspect-[16/9]'
-                        } bg-surface-container-low`}>
-                          <img
-                            src={
-                              (card.optimized_url || card.media_url)
-                                ? `${card.optimized_url || card.media_url}?width=${isLargeCard ? 1200 : 800}&height=${isLargeCard ? 514 : 450}&resize=cover&quality=80`
-                                : ''
-                            }
-                            alt=""
-                            className="h-full w-full object-cover rounded-t-xl"
-                            loading="lazy"
-                          />
-                        </div>
-                      ) : (
-                        <div className={`${
-                          isLargeCard ? 'aspect-[21/9] p-12' : 'aspect-[16/9] p-8'
-                        } bg-primary-container flex items-center justify-center rounded-t-xl`}>
-                          <p className={`${
-                            isLargeCard ? 'text-headline-medium' : 'text-headline-small'
-                          } font-roboto-flex text-on-primary-container line-clamp-6 text-center`}>
-                            {card.description}
-                          </p>
-                        </div>
-                      )}
-
-                      <div className="p-4 sm:p-6 bg-surface border-t border-outline-variant">
-                        <div className="flex items-center justify-between">
-                          <div>
-                            <p className="text-title-medium font-roboto-flex text-on-surface">{card.uploader_display_name}</p>
-                            <p className="text-body-medium font-roboto-flex text-on-surface-variant">
-                              {format(parseISO(card.created_at), 'MMM d, yyyy')}
-                            </p>
-                          </div>
-                          <button
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              handleFavorite(card.id);
-                            }}
-                            className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                          >
-                            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                            <Heart 
-                              size={20} 
-                              className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
-                            />
-                          </button>
+              // Single-column stream, full photo, uploader overlay, heart below
+              <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4">
+                {displayedCards.map((card, index) => (
+                  <article 
+                    key={card.id}
+                    onClick={() => setSelectedCardIndex(index)}
+                    className="group relative bg-transparent rounded-xl transition-all duration-300 cursor-pointer overflow-hidden w-full"
+                  >
+                    {/* Photo or Text Card */}
+                    {card.type === 'photo' ? (
+                      <div className="relative w-full">
+                        <img
+                          src={
+                            (card.optimized_url || card.media_url)
+                              ? `${card.optimized_url || card.media_url}?width=800&quality=80`
+                              : ''
+                          }
+                          alt=""
+                          className="w-full"
+                          style={{ display: 'block', maxWidth: '100%' }}
+                          loading="lazy"
+                        />
+                        {/* Uploader overlay */}
+                        <div className="absolute top-2 left-2 bg-surface/80 rounded-lg px-3 py-1 text-label-medium font-roboto-flex text-on-surface-variant shadow">
+                          {card.uploader_display_name}
                         </div>
                       </div>
-                    </article>
-                  );
-                })}
+                    ) : (
+                      <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
+                        <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
+                          {card.description}
+                        </p>
+                      </div>
+                    )}
+                    {/* Heart button below card, left-aligned */}
+                    <div className="flex items-center mt-2">
+                      <button
+                        onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
+                        className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                      >
+                        <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                        <Heart 
+                          size={20} 
+                          className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
+                        />
+                      </button>
+                    </div>
+                  </article>
+                ))}
               </div>
             )}
           </div>
@@ -865,52 +852,51 @@ const MomentBoard: React.FC = () => {
         />
       )}
 
-      {/* Bottom Sheet */}
-      {isBottomSheetOpen && (
-        <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/50 z-40"
-            onClick={() => setIsBottomSheetOpen(false)}
-          />
-          
-          {/* Bottom Sheet Content */}
-          <div className="fixed bottom-0 left-0 right-0 bg-white rounded-t-xl p-4 z-50 animate-slide-up">
-            <div className="w-12 h-1 bg-gray-300 rounded-full mx-auto mb-4" />
-            
-            <div className="space-y-4">
-              {board.role === 'owner' ? (
-                <>
-                  <button 
-                    onClick={() => setShowDeleteConfirm(true)}
-                    className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
-                  >
-                    <Trash2 size={20} />
-                    <span>Delete Moment</span>
-                  </button>
-                  <button 
-                    onClick={() => {
-                      setIsBottomSheetOpen(false);
-                      navigate(`/edit/${id}`);
-                    }}
-                    className="w-full flex items-center gap-3 p-3 text-gray-700 hover:bg-gray-100 rounded-lg transition-colors"
-                  >
-                    <Edit size={20} />
-                    <span>Edit Moment</span>
-                  </button>
-                </>
-              ) : (
-                <button 
-                  onClick={() => setShowLeaveConfirm(true)}
-                  className="w-full flex items-center gap-3 p-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors"
+      {/* M3 Menu Popover */}
+      {isMenuOpen && (
+        <div
+          className="fixed z-50"
+          style={{
+            top: menuButtonRef.current?.getBoundingClientRect?.().bottom ? menuButtonRef.current.getBoundingClientRect().bottom + 8 : 60,
+            left: menuButtonRef.current?.getBoundingClientRect?.().right ? menuButtonRef.current.getBoundingClientRect().right - 200 : 'auto',
+            minWidth: 200,
+          }}
+          role="menu"
+          tabIndex={-1}
+          onBlur={() => setIsMenuOpen(false)}
+        >
+          <div className="bg-surface rounded-xl shadow-xl border border-outline-variant py-2">
+            {board.role === 'owner' ? (
+              <>
+                <button
+                  onClick={() => { setShowDeleteConfirm(true); setIsMenuOpen(false); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
+                  role="menuitem"
                 >
-                  <LogOut size={20} />
-                  <span>Leave Moment</span>
+                  <Trash2 size={20} />
+                  <span>Delete Moment</span>
                 </button>
-              )}
-            </div>
+                <button
+                  onClick={() => { setIsMenuOpen(false); navigate(`/edit/${id}`); }}
+                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-high rounded-lg transition-colors text-left"
+                  role="menuitem"
+                >
+                  <Edit size={20} />
+                  <span>Edit Moment</span>
+                </button>
+              </>
+            ) : (
+              <button
+                onClick={() => { setShowLeaveConfirm(true); setIsMenuOpen(false); }}
+                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
+                role="menuitem"
+              >
+                <LogOut size={20} />
+                <span>Leave Moment</span>
+              </button>
+            )}
           </div>
-        </>
+        </div>
       )}
 
       {/* Delete Confirmation Dialog */}
