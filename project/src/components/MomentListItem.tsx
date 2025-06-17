@@ -38,7 +38,7 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
 
   return (
     <div className="relative">
-      <div className="flex items-center gap-4 px-4 py-4 bg-surface hover:bg-surface-container-high active:bg-surface-container-high transition-colors">
+      <div className="flex items-center gap-4 px-4 py-4 bg-transparent hover:bg-surface-container-high active:bg-surface-container-high transition-colors">
         {/* State layer for hover/press states */}
         <div className="absolute inset-0 bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
 

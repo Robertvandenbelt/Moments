@@ -59,49 +59,64 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-surface">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
       {/* M3 Medium App Bar */}
       <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
-        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
-          {/* Left: Back Arrow, Headline & Subtitle (side by side) */}
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/timeline" 
-              className="relative p-4 rounded-full hover:bg-surface-container-high transition-colors h-12 w-12 flex items-center justify-center"
+        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
+          {/* Back button (M3 icon button, top left) */}
+          <Link 
+            to="/timeline" 
+            className="relative w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center"
+            aria-label="Back to timeline"
+            style={{ zIndex: 10 }}
+          >
+            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <span 
+              className="material-symbols-outlined text-on-surface"
+              style={{ 
+                fontSize: '24px',
+                fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+              }}
             >
-              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-              <span 
-                className="material-symbols-outlined text-on-surface"
-                style={{ 
-                  fontSize: '24px',
-                  fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                }}
-              >
-                arrow_back
-              </span>
-            </Link>
-            <div className="flex flex-col justify-center">
-              <span className="text-xl sm:text-2xl font-roboto-flex font-normal text-on-surface leading-tight">
-                {displayName}
-              </span>
-              <span className="text-sm sm:text-base font-roboto-flex font-normal text-on-surface-variant leading-snug">
-                {user?.email}
-              </span>
+              arrow_back
+            </span>
+          </Link>
+          {/* Centered Logo */}
+          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
+            <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
+              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-primary-500">
+                m
+                <span 
+                  className="material-symbols-outlined mx-[1px] text-primary-700"
+                  style={{ 
+                    fontSize: '28px',
+                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+                  }}
+                >
+                  photo_camera
+                </span>
+                ments
+              </div>
             </div>
           </div>
-          {/* Right: Placeholder for symmetry */}
-          <div className="w-10 h-10" />
+          {/* Invisible placeholder for right alignment */}
+          <div className="w-10 h-10 md:w-12 md:h-12" />
         </div>
       </div>
 
       <div className="px-4 pt-6 pb-10">
         <div className="max-w-2xl mx-auto">
+          {/* User Info (centered, M3 headline and supporting text) */}
+          <div className="flex flex-col items-center mb-8">
+            <span className="text-2xl sm:text-3xl font-roboto-flex font-medium text-on-surface mb-1">{displayName}</span>
+            <span className="text-base sm:text-lg font-roboto-flex text-on-surface-variant">{user?.email}</span>
+          </div>
           {/* Stats List */}
           <ul className="divide-y divide-outline-variant bg-surface rounded-xl shadow-level1 mb-8">
             {/* Private Moments */}
             <li className="flex items-center px-4 py-3">
               <span className="material-symbols-outlined text-on-primary-container bg-primary-container rounded-lg w-10 h-10 flex items-center justify-center mr-4"
-                style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
+                style={{ fontSize: '28px', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
                 lock
               </span>
               <div className="flex-1 min-w-0">
@@ -113,7 +128,7 @@ const Profile: React.FC = () => {
             {/* Shared Moments */}
             <li className="flex items-center px-4 py-3">
               <span className="material-symbols-outlined text-on-primary-container bg-primary-container rounded-lg w-10 h-10 flex items-center justify-center mr-4"
-                style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
+                style={{ fontSize: '28px', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
                 group
               </span>
               <div className="flex-1 min-w-0">
@@ -125,7 +140,7 @@ const Profile: React.FC = () => {
             {/* Joined Moments */}
             <li className="flex items-center px-4 py-3">
               <span className="material-symbols-outlined text-on-primary-container bg-primary-container rounded-lg w-10 h-10 flex items-center justify-center mr-4"
-                style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
+                style={{ fontSize: '28px', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
                 person_add
               </span>
               <div className="flex-1 min-w-0">
@@ -137,7 +152,7 @@ const Profile: React.FC = () => {
             {/* Cards Added */}
             <li className="flex items-center px-4 py-3">
               <span className="material-symbols-outlined text-on-primary-container bg-primary-container rounded-lg w-10 h-10 flex items-center justify-center mr-4"
-                style={{ fontSize: '24px', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
+                style={{ fontSize: '28px', lineHeight: '1', display: 'flex', alignItems: 'center', justifyContent: 'center', fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>
                 photo_library
               </span>
               <div className="flex-1 min-w-0">
@@ -148,7 +163,7 @@ const Profile: React.FC = () => {
             </li>
           </ul>
 
-          <div>
+          <div className="flex justify-center">
             <LogoutButton />
           </div>
         </div>
