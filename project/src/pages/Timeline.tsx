@@ -206,10 +206,10 @@ const Timeline: React.FC = () => {
             {(selectedMonth === 'all' ? Object.entries(moments) : Object.entries(moments).filter(([key]) => key === selectedMonth))
               .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
               .flatMap(([_, { moments: monthMoments }]) =>
-                monthMoments.map((moment, idx) => (
+                monthMoments.map((moment, idx, arr) => (
                   <React.Fragment key={moment.id}>
                     <Link to={`/board/${moment.id}`} className="block w-full">
-                      <div className="w-full mb-2 bg-transparent p-0 overflow-hidden">
+                      <div className="w-full mb-2 bg-surface-container p-0 overflow-hidden rounded-xl">
                         {/* Title, Date */}
                         <div className="px-6 pt-6 pb-2">
                           {moment.title ? (
@@ -255,6 +255,9 @@ const Timeline: React.FC = () => {
                         </div>
                       </div>
                     </Link>
+                    {idx < arr.length - 1 && (
+                      <hr className="mx-6 border-t border-on-surface-variant" style={{ opacity: 0.3 }} />
+                    )}
                   </React.Fragment>
                 ))
               )}

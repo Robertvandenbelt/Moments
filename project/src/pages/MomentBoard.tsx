@@ -7,7 +7,6 @@ import { parseISO } from 'date-fns/parseISO';
 import { useAuth } from '../context/AuthContext';
 import PhotoCard from '../components/PhotoCard';
 import TextCard from '../components/TextCard';
-import MomentCardViewer from '../components/MomentCardViewer';
 import ConfirmDialog from '../components/ConfirmDialog';
 import PhotoUploadSheet from '../components/PhotoUploadSheet';
 import TextUploadSheet from '../components/TextUploadSheet';
@@ -53,7 +52,6 @@ const MomentBoard: React.FC = () => {
   const [momentCards, setMomentCards] = useState<MomentCard[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
-  const [selectedCardIndex, setSelectedCardIndex] = useState<number | null>(null);
   const [showFavoritesOnly, setShowFavoritesOnly] = useState(false);
   const [showOnlyMyCards, setShowOnlyMyCards] = useState(false);
   const [showOnlyOthersCards, setShowOnlyOthersCards] = useState(false);
@@ -152,18 +150,6 @@ const MomentBoard: React.FC = () => {
     
     return filteredCards;
   }, [momentCards, showFavoritesOnly, showOnlyMyCards, showOnlyOthersCards]);
-
-  useEffect(() => {
-    if (selectedCardIndex !== null) {
-      if (displayedCards.length === 0) {
-        setSelectedCardIndex(null); // Close viewer if no cards left
-      } else if (selectedCardIndex >= displayedCards.length) {
-        setSelectedCardIndex(displayedCards.length - 1); // Go to previous card if last was removed
-      } else if (selectedCardIndex < 0) {
-        setSelectedCardIndex(0); // Go to first card if index is negative
-      }
-    }
-  }, [displayedCards, selectedCardIndex]);
 
   if (loading) {
     return (
@@ -304,14 +290,6 @@ const MomentBoard: React.FC = () => {
           cards: prev.cards.filter(c => c.id !== cardId)
         };
       });
-
-      // If we're in the card viewer, close it if this was the last card
-      if (selectedCardIndex !== null) {
-        const newCards = data?.cards.filter(c => c.id !== cardId) ?? [];
-        if (newCards.length === 0) {
-          setSelectedCardIndex(null);
-        }
-      }
     } catch (err) {
       console.error('Error deleting card:', err);
       setError(err instanceof Error ? err.message : 'Failed to delete card');
@@ -788,69 +766,60 @@ const MomentBoard: React.FC = () => {
               // Single-column stream, full photo, uploader overlay, heart below
               <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4">
                 {displayedCards.map((card, index) => (
-                  <article 
-                    key={card.id}
-                    onClick={() => setSelectedCardIndex(index)}
-                    className="group relative bg-transparent rounded-xl transition-all duration-300 cursor-pointer overflow-hidden w-full"
-                  >
-                    {/* Photo or Text Card */}
-                    {card.type === 'photo' ? (
-                      <div className="relative w-full">
-                        <img
-                          src={
-                            (card.optimized_url || card.media_url)
-                              ? `${card.optimized_url || card.media_url}?width=800&quality=80`
-                              : ''
-                          }
-                          alt=""
-                          className="w-full"
-                          style={{ display: 'block', maxWidth: '100%' }}
-                          loading="lazy"
-                        />
-                        {/* Uploader overlay */}
-                        <div className="absolute top-2 left-2 bg-surface/80 rounded-lg px-3 py-1 text-label-medium font-roboto-flex text-on-surface-variant shadow">
-                          {card.uploader_display_name}
+                  <React.Fragment key={card.id}>
+                    <article 
+                      className="group relative bg-surface-container rounded-xl transition-all duration-300 cursor-pointer overflow-hidden w-full"
+                    >
+                      {/* Photo or Text Card */}
+                      {card.type === 'photo' ? (
+                        <div className="relative w-full">
+                          <img
+                            src={
+                              (card.optimized_url || card.media_url)
+                                ? `${card.optimized_url || card.media_url}?width=800&quality=80`
+                                : ''
+                            }
+                            alt=""
+                            className="w-full"
+                            style={{ display: 'block', maxWidth: '100%' }}
+                            loading="lazy"
+                          />
+                          {/* Uploader overlay */}
+                          <div className="absolute top-2 left-2 bg-surface/80 rounded-lg px-3 py-1 text-label-medium font-roboto-flex text-on-surface-variant shadow">
+                            {card.uploader_display_name}
+                          </div>
                         </div>
+                      ) : (
+                        <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
+                          <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
+                            {card.description}
+                          </p>
+                        </div>
+                      )}
+                      {/* Heart button below card, left-aligned */}
+                      <div className="flex items-center mt-2">
+                        <button
+                          onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
+                          className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                        >
+                          <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                          <Heart 
+                            size={20} 
+                            className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
+                          />
+                        </button>
                       </div>
-                    ) : (
-                      <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
-                        <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
-                          {card.description}
-                        </p>
-                      </div>
+                    </article>
+                    {index < displayedCards.length - 1 && (
+                      <hr className="mx-6 border-t border-on-surface-variant" style={{ opacity: 0.3 }} />
                     )}
-                    {/* Heart button below card, left-aligned */}
-                    <div className="flex items-center mt-2">
-                      <button
-                        onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
-                        className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                      >
-                        <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                        <Heart 
-                          size={20} 
-                          className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
-                        />
-                      </button>
-                    </div>
-                  </article>
+                  </React.Fragment>
                 ))}
               </div>
             )}
           </div>
         </div>
       </div>
-
-      {/* Card viewer */}
-      {selectedCardIndex !== null && (
-        <MomentCardViewer
-          card={displayedCards[selectedCardIndex]}
-          onClose={() => setSelectedCardIndex(null)}
-          onPrevious={() => setSelectedCardIndex(prev => prev !== null ? Math.max(0, prev - 1) : null)}
-          onNext={() => setSelectedCardIndex(prev => prev !== null ? Math.min(displayedCards.length - 1, prev + 1) : null)}
-          hasPrevious={selectedCardIndex > 0}
-          hasNext={selectedCardIndex < displayedCards.length - 1}
-        />
-      )}
 
       {/* M3 Menu Popover */}
       {isMenuOpen && (
