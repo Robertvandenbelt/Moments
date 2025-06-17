@@ -158,15 +158,15 @@ const Timeline: React.FC = () => {
           {/* Right section - Settings */}
           <Link 
             to="/profile" 
-            className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
+            className="relative w-10 h-10 rounded-full bg-secondary-container hover:bg-secondary-container/90 transition-colors flex items-center justify-center"
             aria-label="Settings"
           >
-            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+            <div className="absolute inset-0 rounded-full bg-on-secondary-container opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
             <span 
-              className="material-symbols-outlined text-on-surface"
+              className="material-symbols-outlined text-on-secondary-container relative"
               style={{ 
                 fontSize: '24px',
-                fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
+                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24"
               }}
             >
               settings
@@ -217,11 +217,12 @@ const Timeline: React.FC = () => {
       <div className="fixed bottom-6 right-6 z-50">
         <button
           onClick={handleCreateClick}
-          className="relative flex items-center justify-center w-14 h-14 rounded-full shadow-lg bg-[#E27D60] text-white transition-colors hover:bg-[#d96c4f] active:bg-[#c85d41] focus:outline-none focus:ring-2 focus:ring-[#E27D60]/40"
+          className="relative flex items-center gap-3 justify-center h-14 px-6 rounded-full shadow-lg bg-primary text-white transition-colors hover:bg-primary/90 active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary/40 font-roboto-flex text-label-large"
           aria-label="Add new moment"
           style={{ boxShadow: '0px 3px 8px rgba(0,0,0,0.15)' }}
         >
-          <Plus size={28} />
+          <span className="material-symbols-outlined text-white" style={{ fontSize: 28, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>add</span>
+          New moment
           {/* State layer */}
           <span className="absolute inset-0 rounded-full bg-on-primary opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200 pointer-events-none" />
         </button>

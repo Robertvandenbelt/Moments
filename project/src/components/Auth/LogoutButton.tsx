@@ -26,23 +26,20 @@ const LogoutButton: React.FC = () => {
     <button
       onClick={handleLogout}
       disabled={loading}
-      className="group relative w-full h-10 bg-primary-action hover:shadow-level2 active:shadow-level1 transition-all duration-200 text-white text-label-large font-roboto-flex rounded-full disabled:bg-on-surface/12 disabled:text-on-surface/38 disabled:shadow-none"
+      className="group relative flex items-center gap-2 px-6 h-12 bg-primary hover:bg-primary/90 active:bg-primary/80 transition-colors text-white text-label-large font-roboto-flex rounded-full disabled:bg-on-surface/12 disabled:text-on-surface/38 disabled:shadow-none"
     >
       {/* State layer */}
       <div className="absolute inset-0 rounded-full bg-white opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
-      
       {/* Content container */}
-      <div className="relative flex items-center justify-center gap-2">
-        <span className="material-symbols-outlined"
-          style={{ 
-            fontSize: '18px',
-            fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-          }}
-        >
-          logout
-        </span>
-        {loading ? 'Logging out...' : 'Log out'}
-      </div>
+      <span className="material-symbols-outlined"
+        style={{ 
+          fontSize: '20px',
+          fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+        }}
+      >
+        logout
+      </span>
+      {loading ? 'Logging out...' : 'Log out'}
     </button>
   );
 };

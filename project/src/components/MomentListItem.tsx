@@ -73,7 +73,7 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
               {mainHeading}
             </h3>
             {unseenCardCount > 0 && (
-              <span className="inline-flex items-center h-5 px-2 rounded-full bg-primary-container text-on-primary-container text-label-small font-roboto-flex">
+              <span className="inline-flex items-center h-5 px-2 rounded-full bg-secondary-container text-on-secondary-container text-label-small font-roboto-flex">
                 +{unseenCardCount}
               </span>
             )}
@@ -87,9 +87,9 @@ const MomentListItem: React.FC<MomentListItemProps> = ({
 
           <div className="flex items-center gap-2 mt-2">
             {participantCount > 1 && (
-              <span className="inline-flex items-center h-6 px-2 rounded-full bg-primary-500 text-on-primary text-label-small font-roboto-flex">
+              <span className="inline-flex items-center h-6 px-2 rounded-full bg-secondary-container text-on-secondary-container text-label-small font-roboto-flex">
                 <span 
-                  className="material-symbols-outlined text-on-primary mr-1"
+                  className="material-symbols-outlined text-on-secondary-container mr-1"
                   style={{ 
                     fontSize: '16px',
                     fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"

@@ -67,6 +67,7 @@ const MomentBoard: React.FC = () => {
   const [isDownloading, setIsDownloading] = useState(false);
   const [showLeaveConfirm, setShowLeaveConfirm] = useState(false);
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
+  const [filterModalOpen, setFilterModalOpen] = useState(false);
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -506,6 +507,11 @@ const MomentBoard: React.FC = () => {
     }
   };
 
+  // Calculate counts for each filter state
+  const allCount = momentCards.length;
+  const yoursCount = momentCards.filter(card => card.is_own_card).length;
+  const othersCount = momentCards.filter(card => !card.is_own_card).length;
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
       {/* Top app bar with navigation */}
@@ -617,7 +623,7 @@ const MomentBoard: React.FC = () => {
 
         {/* Primary tabs */}
         <div className="mt-8">
-          <div className="max-w-2xl mx-auto">
+          <div className="max-w-2xl mx-auto flex justify-center">
             {/* Primary tab bar */}
             <div className="flex items-center border-b border-outline-variant">
               <button
@@ -683,51 +689,6 @@ const MomentBoard: React.FC = () => {
                 <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
               </button>
             </div>
-
-            {/* Segmented buttons for All tab (M3 style, single-select) */}
-            {!showFavoritesOnly && (
-              <div className="flex mt-4 gap-2">
-                <button
-                  onClick={() => {
-                    setShowOnlyMyCards(false);
-                    setShowOnlyOthersCards(false);
-                  }}
-                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
-                    ${!showOnlyMyCards && !showOnlyOthersCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
-                  `}
-                  aria-pressed={!showOnlyMyCards && !showOnlyOthersCards}
-                  style={{ minWidth: 100, textAlign: 'left' }}
-                >
-                  All cards
-                </button>
-                <button
-                  onClick={() => {
-                    setShowOnlyMyCards(true);
-                    setShowOnlyOthersCards(false);
-                  }}
-                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
-                    ${showOnlyMyCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
-                  `}
-                  aria-pressed={showOnlyMyCards}
-                  style={{ minWidth: 100, textAlign: 'left' }}
-                >
-                  Your cards
-                </button>
-                <button
-                  onClick={() => {
-                    setShowOnlyMyCards(false);
-                    setShowOnlyOthersCards(true);
-                  }}
-                  className={`px-0 py-2 border-b-2 text-label-large font-roboto-flex transition-colors
-                    ${showOnlyOthersCards ? 'border-primary text-primary font-semibold' : 'border-transparent text-on-surface-variant'}
-                  `}
-                  aria-pressed={showOnlyOthersCards}
-                  style={{ minWidth: 100, textAlign: 'left' }}
-                >
-                  Others cards
-                </button>
-              </div>
-            )}
           </div>
         </div>
 
@@ -767,21 +728,25 @@ const MomentBoard: React.FC = () => {
                     </span>
                   </button>
                 )}
-                <button
-                  className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                  aria-label="View options"
-                >
-                  <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                  <span 
-                    className="material-symbols-outlined text-on-surface-variant"
-                    style={{ 
-                      fontSize: '24px',
-                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                    }}
+                {/* Filter icon only for 'All' tab */}
+                {!showFavoritesOnly && (
+                  <button
+                    className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                    aria-label="Filter cards"
+                    onClick={() => setFilterModalOpen(true)}
                   >
-                    tune
-                  </span>
-                </button>
+                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                    <span 
+                      className="material-symbols-outlined text-on-surface-variant"
+                      style={{ 
+                        fontSize: '24px',
+                        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                      }}
+                    >
+                      tune
+                    </span>
+                  </button>
+                )}
               </div>
             </div>
 
@@ -988,42 +953,44 @@ const MomentBoard: React.FC = () => {
 
       {/* FAB and Menu */}
       <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        {/* FAB Menu (expanded) */}
+        {/* FAB Menu (expanded, M3 extended FAB style) */}
         {isFabMenuOpen && (
           <div className="flex flex-col items-end mb-4 space-y-3 animate-fade-in-up">
-            {/* Add Photo Card */}
+            {/* Add Photo Card (Extended FAB) */}
             <button
               onClick={() => {
                 setIsFabMenuOpen(false);
                 setShowPhotoUpload(true);
               }}
-              className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg" style={{ background: '#DCE9D7', color: '#234B1C' }}
+              className="flex items-center gap-3 h-14 px-6 rounded-full shadow-lg bg-primary-container text-primary font-roboto-flex text-label-large transition-colors hover:bg-primary-container/90 active:bg-primary-container/80"
               aria-label="PhotoCard"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>photo_camera</span>
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: 24, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>photo_camera</span>
+              Photo
             </button>
-            {/* Add Text Card */}
+            {/* Add Text Card (Extended FAB) */}
             <button
               onClick={() => {
                 setIsFabMenuOpen(false);
                 setShowTextUpload(true);
               }}
-              className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg" style={{ background: '#DCE9D7', color: '#234B1C' }}
+              className="flex items-center gap-3 h-14 px-6 rounded-full shadow-lg bg-primary-container text-primary font-roboto-flex text-label-large transition-colors hover:bg-primary-container/90 active:bg-primary-container/80"
               aria-label="TextCard"
             >
-              <span className="material-symbols-outlined" style={{ fontSize: 24 }}>edit</span>
+              <span className="material-symbols-outlined text-primary" style={{ fontSize: 24, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>edit</span>
+              Text
             </button>
           </div>
         )}
         {/* Main FAB */}
         <button
           onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-          className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg bg-[#E27D60] text-white transition-transform hover:bg-[#d96c4f] active:bg-[#c85d41] z-50"
+          className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg bg-primary text-white transition-transform hover:bg-primary/90 active:bg-primary/80 z-50"
           aria-label="Add content"
         >
           <span
             className={`material-symbols-outlined transition-transform duration-200 ${isFabMenuOpen ? 'rotate-45' : ''}`}
-            style={{ fontSize: 28 }}
+            style={{ fontSize: 28, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
           >
             add
           </span>
@@ -1057,6 +1024,77 @@ const MomentBoard: React.FC = () => {
         onConfirm={() => cardToDelete && handleDelete(cardToDelete)}
         onCancel={() => setCardToDelete(null)}
       />
+
+      {/* Filter Modal (M3 bottom sheet style) */}
+      {filterModalOpen && (
+        <>
+          {/* Backdrop */}
+          <div 
+            className="fixed inset-0 bg-black/40 z-40"
+            onClick={() => setFilterModalOpen(false)}
+          />
+          {/* Bottom Sheet */}
+          <div className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl p-6 z-50 shadow-xl animate-slide-up border-t border-outline-variant">
+            <h2 className="text-title-large font-roboto-flex text-on-surface mb-4">Filter cards</h2>
+            <ul className="space-y-2">
+              <li>
+                <button
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${!showOnlyMyCards && !showOnlyOthersCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
+                  onClick={() => {
+                    setShowOnlyMyCards(false);
+                    setShowOnlyOthersCards(false);
+                    setFilterModalOpen(false);
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                    select_all
+                  </span>
+                  All cards
+                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
+                    {allCount}
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${showOnlyMyCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
+                  onClick={() => {
+                    setShowOnlyMyCards(true);
+                    setShowOnlyOthersCards(false);
+                    setFilterModalOpen(false);
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                    person
+                  </span>
+                  Your cards
+                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
+                    {yoursCount}
+                  </span>
+                </button>
+              </li>
+              <li>
+                <button
+                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${showOnlyOthersCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
+                  onClick={() => {
+                    setShowOnlyMyCards(false);
+                    setShowOnlyOthersCards(true);
+                    setFilterModalOpen(false);
+                  }}
+                >
+                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
+                    group
+                  </span>
+                  Others cards
+                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
+                    {othersCount}
+                  </span>
+                </button>
+              </li>
+            </ul>
+          </div>
+        </>
+      )}
     </div>
   );
 };
