@@ -5,7 +5,7 @@ import { securityHeaders } from './vite.plugins';
 
 // https://vitejs.dev/config/
 export default defineConfig({
-  base: '/',
+  base: './',
   plugins: [
     react(),
     securityHeaders(),
@@ -51,6 +51,8 @@ export default defineConfig({
     },
     sourcemap: true, // Enable source maps for Sentry
     reportCompressedSize: true,
+    cssCodeSplit: true,
+    cssMinify: true,
   },
   server: {
     port: 3000,

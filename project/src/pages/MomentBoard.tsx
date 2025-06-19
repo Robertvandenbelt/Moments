@@ -581,11 +581,24 @@ const MomentBoard: React.FC = () => {
                 <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 24 }}>info</span>
               </button>
               {showInfoTooltip && (
-                <div className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50 bg-surface-container-highest text-on-surface-variant rounded-lg px-4 py-2 shadow text-label-medium whitespace-nowrap">
-                  <span className="inline-flex items-center h-8 px-3 rounded-lg bg-surface-container-highest text-on-surface-variant text-label-medium font-roboto-flex border border-outline-variant">
-                    <span className="material-symbols-outlined text-on-surface-variant mr-2" style={{ fontSize: '18px', fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}>person</span>
-                    Created by {board.owner_display_name}
-                  </span>
+                <div 
+                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50"
+                  style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.3)) drop-shadow(0px 1px 3px rgba(0,0,0,0.15))' }}
+                >
+                  <div className="bg-surface-container-low rounded-lg py-2 px-3">
+                    <div className="flex items-center gap-2 text-on-surface text-label-medium font-roboto-flex whitespace-nowrap">
+                      <span 
+                        className="material-symbols-outlined text-on-surface" 
+                        style={{ 
+                          fontSize: '18px',
+                          fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                        }}
+                      >
+                        person
+                      </span>
+                      Created by {board.owner_display_name}
+                    </div>
+                  </div>
                 </div>
               )}
             </div>
@@ -658,6 +671,10 @@ const MomentBoard: React.FC = () => {
                 </span>
                 {/* Label */}
                 <span className="text-label-large font-roboto-flex">All</span>
+                {/* Card count for All tab */}
+                <span className="ml-2 text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle">
+                  {momentCards.length}
+                </span>
                 {/* Active indicator */}
                 <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
                   !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
@@ -733,14 +750,34 @@ const MomentBoard: React.FC = () => {
               )}
             </div>
           </div>
-          {/* Card count, smaller and less margin */}
-          <div className="flex items-center justify-between mt-1 mb-1">
-            <span className="text-xs font-roboto-flex text-on-surface-variant">
-              {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
-              {(!showFavoritesOnly && showOnlyMyCards) && ' created by you'}
-              {(!showFavoritesOnly && showOnlyOthersCards) && ' created by others'}
-            </span>
-          </div>
+          {/* Active filter chip */}
+          {(!showFavoritesOnly && (showOnlyMyCards || showOnlyOthersCards)) && (
+            <div className="mt-2 flex items-center gap-2">
+              <div className="inline-flex items-center bg-secondary-container rounded-full pl-4 pr-2 py-1.5 shadow-level1">
+                <span className="text-label-large font-roboto-flex text-on-secondary-container">
+                  {showOnlyMyCards ? 'Your cards' : 'Others\' cards'}
+                </span>
+                <button
+                  onClick={() => {
+                    setShowOnlyMyCards(false);
+                    setShowOnlyOthersCards(false);
+                  }}
+                  className="ml-1 p-1 rounded-full hover:bg-secondary/10 transition-colors flex items-center justify-center"
+                  aria-label="Clear filter"
+                >
+                  <span 
+                    className="material-symbols-outlined text-on-secondary-container" 
+                    style={{ 
+                      fontSize: '20px',
+                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                    }}
+                  >
+                    close
+                  </span>
+                </button>
+              </div>
+            </div>
+          )}
         </div>
 
         {/* Feed of cards */}
