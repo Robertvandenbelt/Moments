@@ -1,12 +1,10 @@
-import React, { useState, useEffect, useMemo, useRef } from 'react';
+import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, MoreVertical, Trash2, Edit, LogOut, Plus, Camera, Type, Share2, Download, Heart } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, LogOut, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format } from 'date-fns';
 import { parseISO } from 'date-fns/parseISO';
 import { useAuth } from '../context/AuthContext';
-import PhotoCard from '../components/PhotoCard';
-import TextCard from '../components/TextCard';
 import ConfirmDialog from '../components/ConfirmDialog';
 import PhotoUploadSheet from '../components/PhotoUploadSheet';
 import TextUploadSheet from '../components/TextUploadSheet';
@@ -67,7 +65,13 @@ const MomentBoard: React.FC = () => {
   const [cardToDelete, setCardToDelete] = useState<string | null>(null);
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
+  const [currentCardIndex, setCurrentCardIndex] = useState(0);
+  const [isSwipeView, setIsSwipeView] = useState(true);
+  const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
+  const [touchStart, setTouchStart] = useState<number | null>(null);
+  const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
+  const cardContainerRef = useRef<HTMLDivElement>(null);
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -150,6 +154,94 @@ const MomentBoard: React.FC = () => {
     
     return filteredCards;
   }, [momentCards, showFavoritesOnly, showOnlyMyCards, showOnlyOthersCards]);
+
+  // Swipe handling functions
+  const minSwipeDistance = 50;
+
+  const onTouchStart = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(null);
+    setTouchStart(e.targetTouches[0].clientX);
+  }, []);
+
+  const onTouchMove = useCallback((e: React.TouchEvent) => {
+    setTouchEnd(e.targetTouches[0].clientX);
+  }, []);
+
+  const onTouchEnd = useCallback(() => {
+    if (!touchStart || !touchEnd) return;
+    
+    const distance = touchStart - touchEnd;
+    const isLeftSwipe = distance > minSwipeDistance;
+    const isRightSwipe = distance < -minSwipeDistance;
+
+    if (isLeftSwipe && currentCardIndex < displayedCards.length - 1) {
+      setSwipeDirection('left');
+      setTimeout(() => {
+        setCurrentCardIndex(prev => prev + 1);
+        setSwipeDirection(null);
+      }, 150);
+    } else if (isRightSwipe && currentCardIndex > 0) {
+      setSwipeDirection('right');
+      setTimeout(() => {
+        setCurrentCardIndex(prev => prev - 1);
+        setSwipeDirection(null);
+      }, 150);
+    }
+  }, [touchStart, touchEnd, currentCardIndex, displayedCards.length]);
+
+  const goToNextCard = useCallback(() => {
+    if (currentCardIndex < displayedCards.length - 1) {
+      setSwipeDirection('left');
+      setTimeout(() => {
+        setCurrentCardIndex(prev => prev + 1);
+        setSwipeDirection(null);
+      }, 150);
+    }
+  }, [currentCardIndex, displayedCards.length]);
+
+  const goToPreviousCard = useCallback(() => {
+    if (currentCardIndex > 0) {
+      setSwipeDirection('right');
+      setTimeout(() => {
+        setCurrentCardIndex(prev => prev - 1);
+        setSwipeDirection(null);
+      }, 150);
+    }
+  }, [currentCardIndex]);
+
+  const toggleSwipeView = useCallback(() => {
+    setIsSwipeView(prev => !prev);
+    setCurrentCardIndex(0);
+  }, []);
+
+  // Reset card index when filters change
+  useEffect(() => {
+    setCurrentCardIndex(0);
+  }, [displayedCards]);
+
+  // Keyboard navigation for swipe view
+  useEffect(() => {
+    if (!isSwipeView) return;
+
+    const handleKeyDown = (e: KeyboardEvent) => {
+      switch (e.key) {
+        case 'ArrowLeft':
+          e.preventDefault();
+          goToPreviousCard();
+          break;
+        case 'ArrowRight':
+          e.preventDefault();
+          goToNextCard();
+          break;
+        case 'Escape':
+          setIsSwipeView(false);
+          break;
+      }
+    };
+
+    window.addEventListener('keydown', handleKeyDown);
+    return () => window.removeEventListener('keydown', handleKeyDown);
+  }, [isSwipeView, goToPreviousCard, goToNextCard]);
 
   if (loading) {
     return (
@@ -270,12 +362,6 @@ const MomentBoard: React.FC = () => {
     } catch (err) {
       console.error('Error in handleFavorite:', err);
     }
-  };
-
-  const handleDeleteClick = async (cardId: string): Promise<void> => {
-    setCardToDelete(cardId);
-    // Return a resolved promise since this is an async function
-    return Promise.resolve();
   };
 
   const handleDelete = async (cardId: string) => {
@@ -578,29 +664,26 @@ const MomentBoard: React.FC = () => {
 
       <div className="container mx-auto px-6 pt-8">
         {/* Page header */}
-        <div className="max-w-7xl mx-auto mb-12">
-          <div className="space-y-6">
+        <div className="max-w-7xl mx-auto mb-6 sm:mb-12">
+          <div className="space-y-2 sm:space-y-6">
             {/* Title & Date Section */}
-            <div>
-              <h1 className="text-display-small font-roboto-flex text-on-surface mb-2">
+            <div className="sm:mb-0 mb-1">
+              <h1 className="text-2xl sm:text-display-small font-roboto-flex text-on-surface mb-0.5 sm:mb-2">
                 {board.title || formatDate(board.date_start)}
               </h1>
               {board.title && (
-                <p className="text-title-large font-roboto-flex text-on-surface-variant">
+                <p className="text-sm sm:text-title-large font-roboto-flex text-on-surface-variant">
                   {formatDate(board.date_start)}
                   {board.date_end && ` - ${formatDate(board.date_end)}`}
                 </p>
               )}
             </div>
-
             {/* Description Section - if exists */}
             {board.description && (
-              <p className="text-body-large font-roboto-flex text-on-surface-variant max-w-2xl">
+              <p className="text-xs sm:text-body-large font-roboto-flex text-on-surface-variant max-w-2xl line-clamp-2 sm:line-clamp-none">
                 {board.description}
               </p>
             )}
-
-            {/* Creator Info Chip removed from main content */}
           </div>
         </div>
 
@@ -680,7 +763,7 @@ const MomentBoard: React.FC = () => {
         <div className="pt-8 pb-24 px-4 sm:px-6">
           {/* Feed container with dynamic max-width based on viewport */}
           <div className="max-w-7xl mx-auto">
-            {/* Feed header with content summary */}
+            {/* Feed header with content summary and view toggle */}
             <div className="mb-8 flex items-center justify-between">
               <div>
                 <p className="text-headline-small font-roboto-flex text-on-surface">
@@ -690,8 +773,32 @@ const MomentBoard: React.FC = () => {
                 </p>
               </div>
               
-              {/* Dynamic feed layout options - could be expanded later */}
+              {/* View toggle and action buttons */}
               <div className="flex items-center gap-2">
+                {/* Swipe view toggle */}
+                {displayedCards.length > 0 && (
+                  <button
+                    onClick={toggleSwipeView}
+                    className={`relative p-2.5 rounded-full transition-colors ${
+                      isSwipeView 
+                        ? 'bg-primary-container text-primary' 
+                        : 'hover:bg-surface-container-highest text-on-surface-variant'
+                    }`}
+                    aria-label={isSwipeView ? "Switch to grid view" : "Switch to swipe view"}
+                  >
+                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200" />
+                    <span 
+                      className="material-symbols-outlined relative"
+                      style={{ 
+                        fontSize: '24px',
+                        fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
+                      }}
+                    >
+                      {isSwipeView ? 'grid_view' : 'view_carousel'}
+                    </span>
+                  </button>
+                )}
+                
                 {showFavoritesOnly && displayedCards.length > 0 && (
                   <button
                     onClick={() => setShowDownloadConfirm(true)}
@@ -699,10 +806,7 @@ const MomentBoard: React.FC = () => {
                     className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
                     aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
                   >
-                    {/* State layer */}
                     <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200" />
-                    
-                    {/* Icon */}
                     <span 
                       className="material-symbols-outlined text-on-surface-variant relative"
                       style={{ 
@@ -714,6 +818,7 @@ const MomentBoard: React.FC = () => {
                     </span>
                   </button>
                 )}
+                
                 {/* Filter icon only for 'All' tab */}
                 {!showFavoritesOnly && (
                   <button
@@ -762,8 +867,130 @@ const MomentBoard: React.FC = () => {
                   }
                 </p>
               </div>
+            ) : isSwipeView ? (
+              // Swipe view - single card with navigation
+              <div className="relative w-full max-w-2xl mx-auto">
+                {/* Card counter */}
+                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
+                  <div className="bg-surface/80 backdrop-blur-sm rounded-full px-4 py-2 text-label-medium font-roboto-flex text-on-surface-variant">
+                    {currentCardIndex + 1} of {displayedCards.length}
+                  </div>
+                </div>
+
+                {/* Navigation arrows */}
+                {currentCardIndex > 0 && (
+                  <button
+                    onClick={goToPreviousCard}
+                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
+                    aria-label="Previous card"
+                  >
+                    <ChevronLeft size={24} />
+                  </button>
+                )}
+
+                {currentCardIndex < displayedCards.length - 1 && (
+                  <button
+                    onClick={goToNextCard}
+                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
+                    aria-label="Next card"
+                  >
+                    <ChevronRight size={24} />
+                  </button>
+                )}
+
+                {/* Current card */}
+                <div
+                  ref={cardContainerRef}
+                  className="relative w-full"
+                  onTouchStart={onTouchStart}
+                  onTouchMove={onTouchMove}
+                  onTouchEnd={onTouchEnd}
+                >
+                  <article 
+                    className={`group relative bg-surface-container rounded-xl transition-all duration-300 overflow-hidden w-full ${
+                      swipeDirection === 'left' ? 'animate-slide-out-left' : 
+                      swipeDirection === 'right' ? 'animate-slide-out-right' : ''
+                    }`}
+                  >
+                    {(() => {
+                      const card = displayedCards[currentCardIndex];
+                      return (
+                        <>
+                          {/* Photo or Text Card */}
+                          {card.type === 'photo' ? (
+                            <div className="relative w-full">
+                              <img
+                                src={
+                                  (card.optimized_url || card.media_url)
+                                    ? `${card.optimized_url || card.media_url}?width=800&quality=80`
+                                    : ''
+                                }
+                                alt=""
+                                className="w-full"
+                                style={{ display: 'block', maxWidth: '100%' }}
+                                loading="lazy"
+                              />
+                            </div>
+                          ) : (
+                            <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
+                              <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
+                                {card.description}
+                              </p>
+                            </div>
+                          )}
+                          {/* Card footer: heart, date, uploader */}
+                          <div className="flex items-center justify-between mt-2 px-2">
+                            <button
+                              onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
+                              className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                            >
+                              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
+                              <Heart 
+                                size={20} 
+                                className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
+                              />
+                            </button>
+                            <div className="text-label-small font-roboto-flex text-on-surface-variant">
+                              {card.uploader_display_name}
+                            </div>
+                          </div>
+                        </>
+                      );
+                    })()}
+                  </article>
+                </div>
+
+                {/* Swipe hint */}
+                {displayedCards.length > 1 && (
+                  <div className="mt-4 text-center">
+                    <p className="text-label-medium font-roboto-flex text-on-surface-variant">
+                      Swipe left or right to navigate
+                    </p>
+                  </div>
+                )}
+
+                {/* Card position indicator */}
+                {displayedCards.length > 1 && (
+                  <div className="mt-6 flex justify-center">
+                    <div className="flex gap-2">
+                      {displayedCards.map((_, index) => (
+                        <button
+                          key={index}
+                          onClick={() => setCurrentCardIndex(index)}
+                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
+                            index === currentCardIndex
+                              ? 'bg-primary w-6'
+                              : 'bg-outline-variant hover:bg-outline'
+                          }`}
+                          aria-label={`Go to card ${index + 1}`}
+                        />
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
             ) : (
-              // Single-column stream, full photo, uploader overlay, heart below
+              // Grid view - original layout
               <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4">
                 {displayedCards.map((card, index) => (
                   <React.Fragment key={card.id}>
@@ -784,10 +1011,6 @@ const MomentBoard: React.FC = () => {
                             style={{ display: 'block', maxWidth: '100%' }}
                             loading="lazy"
                           />
-                          {/* Uploader overlay */}
-                          <div className="absolute top-2 left-2 bg-surface/80 rounded-lg px-3 py-1 text-label-medium font-roboto-flex text-on-surface-variant shadow">
-                            {card.uploader_display_name}
-                          </div>
                         </div>
                       ) : (
                         <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
