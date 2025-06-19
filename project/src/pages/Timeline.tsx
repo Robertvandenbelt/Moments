@@ -209,7 +209,7 @@ const Timeline: React.FC = () => {
                 monthMoments.map((moment, idx, arr) => (
                   <React.Fragment key={moment.id}>
                     <Link to={`/board/${moment.id}`} className="block w-full">
-                      <div className="w-full mb-2 bg-surface-container p-0 overflow-hidden rounded-xl">
+                      <div className="w-full mb-2 p-0 overflow-hidden rounded-xl">
                         {/* Title, Date */}
                         <div className="px-6 pt-6 pb-2">
                           {moment.title ? (

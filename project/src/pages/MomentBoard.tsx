@@ -66,7 +66,6 @@ const MomentBoard: React.FC = () => {
   const [filterModalOpen, setFilterModalOpen] = useState(false);
   const [showInfoTooltip, setShowInfoTooltip] = useState(false);
   const [currentCardIndex, setCurrentCardIndex] = useState(0);
-  const [isSwipeView, setIsSwipeView] = useState(true);
   const [swipeDirection, setSwipeDirection] = useState<'left' | 'right' | null>(null);
   const [touchStart, setTouchStart] = useState<number | null>(null);
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
@@ -208,40 +207,6 @@ const MomentBoard: React.FC = () => {
       }, 150);
     }
   }, [currentCardIndex]);
-
-  const toggleSwipeView = useCallback(() => {
-    setIsSwipeView(prev => !prev);
-    setCurrentCardIndex(0);
-  }, []);
-
-  // Reset card index when filters change
-  useEffect(() => {
-    setCurrentCardIndex(0);
-  }, [displayedCards]);
-
-  // Keyboard navigation for swipe view
-  useEffect(() => {
-    if (!isSwipeView) return;
-
-    const handleKeyDown = (e: KeyboardEvent) => {
-      switch (e.key) {
-        case 'ArrowLeft':
-          e.preventDefault();
-          goToPreviousCard();
-          break;
-        case 'ArrowRight':
-          e.preventDefault();
-          goToNextCard();
-          break;
-        case 'Escape':
-          setIsSwipeView(false);
-          break;
-      }
-    };
-
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
-  }, [isSwipeView, goToPreviousCard, goToNextCard]);
 
   if (loading) {
     return (
@@ -578,6 +543,9 @@ const MomentBoard: React.FC = () => {
   const yoursCount = momentCards.filter(card => card.is_own_card).length;
   const othersCount = momentCards.filter(card => !card.is_own_card).length;
 
+  // In swipe view, use a safeCardIndex to avoid out-of-bounds errors
+  const safeCardIndex = Math.max(0, Math.min(currentCardIndex, displayedCards.length - 1));
+
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
       {/* Top app bar with navigation */}
@@ -666,8 +634,8 @@ const MomentBoard: React.FC = () => {
         {/* Page header */}
         <div className="max-w-7xl mx-auto mb-6 sm:mb-12">
           <div className="space-y-2 sm:space-y-6">
-            {/* Title & Date Section */}
-            <div className="sm:mb-0 mb-1">
+            {/* Title & Date above tabs */}
+            <div className="mb-2 sm:mb-4">
               <h1 className="text-2xl sm:text-display-small font-roboto-flex text-on-surface mb-0.5 sm:mb-2">
                 {board.title || formatDate(board.date_start)}
               </h1>
@@ -678,20 +646,14 @@ const MomentBoard: React.FC = () => {
                 </p>
               )}
             </div>
-            {/* Description Section - if exists */}
-            {board.description && (
-              <p className="text-xs sm:text-body-large font-roboto-flex text-on-surface-variant max-w-2xl line-clamp-2 sm:line-clamp-none">
-                {board.description}
-              </p>
-            )}
           </div>
         </div>
 
         {/* Primary tabs */}
-        <div className="mt-8">
-          <div className="max-w-2xl mx-auto flex justify-center">
-            {/* Primary tab bar */}
-            <div className="flex items-center border-b border-outline-variant">
+        <div className="flex flex-col gap-0.5">
+          <div className="flex items-center justify-between">
+            {/* Tab bar */}
+            <div className="flex items-center border-b border-outline-variant flex-1">
               <button
                 onClick={() => {
                   setShowFavoritesOnly(false);
@@ -756,6 +718,46 @@ const MomentBoard: React.FC = () => {
                 <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
               </button>
             </div>
+            {/* View toggle and filter icons, smaller and closer */}
+            <div className="flex items-center gap-1 ml-2">
+              {!showFavoritesOnly && (
+                <button
+                  className="relative p-1.5 rounded-full hover:bg-surface-container-highest transition-colors"
+                  aria-label="Filter cards"
+                  onClick={() => setFilterModalOpen(true)}
+                >
+                  <span 
+                    className="material-symbols-outlined text-on-surface-variant"
+                    style={{ fontSize: '20px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}
+                  >
+                    tune
+                  </span>
+                </button>
+              )}
+              {showFavoritesOnly && displayedCards.length > 0 && (
+                <button
+                  onClick={() => setShowDownloadConfirm(true)}
+                  disabled={isDownloading}
+                  className="relative p-1.5 rounded-full hover:bg-surface-container-highest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
+                  aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
+                >
+                  <span 
+                    className="material-symbols-outlined text-on-surface-variant relative"
+                    style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}
+                  >
+                    {isDownloading ? 'progress_activity' : 'download'}
+                  </span>
+                </button>
+              )}
+            </div>
+          </div>
+          {/* Card count, smaller and less margin */}
+          <div className="flex items-center justify-between mt-1 mb-1">
+            <span className="text-xs font-roboto-flex text-on-surface-variant">
+              {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
+              {(!showFavoritesOnly && showOnlyMyCards) && ' created by you'}
+              {(!showFavoritesOnly && showOnlyOthersCards) && ' created by others'}
+            </span>
           </div>
         </div>
 
@@ -764,83 +766,6 @@ const MomentBoard: React.FC = () => {
           {/* Feed container with dynamic max-width based on viewport */}
           <div className="max-w-7xl mx-auto">
             {/* Feed header with content summary and view toggle */}
-            <div className="mb-8 flex items-center justify-between">
-              <div>
-                <p className="text-headline-small font-roboto-flex text-on-surface">
-                  {displayedCards.length} {displayedCards.length === 1 ? 'card' : 'cards'}
-                  {(!showFavoritesOnly && showOnlyMyCards) && ' created by you'}
-                  {(!showFavoritesOnly && showOnlyOthersCards) && ' created by others'}
-                </p>
-              </div>
-              
-              {/* View toggle and action buttons */}
-              <div className="flex items-center gap-2">
-                {/* Swipe view toggle */}
-                {displayedCards.length > 0 && (
-                  <button
-                    onClick={toggleSwipeView}
-                    className={`relative p-2.5 rounded-full transition-colors ${
-                      isSwipeView 
-                        ? 'bg-primary-container text-primary' 
-                        : 'hover:bg-surface-container-highest text-on-surface-variant'
-                    }`}
-                    aria-label={isSwipeView ? "Switch to grid view" : "Switch to swipe view"}
-                  >
-                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200" />
-                    <span 
-                      className="material-symbols-outlined relative"
-                      style={{ 
-                        fontSize: '24px',
-                        fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                      }}
-                    >
-                      {isSwipeView ? 'grid_view' : 'view_carousel'}
-                    </span>
-                  </button>
-                )}
-                
-                {showFavoritesOnly && displayedCards.length > 0 && (
-                  <button
-                    onClick={() => setShowDownloadConfirm(true)}
-                    disabled={isDownloading}
-                    className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                    aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
-                  >
-                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200" />
-                    <span 
-                      className="material-symbols-outlined text-on-surface-variant relative"
-                      style={{ 
-                        fontSize: '24px',
-                        fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                      }}
-                    >
-                      {isDownloading ? 'progress_activity' : 'download'}
-                    </span>
-                  </button>
-                )}
-                
-                {/* Filter icon only for 'All' tab */}
-                {!showFavoritesOnly && (
-                  <button
-                    className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                    aria-label="Filter cards"
-                    onClick={() => setFilterModalOpen(true)}
-                  >
-                    <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                    <span 
-                      className="material-symbols-outlined text-on-surface-variant"
-                      style={{ 
-                        fontSize: '24px',
-                        fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                      }}
-                    >
-                      tune
-                    </span>
-                  </button>
-                )}
-              </div>
-            </div>
-
             {/* Dynamic feed content */}
             {displayedCards.length === 0 ? (
               // Empty state
@@ -867,18 +792,18 @@ const MomentBoard: React.FC = () => {
                   }
                 </p>
               </div>
-            ) : isSwipeView ? (
+            ) : (
               // Swipe view - single card with navigation
               <div className="relative w-full max-w-2xl mx-auto">
                 {/* Card counter */}
                 <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
                   <div className="bg-surface/80 backdrop-blur-sm rounded-full px-4 py-2 text-label-medium font-roboto-flex text-on-surface-variant">
-                    {currentCardIndex + 1} of {displayedCards.length}
+                    {safeCardIndex + 1} of {displayedCards.length}
                   </div>
                 </div>
 
                 {/* Navigation arrows */}
-                {currentCardIndex > 0 && (
+                {safeCardIndex > 0 && (
                   <button
                     onClick={goToPreviousCard}
                     className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
@@ -888,7 +813,7 @@ const MomentBoard: React.FC = () => {
                   </button>
                 )}
 
-                {currentCardIndex < displayedCards.length - 1 && (
+                {safeCardIndex < displayedCards.length - 1 && (
                   <button
                     onClick={goToNextCard}
                     className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
@@ -913,7 +838,8 @@ const MomentBoard: React.FC = () => {
                     }`}
                   >
                     {(() => {
-                      const card = displayedCards[currentCardIndex];
+                      if (displayedCards.length === 0) return null;
+                      const card = displayedCards[safeCardIndex];
                       return (
                         <>
                           {/* Photo or Text Card */}
@@ -959,85 +885,6 @@ const MomentBoard: React.FC = () => {
                     })()}
                   </article>
                 </div>
-
-                {/* Swipe hint */}
-                {displayedCards.length > 1 && (
-                  <div className="mt-4 text-center">
-                    <p className="text-label-medium font-roboto-flex text-on-surface-variant">
-                      Swipe left or right to navigate
-                    </p>
-                  </div>
-                )}
-
-                {/* Card position indicator */}
-                {displayedCards.length > 1 && (
-                  <div className="mt-6 flex justify-center">
-                    <div className="flex gap-2">
-                      {displayedCards.map((_, index) => (
-                        <button
-                          key={index}
-                          onClick={() => setCurrentCardIndex(index)}
-                          className={`w-2 h-2 rounded-full transition-all duration-200 ${
-                            index === currentCardIndex
-                              ? 'bg-primary w-6'
-                              : 'bg-outline-variant hover:bg-outline'
-                          }`}
-                          aria-label={`Go to card ${index + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                )}
-              </div>
-            ) : (
-              // Grid view - original layout
-              <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4">
-                {displayedCards.map((card, index) => (
-                  <React.Fragment key={card.id}>
-                    <article 
-                      className="group relative bg-surface-container rounded-xl transition-all duration-300 cursor-pointer overflow-hidden w-full"
-                    >
-                      {/* Photo or Text Card */}
-                      {card.type === 'photo' ? (
-                        <div className="relative w-full">
-                          <img
-                            src={
-                              (card.optimized_url || card.media_url)
-                                ? `${card.optimized_url || card.media_url}?width=800&quality=80`
-                                : ''
-                            }
-                            alt=""
-                            className="w-full"
-                            style={{ display: 'block', maxWidth: '100%' }}
-                            loading="lazy"
-                          />
-                        </div>
-                      ) : (
-                        <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
-                          <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
-                            {card.description}
-                          </p>
-                        </div>
-                      )}
-                      {/* Heart button below card, left-aligned */}
-                      <div className="flex items-center mt-2">
-                        <button
-                          onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
-                          className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                        >
-                          <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                          <Heart 
-                            size={20} 
-                            className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
-                          />
-                        </button>
-                      </div>
-                    </article>
-                    {index < displayedCards.length - 1 && (
-                      <hr className="mx-6 border-t border-on-surface-variant" style={{ opacity: 0.3 }} />
-                    )}
-                  </React.Fragment>
-                ))}
               </div>
             )}
           </div>
@@ -1272,6 +1119,15 @@ const MomentBoard: React.FC = () => {
             </ul>
           </div>
         </>
+      )}
+
+      {/* Description at the bottom of the page */}
+      {board.description && (
+        <div className="max-w-2xl mx-auto mt-8 mb-8">
+          <p className="text-xs sm:text-body-large font-roboto-flex text-on-surface-variant">
+            {board.description}
+          </p>
+        </div>
       )}
     </div>
   );
