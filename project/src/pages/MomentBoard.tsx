@@ -631,24 +631,6 @@ const MomentBoard: React.FC = () => {
       </div>
 
       <div className="container mx-auto px-6 pt-8">
-        {/* Page header */}
-        <div className="max-w-7xl mx-auto mb-6 sm:mb-12">
-          <div className="space-y-2 sm:space-y-6">
-            {/* Title & Date above tabs */}
-            <div className="mb-2 sm:mb-4">
-              <h1 className="text-2xl sm:text-display-small font-roboto-flex text-on-surface mb-0.5 sm:mb-2">
-                {board.title || formatDate(board.date_start)}
-              </h1>
-              {board.title && (
-                <p className="text-sm sm:text-title-large font-roboto-flex text-on-surface-variant">
-                  {formatDate(board.date_start)}
-                  {board.date_end && ` - ${formatDate(board.date_end)}`}
-                </p>
-              )}
-            </div>
-          </div>
-        </div>
-
         {/* Primary tabs */}
         <div className="flex flex-col gap-0.5">
           <div className="flex items-center justify-between">
@@ -762,7 +744,7 @@ const MomentBoard: React.FC = () => {
         </div>
 
         {/* Feed of cards */}
-        <div className="pt-8 pb-24 px-4 sm:px-6">
+        <div className="pt-8 pb-12 px-4 sm:px-6">
           {/* Feed container with dynamic max-width based on viewport */}
           <div className="max-w-7xl mx-auto">
             {/* Feed header with content summary and view toggle */}
@@ -885,6 +867,33 @@ const MomentBoard: React.FC = () => {
                     })()}
                   </article>
                 </div>
+              </div>
+            )}
+          </div>
+        </div>
+
+        {/* Title, Date & Description section below cards */}
+        <div className="max-w-2xl mx-auto mb-8 px-4 sm:px-6">
+          <div className="rounded-xl p-6 space-y-4">
+            {/* Title & Date */}
+            <div className="space-y-2">
+              <h1 className="text-2xl sm:text-display-small font-roboto-flex text-on-surface">
+                {board.title || formatDate(board.date_start)}
+              </h1>
+              {board.title && (
+                <p className="text-sm sm:text-title-large font-roboto-flex text-on-surface-variant">
+                  {formatDate(board.date_start)}
+                  {board.date_end && ` - ${formatDate(board.date_end)}`}
+                </p>
+              )}
+            </div>
+            
+            {/* Description */}
+            {board.description && (
+              <div className="pt-2 border-t border-outline-variant">
+                <p className="text-body-large font-roboto-flex text-on-surface-variant leading-relaxed">
+                  {board.description}
+                </p>
               </div>
             )}
           </div>
@@ -1119,15 +1128,6 @@ const MomentBoard: React.FC = () => {
             </ul>
           </div>
         </>
-      )}
-
-      {/* Description at the bottom of the page */}
-      {board.description && (
-        <div className="max-w-2xl mx-auto mt-8 mb-8">
-          <p className="text-xs sm:text-body-large font-roboto-flex text-on-surface-variant">
-            {board.description}
-          </p>
-        </div>
       )}
     </div>
   );
