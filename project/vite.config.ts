@@ -45,8 +45,9 @@ export default defineConfig({
     minify: 'terser',
     terserOptions: {
       compress: {
-        drop_console: true, // Remove console.* in production
+        drop_console: false, // Keep console.error and console.warn for debugging
         drop_debugger: true,
+        pure_funcs: ['console.log', 'console.info', 'console.debug'], // Only remove non-error logs
       },
     },
     sourcemap: true, // Enable source maps for Sentry

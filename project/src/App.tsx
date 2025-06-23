@@ -14,7 +14,8 @@ const Profile = React.lazy(() => import('./pages/Profile'));
 const CreateMomentBoard = React.lazy(() => import('./pages/CreateMomentBoard'));
 const ShareMomentBoard = React.lazy(() => import('./pages/ShareMomentBoard'));
 const MomentBoard = React.lazy(() => import('./pages/MomentBoard'));
-const JoinMomentBoard = React.lazy(() => import('./pages/JoinMomentBoard'));
+// Temporarily import JoinMomentBoard directly to test
+import JoinMomentBoard from './pages/JoinMomentBoard';
 const EditMomentBoard = React.lazy(() => import('./pages/EditMomentBoard'));
 
 function App() {
