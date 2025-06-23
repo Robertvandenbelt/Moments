@@ -18,6 +18,17 @@ export type RouteProps = {
   children: React.ReactNode;
 };
 
+export type BasicMomentBoard = {
+  id: string;
+  title: string | null;
+  description: string | null;
+  date_start: string;
+  date_end: string | null;
+  created_by: string;
+  created_at?: string;
+  is_public_preview?: boolean;
+};
+
 export type MomentBoard = {
   id: string;
   title: string | null;

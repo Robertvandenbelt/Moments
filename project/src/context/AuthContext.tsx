@@ -1,5 +1,6 @@
 import React, { createContext, useContext, useEffect, useState } from 'react';
-import { supabase, getCurrentUser } from '../services/supabase';
+import { supabase } from '../lib/supabaseClient';
+import { getCurrentUser } from '../services/supabase';
 import { User } from '../lib/types';
 
 type AuthContextType = {
@@ -22,10 +23,12 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const refreshUser = async () => {
     try {
+      console.log('AuthContext: Refreshing user');
       const currentUser = await getCurrentUser();
+      console.log('AuthContext: Current user:', currentUser);
       setUser(currentUser as User | null);
     } catch (error) {
-      console.error('Error refreshing user:', error);
+      console.error('AuthContext: Error refreshing user:', error);
       setUser(null);
     } finally {
       setLoading(false);
@@ -33,11 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   useEffect(() => {
+    console.log('AuthContext: Initializing auth state');
     refreshUser();
 
     // Set up auth state listener
     const { data: authListener } = supabase.auth.onAuthStateChange(
       async (event, session) => {
+        console.log('AuthContext: Auth state change:', event, !!session?.user);
         if (session?.user) {
           setUser(session.user as User);
         } else {

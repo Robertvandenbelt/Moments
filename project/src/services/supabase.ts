@@ -1,5 +1,5 @@
 import { createClient } from '@supabase/supabase-js';
-import { MomentBoard, CreateMomentBoardData } from '../lib/types';
+import { MomentBoard, CreateMomentBoardData, BasicMomentBoard } from '../lib/types';
 
 const supabaseUrl = import.meta.env.VITE_SUPABASE_URL;
 const supabaseAnonKey = import.meta.env.VITE_SUPABASE_ANON_KEY;
@@ -147,15 +147,32 @@ export async function getProfileStats(userId: string) {
   }
 }
 
-export async function getMomentBoard(id: string): Promise<MomentBoard> {
-  const { data, error } = await supabase
-    .from('moment_boards')
-    .select('*')
-    .eq('id', id)
-    .single();
+export async function getMomentBoard(id: string): Promise<BasicMomentBoard> {
+  console.log('getMomentBoard: Starting fetch for ID:', id);
+  
+  try {
+    const { data, error } = await supabase
+      .from('moment_boards')
+      .select('*')
+      .eq('id', id)
+      .single();
 
-  if (error) throw error;
-  return data;
+    if (error) {
+      console.error('getMomentBoard: Database error:', error);
+      throw error;
+    }
+
+    if (!data) {
+      console.error('getMomentBoard: No data returned for ID:', id);
+      throw new Error('Moment board not found');
+    }
+
+    console.log('getMomentBoard: Successfully retrieved board:', data);
+    return data;
+  } catch (err) {
+    console.error('getMomentBoard: Unexpected error:', err);
+    throw err;
+  }
 }
 
 export async function checkBoardMembership(boardId: string, userId: string): Promise<boolean> {
