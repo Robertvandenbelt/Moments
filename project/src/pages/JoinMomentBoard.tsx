@@ -321,23 +321,34 @@ const JoinMomentBoardContent: React.FC = () => {
 };
 
 const JoinMomentBoard: React.FC = () => {
-  // Simple test to ensure component loads
+  console.error('JoinMomentBoard: Component rendering');
+  
+  // Simple test to ensure component loads - minimal version
   const testRender = (
-    <div className="min-h-screen bg-red-500 flex items-center justify-center">
-      <div className="text-white text-center">
-        <h1 className="text-4xl font-bold mb-4">JoinMomentBoard Test</h1>
-        <p>If you can see this, the component is loading!</p>
-        <p className="text-sm mt-2">Timestamp: {new Date().toISOString()}</p>
+    <div style={{
+      minHeight: '100vh',
+      backgroundColor: 'red',
+      display: 'flex',
+      alignItems: 'center',
+      justifyContent: 'center',
+      color: 'white',
+      fontSize: '24px',
+      fontFamily: 'Arial, sans-serif'
+    }}>
+      <div style={{ textAlign: 'center' }}>
+        <h1 style={{ fontSize: '48px', marginBottom: '16px' }}>🎉 JOIN TEST 🎉</h1>
+        <p>Component is loading!</p>
+        <p style={{ fontSize: '14px', marginTop: '8px' }}>
+          Time: {new Date().toLocaleTimeString()}
+        </p>
+        <p style={{ fontSize: '14px' }}>
+          URL: {window.location.href}
+        </p>
       </div>
     </div>
   );
 
-  return (
-    <JoinMomentBoardErrorBoundary>
-      {testRender}
-      <JoinMomentBoardContent />
-    </JoinMomentBoardErrorBoundary>
-  );
+  return testRender;
 };
 
 export default JoinMomentBoard;

@@ -1,5 +1,5 @@
 import React, { Suspense } from 'react';
-import { Routes, Route, Navigate } from 'react-router-dom';
+import { Routes, Route, Navigate, useLocation } from 'react-router-dom';
 import { AuthProvider } from './context/AuthContext';
 import ProtectedRoute from './components/ProtectedRoute';
 import PublicRoute from './components/PublicRoute';
@@ -18,10 +18,25 @@ const MomentBoard = React.lazy(() => import('./pages/MomentBoard'));
 import JoinMomentBoard from './pages/JoinMomentBoard';
 const EditMomentBoard = React.lazy(() => import('./pages/EditMomentBoard'));
 
+// Debug component to track routing
+const AppDebug: React.FC = () => {
+  const location = useLocation();
+  
+  React.useEffect(() => {
+    console.error('AppDebug: Current location:', location.pathname);
+    console.error('AppDebug: Full location:', location);
+  }, [location]);
+  
+  return null;
+};
+
 function App() {
+  console.error('App: Component rendering');
+  
   return (
     <AuthProvider>
       <ErrorBoundary>
+        <AppDebug />
         <Suspense fallback={<div className="flex items-center justify-center min-h-screen">Loading...</div>}>
           <Routes>
             <Route path="/" element={<Homepage />} />

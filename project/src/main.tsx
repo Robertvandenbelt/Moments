@@ -17,10 +17,27 @@ Sentry.init({
   debug: import.meta.env.DEV,
 });
 
-ReactDOM.createRoot(document.getElementById('root')!).render(
+// Debug: Check if we're even getting to this point
+console.error('main.tsx: Starting React app initialization');
+
+const rootElement = document.getElementById('root');
+if (!rootElement) {
+  console.error('main.tsx: Root element not found!');
+  throw new Error('Root element not found');
+}
+
+console.error('main.tsx: Root element found, creating React root');
+
+const root = ReactDOM.createRoot(rootElement);
+
+console.error('main.tsx: Rendering App component');
+
+root.render(
   <React.StrictMode>
     <BrowserRouter>
       <App />
     </BrowserRouter>
   </React.StrictMode>,
 );
+
+console.error('main.tsx: App component rendered');
