@@ -14,4 +14,6 @@ This project is automatically deployed to Vercel when changes are pushed to the 
 The following environment variables are required for deployment:
 - `VITE_SUPABASE_URL`
 - `VITE_SUPABASE_ANON_KEY`
-- `VITE_APP_URL` 
+- `VITE_APP_URL`
+
+<!-- Trigger redeploy --> 
