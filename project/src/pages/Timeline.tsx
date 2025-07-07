@@ -141,7 +141,7 @@ const Timeline: React.FC = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-white bg-opacity-80 relative max-w-full overflow-x-hidden">
       {/* Sidebar Navigation for md+ screens */}
       <SidebarNav />
       <main
@@ -153,18 +153,17 @@ const Timeline: React.FC = () => {
             <p className="text-gray-500">No moments yet. Create your first one!</p>
           </div>
         ) : (
-          <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4">
+          <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-4 px-6">
             {/* Filtered moments */}
             {(selectedMonth === 'all' ? Object.entries(moments) : Object.entries(moments).filter(([key]) => key === selectedMonth))
               .sort(([monthA], [monthB]) => monthB.localeCompare(monthA))
               .flatMap(([_, { moments: monthMoments }]) =>
                 monthMoments.map((moment, idx, arr) => (
                   <React.Fragment key={moment.id}>
-                    {/* User/Meta Row - OUTSIDE the card */}
-                    <div className="flex items-center gap-4 px-2 pt-2 pb-1">
-                      <Avatar name={moment.created_by_display_name || 'User'} size={44} />
-                      <div className="flex flex-col">
-                        <span className="font-bold text-on-surface text-base leading-tight">{moment.created_by_display_name || 'User'}</span>
+                    <div className="flex items-start gap-4 pt-2 pb-1 w-full">
+                      <Avatar name={moment.display_name || 'User'} size={44} />
+                      <div className="flex flex-col mt-0.5">
+                        <span className="font-bold text-on-surface text-base leading-tight">{moment.display_name || 'User'}</span>
                         <span className="text-on-surface-variant text-sm">
                           Created {moment.date_start ? formatDistanceToNow(parseISO(moment.date_start), { addSuffix: true }) : ''}
                           {` - ${moment.participant_count} member${Number(moment.participant_count) === 1 ? '' : 's'} - ${moment.total_card_count} photo${Number(moment.total_card_count) === 1 ? '' : 's'}`}

@@ -61,7 +61,7 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
+    <div className="min-h-screen bg-white bg-opacity-80 relative max-w-full overflow-x-hidden">
       {/* Sidebar Navigation for md+ screens */}
       <SidebarNav />
       <div className="px-4 pt-6 pb-10 md:pl-28 lg:pl-60">

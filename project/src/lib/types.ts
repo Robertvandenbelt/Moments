@@ -45,6 +45,7 @@ export type MomentBoard = {
   moment_cards?: {
     count: number;
   };
+  display_name?: string;
   created_by_display_name?: string;
 };
 
