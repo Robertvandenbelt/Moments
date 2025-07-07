@@ -165,7 +165,7 @@ const Timeline: React.FC = () => {
                       <div className="flex flex-col mt-0.5">
                         <span className="font-bold text-on-surface text-base leading-tight">{moment.display_name || 'User'}</span>
                         <span className="text-on-surface-variant text-sm">
-                          Created {moment.date_start ? formatDistanceToNow(parseISO(moment.date_start), { addSuffix: true }) : ''}
+                          {moment.date_start ? formatDistanceToNow(parseISO(moment.date_start), { addSuffix: true }) : ''}
                           {` - ${moment.participant_count} member${Number(moment.participant_count) === 1 ? '' : 's'} - ${moment.total_card_count} photo${Number(moment.total_card_count) === 1 ? '' : 's'}`}
                         </span>
                       </div>

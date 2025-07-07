@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Edit, LogOut, Heart, ChevronLeft, ChevronRight } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, LogOut, Heart, ChevronLeft, ChevronRight, Check } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format } from 'date-fns';
 import { parseISO } from 'date-fns/parseISO';
@@ -71,6 +71,8 @@ const MomentBoard: React.FC = () => {
   const [touchEnd, setTouchEnd] = useState<number | null>(null);
   const menuButtonRef = useRef<HTMLButtonElement>(null);
   const cardContainerRef = useRef<HTMLDivElement>(null);
+  const [activeTab, setActiveTab] = useState(0); // 0: All photos, 1: Favorite photos, 2: About
+  const [photoChip, setPhotoChip] = useState<'all' | 'yours' | 'others'>('all');
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -548,623 +550,139 @@ const MomentBoard: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative">
-      {/* Top app bar with navigation */}
-      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
-        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto">
-          <div className="flex items-center gap-4">
-            <Link 
-              to="/timeline" 
-              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
-            >
-              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-              <span 
-                className="material-symbols-outlined text-on-surface"
-                style={{ 
-                  fontSize: '24px',
-                  fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                }}
-              >
-                arrow_back
-              </span>
-            </Link>
-          </div>
-
-          <div className="flex items-center gap-2">
-            {/* Info icon with tooltip */}
-            <div className="relative">
-              <button
-                className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
-                aria-label="Show info"
-                onClick={() => setShowInfoTooltip((v) => !v)}
-                onBlur={() => setShowInfoTooltip(false)}
-              >
-                <span className="material-symbols-outlined text-on-surface-variant" style={{ fontSize: 24 }}>info</span>
-              </button>
-              {showInfoTooltip && (
-                <div 
-                  className="absolute left-1/2 -translate-x-1/2 top-full mt-2 z-50"
-                  style={{ filter: 'drop-shadow(0px 1px 2px rgba(0,0,0,0.3)) drop-shadow(0px 1px 3px rgba(0,0,0,0.15))' }}
-                >
-                  <div className="bg-surface-container-low rounded-lg py-2 px-3">
-                    <div className="flex items-center gap-2 text-on-surface text-label-medium font-roboto-flex whitespace-nowrap">
-                      <span 
-                        className="material-symbols-outlined text-on-surface" 
-                        style={{ 
-                          fontSize: '18px',
-                          fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                        }}
-                      >
-                        person
-                      </span>
-                      Created by {board.owner_display_name}
-                    </div>
-                  </div>
-                </div>
-              )}
-            </div>
-            {/* Share button for owners */}
-            {board.role === 'owner' && (
-              <button
-                onClick={() => navigate(`/share/${id}`)}
-                className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
-                aria-label="Share moment"
-              >
-                <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                <span
-                  className="material-symbols-outlined text-on-surface"
-                  style={{
-                    fontSize: '24px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  share
-                </span>
-              </button>
-            )}
-            <button 
-              ref={menuButtonRef}
-              onClick={() => setIsMenuOpen((open) => !open)}
-              className="relative p-4 rounded-full hover:bg-surface-container-highest transition-colors"
-              aria-haspopup="menu"
-              aria-expanded={isMenuOpen}
-            >
-              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-              <span 
-                className="material-symbols-outlined text-on-surface"
-                style={{ 
-                  fontSize: '24px',
-                  fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                }}
-              >
-                more_vert
-              </span>
-            </button>
-          </div>
-        </div>
+      {/* Top App Bar - Material 3 Small App Bar */}
+      <div className="w-full border-b border-outline-variant bg-surface-container-low px-4 py-3 flex items-center gap-2">
+        <Link to="/timeline" className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors">
+          <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 24 }}>arrow_back</span>
+        </Link>
+        <h1 className="text-title-medium font-medium text-on-surface ml-2 truncate">
+          {board.title || formatDate(board.date_start)}
+        </h1>
       </div>
 
-      <div className="container mx-auto px-6 pt-8">
-        {/* Primary tabs */}
-        <div className="flex flex-col gap-0.5">
-          <div className="flex items-center justify-between">
-            {/* Tab bar */}
-            <div className="flex items-center border-b border-outline-variant flex-1">
-              <button
-                onClick={() => {
-                  setShowFavoritesOnly(false);
-                  setShowOnlyMyCards(false);
-                  setShowOnlyOthersCards(false);
-                }}
-                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
-                  !showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
-                }`}
-              >
-                {/* Icon */}
-                <span 
-                  className="material-symbols-outlined"
-                  style={{ 
-                    fontSize: '24px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  grid_view
-                </span>
-                {/* Label */}
-                <span className="text-label-large font-roboto-flex">All</span>
-                {/* Card count for All tab */}
-                <span className="ml-2 text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle">
-                  {momentCards.length}
-                </span>
-                {/* Active indicator */}
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
-                  !showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
-                }`} />
-                {/* State layer */}
-                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
-              </button>
-
-              <button
-                onClick={() => {
-                  setShowFavoritesOnly(true);
-                  setShowOnlyMyCards(false);
-                  setShowOnlyOthersCards(false);
-                }}
-                className={`group relative min-w-[100px] p-3 flex items-center gap-2 transition-colors ${
-                  showFavoritesOnly ? 'text-primary' : 'text-on-surface-variant'
-                }`}
-              >
-                {/* Icon */}
-                <span 
-                  className="material-symbols-outlined"
-                  style={{ 
-                    fontSize: '24px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  favorite
-                </span>
-                {/* Label */}
-                <span className="text-label-large font-roboto-flex">Favorites</span>
-                {/* Card count indicator for Favorites tab */}
-                <span className="ml-2 text-label-medium font-roboto-flex bg-primary-container text-on-primary-container rounded-full px-2 py-0.5 align-middle">
-                  {momentCards.filter(card => card.is_favorited).length}
-                </span>
-                {/* Active indicator */}
-                <div className={`absolute bottom-0 left-0 right-0 h-[3px] bg-primary transform transition-transform duration-200 ${
-                  showFavoritesOnly ? 'scale-x-100' : 'scale-x-0'
-                }`} />
-                {/* State layer */}
-                <div className="absolute inset-0 bg-on-surface opacity-0 group-hover:opacity-[0.08] group-active:opacity-[0.12] transition-opacity duration-200" />
-              </button>
-            </div>
-            {/* View toggle and filter icons, smaller and closer */}
-            <div className="flex items-center gap-1 ml-2">
-              {!showFavoritesOnly && (
-                <button
-                  className="relative p-1.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                  aria-label="Filter cards"
-                  onClick={() => setFilterModalOpen(true)}
-                >
-                  <span 
-                    className="material-symbols-outlined text-on-surface-variant"
-                    style={{ fontSize: '20px', fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}
-                  >
-                    tune
-                  </span>
-                </button>
-              )}
-              {showFavoritesOnly && displayedCards.length > 0 && (
-                <button
-                  onClick={() => setShowDownloadConfirm(true)}
-                  disabled={isDownloading}
-                  className="relative p-1.5 rounded-full hover:bg-surface-container-highest transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-                  aria-label={isDownloading ? "Downloading favorites..." : "Download favorites"}
-                >
-                  <span 
-                    className="material-symbols-outlined text-on-surface-variant relative"
-                    style={{ fontSize: '20px', fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24" }}
-                  >
-                    {isDownloading ? 'progress_activity' : 'download'}
-                  </span>
-                </button>
-              )}
-            </div>
-          </div>
-          {/* Active filter chip */}
-          {(!showFavoritesOnly && (showOnlyMyCards || showOnlyOthersCards)) && (
-            <div className="mt-2 flex items-center gap-2">
-              <div className="inline-flex items-center bg-secondary-container rounded-full pl-4 pr-2 py-1.5 shadow-level1">
-                <span className="text-label-large font-roboto-flex text-on-secondary-container">
-                  {showOnlyMyCards ? 'Your cards' : 'Others\' cards'}
-                </span>
-                <button
-                  onClick={() => {
-                    setShowOnlyMyCards(false);
-                    setShowOnlyOthersCards(false);
-                  }}
-                  className="ml-1 p-1 rounded-full hover:bg-secondary/10 transition-colors flex items-center justify-center"
-                  aria-label="Clear filter"
-                >
-                  <span 
-                    className="material-symbols-outlined text-on-secondary-container" 
-                    style={{ 
-                      fontSize: '20px',
-                      fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                    }}
-                  >
-                    close
-                  </span>
-                </button>
-              </div>
-            </div>
-          )}
-        </div>
-
-        {/* Feed of cards */}
-        <div className="pt-8 pb-12 px-4 sm:px-6">
-          {/* Feed container with dynamic max-width based on viewport */}
-          <div className="max-w-7xl mx-auto">
-            {/* Feed header with content summary and view toggle */}
-            {/* Dynamic feed content */}
-            {displayedCards.length === 0 ? (
-              // Empty state
-              <div className="py-12 flex flex-col items-center justify-center text-center bg-surface-container-low rounded-xl">
-                <span 
-                  className="material-symbols-outlined text-on-surface-variant mb-4"
-                  style={{ 
-                    fontSize: '48px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 400, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  {showFavoritesOnly ? 'favorite' : 'photo_library'}
-                </span>
-                <p className="text-title-large font-roboto-flex text-on-surface mb-2">
-                  {showFavoritesOnly 
-                    ? 'No favorite cards yet' 
-                    : 'No cards added yet'
-                  }
-                </p>
-                <p className="text-body-medium font-roboto-flex text-on-surface-variant max-w-sm">
-                  {showFavoritesOnly
-                    ? 'Cards you mark as favorites will appear here'
-                    : 'Start adding photo or text cards to create your moment'
-                  }
-                </p>
-              </div>
-            ) : (
-              // Swipe view - single card with navigation
-              <div className="relative w-full max-w-2xl mx-auto">
-                {/* Card counter */}
-                <div className="absolute top-4 left-1/2 -translate-x-1/2 z-10">
-                  <div className="bg-surface/80 backdrop-blur-sm rounded-full px-4 py-2 text-label-medium font-roboto-flex text-on-surface-variant">
-                    {safeCardIndex + 1} of {displayedCards.length}
-                  </div>
-                </div>
-
-                {/* Navigation arrows */}
-                {safeCardIndex > 0 && (
-                  <button
-                    onClick={goToPreviousCard}
-                    className="absolute left-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
-                    aria-label="Previous card"
-                  >
-                    <ChevronLeft size={24} />
-                  </button>
-                )}
-
-                {safeCardIndex < displayedCards.length - 1 && (
-                  <button
-                    onClick={goToNextCard}
-                    className="absolute right-4 top-1/2 -translate-y-1/2 z-10 w-12 h-12 flex items-center justify-center rounded-full bg-surface/80 backdrop-blur-sm text-on-surface hover:bg-surface/90 transition-colors"
-                    aria-label="Next card"
-                  >
-                    <ChevronRight size={24} />
-                  </button>
-                )}
-
-                {/* Current card */}
-                <div
-                  ref={cardContainerRef}
-                  className="relative w-full"
-                  onTouchStart={onTouchStart}
-                  onTouchMove={onTouchMove}
-                  onTouchEnd={onTouchEnd}
-                >
-                  <article 
-                    className={`group relative bg-surface-container rounded-xl transition-all duration-300 overflow-hidden w-full ${
-                      swipeDirection === 'left' ? 'animate-slide-out-left' : 
-                      swipeDirection === 'right' ? 'animate-slide-out-right' : ''
-                    }`}
-                  >
-                    {(() => {
-                      if (displayedCards.length === 0) return null;
-                      const card = displayedCards[safeCardIndex];
-                      return (
-                        <>
-                          {/* Photo or Text Card */}
-                          {card.type === 'photo' ? (
-                            <div className="relative w-full">
-                              <img
-                                src={
-                                  (card.optimized_url || card.media_url)
-                                    ? `${card.optimized_url || card.media_url}?width=800&quality=80`
-                                    : ''
-                                }
-                                alt=""
-                                className="w-full"
-                                style={{ display: 'block', maxWidth: '100%' }}
-                                loading="lazy"
-                              />
-                            </div>
-                          ) : (
-                            <div className="bg-primary-container flex items-center justify-center rounded-xl w-full min-h-[120px]">
-                              <p className="text-headline-small font-roboto-flex text-on-primary-container line-clamp-6 text-center p-6">
-                                {card.description}
-                              </p>
-                            </div>
-                          )}
-                          {/* Card footer: heart, date, uploader */}
-                          <div className="flex items-center justify-between mt-2 px-2">
-                            <button
-                              onClick={e => { e.stopPropagation(); handleFavorite(card.id); }}
-                              className="relative p-2.5 rounded-full hover:bg-surface-container-highest transition-colors"
-                            >
-                              <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-                              <Heart 
-                                size={20} 
-                                className={`relative ${card.is_favorited ? 'text-primary-action fill-current' : 'text-on-surface-variant'}`}
-                              />
-                            </button>
-                            <div className="text-label-small font-roboto-flex text-on-surface-variant">
-                              {card.uploader_display_name}
-                            </div>
-                          </div>
-                        </>
-                      );
-                    })()}
-                  </article>
-                </div>
-              </div>
-            )}
-          </div>
-        </div>
-
-        {/* Title, Date & Description section below cards */}
-        <div className="max-w-2xl mx-auto mb-8 px-4 sm:px-6">
-          <div className="rounded-xl p-6 space-y-4">
-            {/* Title & Date */}
-            <div className="space-y-2">
-              <h1 className="text-2xl sm:text-display-small font-roboto-flex text-on-surface">
-                {board.title || formatDate(board.date_start)}
-              </h1>
-              {board.title && (
-                <p className="text-sm sm:text-title-large font-roboto-flex text-on-surface-variant">
-                  {formatDate(board.date_start)}
-                  {board.date_end && ` - ${formatDate(board.date_end)}`}
-                </p>
-              )}
-            </div>
-            
-            {/* Description */}
-            {board.description && (
-              <div className="pt-2 border-t border-outline-variant">
-                <p className="text-body-large font-roboto-flex text-on-surface-variant leading-relaxed">
-                  {board.description}
-                </p>
-              </div>
-            )}
-          </div>
-        </div>
-      </div>
-
-      {/* M3 Menu Popover */}
-      {isMenuOpen && (
-        <div
-          className="fixed z-50"
-          style={{
-            top: menuButtonRef.current?.getBoundingClientRect?.().bottom ? menuButtonRef.current.getBoundingClientRect().bottom + 8 : 60,
-            left: menuButtonRef.current?.getBoundingClientRect?.().right ? menuButtonRef.current.getBoundingClientRect().right - 200 : 'auto',
-            minWidth: 200,
-          }}
-          role="menu"
-          tabIndex={-1}
-          onBlur={() => setIsMenuOpen(false)}
-        >
-          <div className="bg-surface rounded-xl shadow-xl border border-outline-variant py-2">
-            {board.role === 'owner' ? (
-              <>
-                <button
-                  onClick={() => { setShowDeleteConfirm(true); setIsMenuOpen(false); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
-                  role="menuitem"
-                >
-                  <Trash2 size={20} />
-                  <span>Delete Moment</span>
-                </button>
-                <button
-                  onClick={() => { setIsMenuOpen(false); navigate(`/edit/${id}`); }}
-                  className="w-full flex items-center gap-3 px-4 py-3 text-on-surface hover:bg-surface-container-high rounded-lg transition-colors text-left"
-                  role="menuitem"
-                >
-                  <Edit size={20} />
-                  <span>Edit Moment</span>
-                </button>
-              </>
-            ) : (
-              <button
-                onClick={() => { setShowLeaveConfirm(true); setIsMenuOpen(false); }}
-                className="w-full flex items-center gap-3 px-4 py-3 text-red-600 hover:bg-red-50 rounded-lg transition-colors text-left"
-                role="menuitem"
-              >
-                <LogOut size={20} />
-                <span>Leave Moment</span>
-              </button>
-            )}
-          </div>
-        </div>
-      )}
-
-      {/* Delete Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showDeleteConfirm}
-        title="Delete Moment"
-        message="Are you sure you want to delete this moment? This action cannot be undone and will remove all associated cards and comments."
-        confirmLabel="Delete"
-        cancelLabel="Cancel"
-        onConfirm={handleDeleteMoment}
-        onCancel={() => setShowDeleteConfirm(false)}
-        isDestructive={true}
-      />
-
-      {/* Leave Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showLeaveConfirm}
-        title="Leave Moment"
-        message="Are you sure you want to leave this moment? You will no longer have access to view or add content."
-        confirmLabel="Leave"
-        cancelLabel="Cancel"
-        onConfirm={handleLeaveMoment}
-        onCancel={() => setShowLeaveConfirm(false)}
-        isDestructive={true}
-      />
-
-      {/* Download Confirmation Dialog */}
-      <ConfirmDialog
-        isOpen={showDownloadConfirm}
-        title="Download Favorites"
-        message="This will download all your favorite cards in their original quality. Would you like to continue?"
-        confirmLabel="Download"
-        cancelLabel="Cancel"
-        onConfirm={() => {
-          setShowDownloadConfirm(false);
-          handleDownloadFavorites();
-        }}
-        onCancel={() => setShowDownloadConfirm(false)}
-      />
-
-      {/* FAB and Menu */}
-      <div className="fixed bottom-6 right-6 z-50 flex flex-col items-end">
-        {/* FAB Menu (expanded, M3 extended FAB style) */}
-        {isFabMenuOpen && (
-          <div className="flex flex-col items-end mb-4 space-y-3 animate-fade-in-up">
-            {/* Add Photo Card (Extended FAB) */}
+      {/* Tabs - Material 3 Primary Tabs */}
+      <div className="flex items-center justify-center w-full mb-2">
+        <div className="flex w-full max-w-2xl mx-auto border-b border-outline-variant">
+          {['All photos', 'Favorite photos', 'About'].map((tab, idx) => (
             <button
-              onClick={() => {
-                setIsFabMenuOpen(false);
-                setShowPhotoUpload(true);
-              }}
-              className="flex items-center gap-3 h-14 px-6 rounded-full shadow-lg bg-primary-container text-primary font-roboto-flex text-label-large transition-colors hover:bg-primary-container/90 active:bg-primary-container/80"
-              aria-label="PhotoCard"
+              key={tab}
+              onClick={() => setActiveTab(idx)}
+              className={`flex-1 py-3 text-label-large font-roboto-flex transition-colors relative
+                ${activeTab === idx ? 'text-primary font-bold' : 'text-on-surface-variant'}
+              `}
+              style={{ outline: 'none' }}
             >
-              <span className="material-symbols-outlined text-primary" style={{ fontSize: 24, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>photo_camera</span>
-              Photo
+              {tab}
+              {activeTab === idx && (
+                <span className="absolute left-1/2 -translate-x-1/2 bottom-0 h-[3px] w-2/3 bg-primary rounded-full" />
+              )}
             </button>
-            {/* Add Text Card (Extended FAB) */}
-            <button
-              onClick={() => {
-                setIsFabMenuOpen(false);
-                setShowTextUpload(true);
-              }}
-              className="flex items-center gap-3 h-14 px-6 rounded-full shadow-lg bg-primary-container text-primary font-roboto-flex text-label-large transition-colors hover:bg-primary-container/90 active:bg-primary-container/80"
-              aria-label="TextCard"
-            >
-              <span className="material-symbols-outlined text-primary" style={{ fontSize: 24, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>edit</span>
-              Text
-            </button>
-          </div>
-        )}
-        {/* Main FAB */}
-        <button
-          onClick={() => setIsFabMenuOpen(!isFabMenuOpen)}
-          className="w-14 h-14 flex items-center justify-center rounded-full shadow-lg bg-primary text-white transition-transform hover:bg-primary/90 active:bg-primary/80 z-50"
-          aria-label="Add content"
-        >
-          <span
-            className={`material-symbols-outlined transition-transform duration-200 ${isFabMenuOpen ? 'rotate-45' : ''}`}
-            style={{ fontSize: 28, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}
-          >
-            add
-          </span>
-        </button>
+          ))}
+        </div>
       </div>
 
-      {/* Photo Upload Sheet */}
-      {showPhotoUpload && id && (
-        <PhotoUploadSheet
-          momentBoardId={id}
-          onClose={() => setShowPhotoUpload(false)}
-          onSuccess={(newCard) => {
-            handlePhotoUploadSuccess(newCard);
-            setShowPhotoUpload(false);
-          }}
-        />
-      )}
-
-      {/* Text Upload Sheet */}
-      {showTextUpload && (
-        <TextUploadSheet
-          onClose={() => setShowTextUpload(false)}
-          onSubmit={handleTextCardCreate}
-          isSubmitting={isSubmitting}
-        />
-      )}
-
-      {/* Delete confirmation dialog */}
-      <DeleteConfirmationDialog
-        isOpen={cardToDelete !== null}
-        onConfirm={() => cardToDelete && handleDelete(cardToDelete)}
-        onCancel={() => setCardToDelete(null)}
-      />
-
-      {/* Filter Modal (M3 bottom sheet style) */}
-      {filterModalOpen && (
+      {/* Chips for All Photos tab - Material 3 Filter Chips with check icon */}
+      {activeTab === 0 && (
         <>
-          {/* Backdrop */}
-          <div 
-            className="fixed inset-0 bg-black/40 z-40"
-            onClick={() => setFilterModalOpen(false)}
-          />
-          {/* Bottom Sheet */}
-          <div className="fixed bottom-0 left-0 right-0 bg-surface rounded-t-2xl p-6 z-50 shadow-xl animate-slide-up border-t border-outline-variant">
-            <h2 className="text-title-large font-roboto-flex text-on-surface mb-4">Filter cards</h2>
-            <ul className="space-y-2">
-              <li>
-                <button
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${!showOnlyMyCards && !showOnlyOthersCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
-                  onClick={() => {
-                    setShowOnlyMyCards(false);
-                    setShowOnlyOthersCards(false);
-                    setFilterModalOpen(false);
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-                    select_all
-                  </span>
-                  All cards
-                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
-                    {allCount}
-                  </span>
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${showOnlyMyCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
-                  onClick={() => {
-                    setShowOnlyMyCards(true);
-                    setShowOnlyOthersCards(false);
-                    setFilterModalOpen(false);
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-                    person
-                  </span>
-                  Your cards
-                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
-                    {yoursCount}
-                  </span>
-                </button>
-              </li>
-              <li>
-                <button
-                  className={`w-full flex items-center gap-3 p-3 rounded-lg transition-colors text-left ${showOnlyOthersCards ? 'bg-primary-container text-on-primary-container font-semibold' : 'hover:bg-surface-container-highest text-on-surface-variant'}`}
-                  onClick={() => {
-                    setShowOnlyMyCards(false);
-                    setShowOnlyOthersCards(true);
-                    setFilterModalOpen(false);
-                  }}
-                >
-                  <span className="material-symbols-outlined" style={{ fontSize: 20 }}>
-                    group
-                  </span>
-                  Others cards
-                  <span className="ml-auto text-label-medium font-roboto-flex bg-surface-container-highest text-on-surface rounded-full px-2 py-0.5 align-middle min-w-[2.5rem] text-center">
-                    {othersCount}
-                  </span>
-                </button>
-              </li>
-            </ul>
+          <div className="flex items-center justify-center w-full mt-4 mb-6">
+            <div className="flex gap-3 justify-center">
+              <button
+                onClick={() => setPhotoChip('all')}
+                aria-pressed={photoChip === 'all'}
+                className={`px-4 py-2 rounded-full border text-label-large font-roboto-flex flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40
+                  ${photoChip === 'all' ? 'bg-primary/10 border-primary text-primary' : 'bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-highest'}`}
+                tabIndex={0}
+              >
+                {photoChip === 'all' && <Check size={16} className="text-primary" />}
+                All photos ({data?.cards?.filter(card => card.type === 'photo').length || 0})
+              </button>
+              <button
+                onClick={() => setPhotoChip('yours')}
+                aria-pressed={photoChip === 'yours'}
+                className={`px-4 py-2 rounded-full border text-label-large font-roboto-flex flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40
+                  ${photoChip === 'yours' ? 'bg-primary/10 border-primary text-primary' : 'bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-highest'}`}
+                tabIndex={0}
+              >
+                {photoChip === 'yours' && <Check size={16} className="text-primary" />}
+                Your photos ({data?.cards?.filter(card => card.type === 'photo' && card.is_own_card).length || 0})
+              </button>
+              <button
+                onClick={() => setPhotoChip('others')}
+                aria-pressed={photoChip === 'others'}
+                className={`px-4 py-2 rounded-full border text-label-large font-roboto-flex flex items-center gap-2 transition-colors focus:outline-none focus:ring-2 focus:ring-primary/40
+                  ${photoChip === 'others' ? 'bg-primary/10 border-primary text-primary' : 'bg-surface border-outline-variant text-on-surface-variant hover:bg-surface-container-highest'}`}
+                tabIndex={0}
+              >
+                {photoChip === 'others' && <Check size={16} className="text-primary" />}
+                Others photos ({data?.cards?.filter(card => card.type === 'photo' && !card.is_own_card).length || 0})
+              </button>
+            </div>
+          </div>
+
+          {/* All Photos List */}
+          <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-8 pb-16">
+            {data?.cards
+              ?.filter(card => card.type === 'photo')
+              ?.filter(card =>
+                photoChip === 'all' ? true :
+                photoChip === 'yours' ? card.is_own_card :
+                !card.is_own_card
+              )
+              .map(card => (
+                <div key={card.id} className="w-full rounded-2xl overflow-hidden bg-surface border border-outline-variant">
+                  {card.optimized_url || card.media_url ? (
+                    <img
+                      src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
+                      alt={card.description || ''}
+                      className="w-full aspect-[4/5] object-cover"
+                      style={{ display: 'block', maxWidth: '100%' }}
+                    />
+                  ) : (
+                    <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                      No photo
+                    </div>
+                  )}
+                  <div className="flex items-center justify-between px-4 py-3">
+                    <span className="text-label-large font-roboto-flex text-on-surface truncate">{card.uploader_display_name}</span>
+                    <span className="flex items-center gap-1 text-on-surface-variant">
+                      <Heart size={18} className="inline-block" />
+                      {card.is_favorited ? 1 : 0}
+                    </span>
+                  </div>
+                </div>
+              ))}
+            {data?.cards?.filter(card => card.type === 'photo')
+              ?.filter(card =>
+                photoChip === 'all' ? true :
+                photoChip === 'yours' ? card.is_own_card :
+                !card.is_own_card
+              ).length === 0 && (
+                <div className="text-on-surface-variant text-center py-12">No photos to show.</div>
+            )}
           </div>
         </>
+      )}
+
+      {/* About Tab */}
+      {activeTab === 2 && (
+        <div className="flex items-center justify-center w-full mt-8">
+          <div className="w-full max-w-2xl mx-auto bg-surface rounded-2xl border border-outline-variant p-6 shadow-sm">
+            <h2 className="text-title-large font-bold text-on-surface mb-2">{board.title || 'Untitled Moment'}</h2>
+            <div className="text-label-large text-on-surface-variant mb-2">
+              {formatDate(board.date_start)}
+              {board.date_end && ` - ${formatDate(board.date_end)}`}
+            </div>
+            {board.description && (
+              <div className="mb-4">
+                <div className="text-body-large font-roboto-flex text-on-surface-variant whitespace-pre-line">{board.description}</div>
+              </div>
+            )}
+            <div className="flex items-center gap-2 mt-2 text-label-large text-on-surface-variant">
+              <span className="material-symbols-outlined" style={{ fontSize: 20 }}>group</span>
+              {board.participant_count} participant{Number(board.participant_count) === 1 ? '' : 's'}
+            </div>
+          </div>
+        </div>
       )}
     </div>
   );

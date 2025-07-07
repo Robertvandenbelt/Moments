@@ -72,7 +72,7 @@ const Profile: React.FC = () => {
             <span className="text-base sm:text-lg font-roboto-flex text-on-surface-variant">{user?.email}</span>
           </div>
           {/* Stats List */}
-          <ul className="divide-y divide-outline-variant bg-surface rounded-xl shadow-level1 mb-8">
+          <ul className="bg-surface rounded-xl mb-8">
             {/* Private Moments */}
             <li className="flex items-center px-4 py-3">
               <span className="material-symbols-outlined text-on-primary-container bg-primary-container rounded-lg w-10 h-10 flex items-center justify-center mr-4"
