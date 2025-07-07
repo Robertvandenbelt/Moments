@@ -5,6 +5,8 @@ import { getProfile, getProfileStats } from '../services/supabase';
 import LogoutButton from '../components/Auth/LogoutButton';
 import { Profile as ProfileType } from '../lib/types';
 import 'material-symbols/outlined.css';
+import SidebarNav from '../components/SidebarNav';
+import BottomNavBar from '../components/BottomNavBar';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -59,52 +61,10 @@ const Profile: React.FC = () => {
   const displayName = profile?.display_name || user?.email?.split('@')[0] || 'User';
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
-      {/* M3 Medium App Bar */}
-      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
-        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
-          {/* Back button (M3 icon button, top left) */}
-          <Link 
-            to="/timeline" 
-            className="relative w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors flex items-center justify-center"
-            aria-label="Back to timeline"
-            style={{ zIndex: 10 }}
-          >
-            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-            <span 
-              className="material-symbols-outlined text-on-surface"
-              style={{ 
-                fontSize: '24px',
-                fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-              }}
-            >
-              arrow_back
-            </span>
-          </Link>
-          {/* Centered Logo */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
-              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-primary-500">
-                m
-                <span 
-                  className="material-symbols-outlined mx-[1px] text-primary-700"
-                  style={{ 
-                    fontSize: '28px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  photo_camera
-                </span>
-                ments
-              </div>
-            </div>
-          </div>
-          {/* Invisible placeholder for right alignment */}
-          <div className="w-10 h-10 md:w-12 md:h-12" />
-        </div>
-      </div>
-
-      <div className="px-4 pt-6 pb-10">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
+      {/* Sidebar Navigation for md+ screens */}
+      <SidebarNav />
+      <div className="px-4 pt-6 pb-10 md:pl-28 lg:pl-60">
         <div className="max-w-2xl mx-auto">
           {/* User Info (centered, M3 headline and supporting text) */}
           <div className="flex flex-col items-center mb-8">
@@ -168,6 +128,8 @@ const Profile: React.FC = () => {
           </div>
         </div>
       </div>
+      {/* Bottom Navigation Bar for mobile */}
+      <BottomNavBar />
     </div>
   );
 };

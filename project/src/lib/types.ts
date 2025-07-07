@@ -45,6 +45,7 @@ export type MomentBoard = {
   moment_cards?: {
     count: number;
   };
+  created_by_display_name?: string;
 };
 
 export type GroupedMoments = {

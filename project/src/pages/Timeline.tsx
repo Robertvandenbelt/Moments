@@ -4,9 +4,12 @@ import MomentListItem from '../components/MomentListItem';
 import { Plus } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { MomentBoard } from '../lib/types';
-import { format } from 'date-fns';
+import { format, formatDistanceToNow } from 'date-fns';
 import { parseISO } from 'date-fns/parseISO';
 import 'material-symbols/outlined.css';
+import BottomNavBar from '../components/BottomNavBar';
+import SidebarNav from '../components/SidebarNav';
+import Avatar from '../components/Avatar';
 
 type GroupedMoments = {
   [key: string]: {
@@ -139,61 +142,10 @@ const Timeline: React.FC = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50 relative max-w-full overflow-x-hidden">
-      {/* M3 Top App Bar */}
-      <div className="sticky top-0 z-20 bg-surface-container-low backdrop-blur-xl border-b border-outline-variant">
-        <div className="px-6 h-20 flex items-center justify-between max-w-7xl mx-auto relative">
-          {/* Left: Filter Button */}
-          <button
-            className="relative w-10 h-10 flex items-center justify-center hover:bg-surface-container-highest transition-colors"
-            aria-label="Filter timeline"
-            onClick={() => setFilterModalOpen(true)}
-          >
-            <span className="material-symbols-outlined text-on-surface" style={{ fontSize: 24 }}>
-              tune
-            </span>
-          </button>
-
-          {/* Centered Logo */}
-          <div className="absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2">
-            <div className="px-6 py-2 -rotate-3 hover:rotate-0 transition-transform duration-200">
-              <div className="flex items-center text-2xl sm:text-3xl md:text-4xl font-roboto-flex font-bold tracking-tight text-primary-500">
-                m
-                <span 
-                  className="material-symbols-outlined mx-[1px] text-primary-700"
-                  style={{ 
-                    fontSize: '28px',
-                    fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24"
-                  }}
-                >
-                  photo_camera
-                </span>
-                ments
-              </div>
-            </div>
-          </div>
-
-          {/* Right: Settings Button (plain icon) */}
-          <Link 
-            to="/profile" 
-            className="relative w-10 h-10 flex items-center justify-center"
-            aria-label="Settings"
-          >
-            <div className="absolute inset-0 rounded-full bg-on-surface opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-300" />
-            <span 
-              className="material-symbols-outlined text-on-surface-variant relative"
-              style={{ 
-                fontSize: '24px',
-                fontVariationSettings: "'FILL' 0, 'wght' 400, 'GRAD' 0, 'opsz' 24"
-              }}
-            >
-              settings
-            </span>
-          </Link>
-        </div>
-      </div>
-      
+      {/* Sidebar Navigation for md+ screens */}
+      <SidebarNav />
       <main
-        className="container mx-auto px-4 pt-8 pb-32 relative"
+        className="container mx-auto px-4 pt-8 pb-32 relative md:pl-28 lg:pl-60"
         style={{ paddingBottom: 'calc(8rem + env(safe-area-inset-bottom, 0px))' }}
       >
         {Object.entries(moments).length === 0 ? (
@@ -208,50 +160,44 @@ const Timeline: React.FC = () => {
               .flatMap(([_, { moments: monthMoments }]) =>
                 monthMoments.map((moment, idx, arr) => (
                   <React.Fragment key={moment.id}>
+                    {/* User/Meta Row - OUTSIDE the card */}
+                    <div className="flex items-center gap-4 px-2 pt-2 pb-1">
+                      <Avatar name={moment.created_by_display_name || 'User'} size={44} />
+                      <div className="flex flex-col">
+                        <span className="font-bold text-on-surface text-base leading-tight">{moment.created_by_display_name || 'User'}</span>
+                        <span className="text-on-surface-variant text-sm">
+                          Created {moment.date_start ? formatDistanceToNow(parseISO(moment.date_start), { addSuffix: true }) : ''}
+                          {` - ${moment.participant_count} member${Number(moment.participant_count) === 1 ? '' : 's'} - ${moment.total_card_count} photo${Number(moment.total_card_count) === 1 ? '' : 's'}`}
+                        </span>
+                      </div>
+                    </div>
                     <Link to={`/board/${moment.id}`} className="block w-full">
-                      <div className="w-full mb-2 p-0 overflow-hidden rounded-xl">
-                        {/* Title, Date */}
-                        <div className="px-6 pt-6 pb-2">
-                          {moment.title ? (
-                            <>
-                              <div className="text-title-large font-bold text-on-surface mb-1">{moment.title}</div>
+                      <div className="w-full mb-6 p-0 overflow-hidden rounded-2xl bg-surface border border-outline-variant">
+                        {/* Card Image/Content */}
+                        <div className="px-0 pt-0 pb-0">
+                          <div className="rounded-t-2xl overflow-hidden bg-surface-container-high aspect-[4/5] relative">
+                            {moment.preview_photo_url && (
+                              <img
+                                src={moment.preview_photo_url}
+                                alt={moment.title || ''}
+                                className="w-full h-full object-cover absolute inset-0"
+                                style={{ maxWidth: '100%' }}
+                              />
+                            )}
+                          </div>
+                          <div className="px-6 py-4">
+                            <div className="text-title-large font-bold text-on-surface mb-1">
+                              {moment.title || (moment.date_start ? format(parseISO(moment.date_start), 'MMMM d, yyyy') : '')}
+                            </div>
+                            {moment.title && (
                               <div className="text-label-large text-on-surface-variant mb-1">{moment.date_start ? format(parseISO(moment.date_start), 'MMMM d, yyyy') : ''}</div>
-                            </>
-                          ) : (
-                            <div className="text-title-large font-bold text-on-surface mb-1">{moment.date_start ? format(parseISO(moment.date_start), 'MMMM d, yyyy') : ''}</div>
-                          )}
-                          {moment.description && (
-                            <div className="pt-2 pb-6">
-                              <div className="text-body-large font-roboto-flex text-on-surface-variant max-w-2xl">{moment.description}</div>
-                            </div>
-                          )}
-                        </div>
-                        {/* Photo with photo count and participants badges */}
-                        <div className="relative w-full">
-                          {moment.preview_photo_url && (
-                            <img
-                              src={moment.preview_photo_url}
-                              alt={moment.title || ''}
-                              className="w-full rounded-none"
-                              style={{ display: 'block', maxWidth: '100%' }}
-                            />
-                          )}
-                          {(moment.total_card_count > 1 || Number(moment.participant_count) > 1) && (
-                            <div className="absolute top-2 right-2 flex flex-row gap-2">
-                              {moment.total_card_count > 1 && (
-                                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface text-on-surface shadow text-label-small font-roboto-flex">
-                                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>collections</span>
-                                  {moment.total_card_count}
-                                </span>
-                              )}
-                              {Number(moment.participant_count) > 1 && (
-                                <span className="flex items-center gap-1 px-2 py-1 rounded-lg bg-surface text-on-surface shadow text-label-small font-roboto-flex">
-                                  <span className="material-symbols-outlined" style={{ fontSize: 18 }}>group</span>
-                                  {moment.participant_count}
-                                </span>
-                              )}
-                            </div>
-                          )}
+                            )}
+                            {moment.description && (
+                              <div className="pt-1">
+                                <div className="text-body-large font-roboto-flex text-on-surface-variant max-w-2xl">{moment.description}</div>
+                              </div>
+                            )}
+                          </div>
                         </div>
                       </div>
                     </Link>
@@ -265,19 +211,8 @@ const Timeline: React.FC = () => {
         )}
       </main>
 
-      <div className="fixed bottom-6 right-6 z-50">
-        <button
-          onClick={handleCreateClick}
-          className="relative flex items-center gap-3 justify-center h-14 px-6 rounded-full shadow-lg bg-primary text-white transition-colors hover:bg-primary/90 active:bg-primary/80 focus:outline-none focus:ring-2 focus:ring-primary/40 font-roboto-flex text-label-large"
-          aria-label="Add new moment"
-          style={{ boxShadow: '0px 3px 8px rgba(0,0,0,0.15)' }}
-        >
-          <span className="material-symbols-outlined text-white" style={{ fontSize: 28, fontVariationSettings: "'FILL' 1, 'wght' 500, 'GRAD' -25, 'opsz' 24" }}>add</span>
-          New moment
-          {/* State layer */}
-          <span className="absolute inset-0 rounded-full bg-on-primary opacity-0 hover:opacity-[0.08] active:opacity-[0.12] transition-opacity duration-200 pointer-events-none" />
-        </button>
-      </div>
+      {/* Bottom Navigation Bar */}
+      <BottomNavBar />
 
       {/* Filter Modal (M3 bottom sheet style) */}
       {filterModalOpen && (
