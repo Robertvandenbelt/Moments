@@ -73,6 +73,8 @@ const MomentBoard: React.FC = () => {
   const cardContainerRef = useRef<HTMLDivElement>(null);
   const [activeTab, setActiveTab] = useState(0); // 0: All photos, 1: Favorite photos, 2: About
   const [photoChip, setPhotoChip] = useState<'all' | 'yours' | 'others'>('all');
+  const [doubleTapTimers, setDoubleTapTimers] = useState<{ [key: string]: NodeJS.Timeout }>({});
+  const [favoriteAnimations, setFavoriteAnimations] = useState<{ [key: string]: boolean }>({});
 
   useEffect(() => {
     const fetchBoardData = async () => {
@@ -141,6 +143,13 @@ const MomentBoard: React.FC = () => {
     // Cleanup the timer if component unmounts before the delay
     return () => clearTimeout(timer);
   }, [id, user]);
+
+  // Cleanup double tap timers on unmount
+  useEffect(() => {
+    return () => {
+      Object.values(doubleTapTimers).forEach(timer => clearTimeout(timer));
+    };
+  }, [doubleTapTimers]);
 
   const displayedCards = useMemo(() => {
     let filteredCards = showFavoritesOnly ? momentCards.filter((card) => card.is_favorited) : momentCards;
@@ -261,6 +270,14 @@ const MomentBoard: React.FC = () => {
       return;
     }
 
+    // Trigger animation
+    setFavoriteAnimations(prev => ({ ...prev, [cardId]: true }));
+    
+    // Clear animation after 1 second
+    setTimeout(() => {
+      setFavoriteAnimations(prev => ({ ...prev, [cardId]: false }));
+    }, 1000);
+
     // Optimistically update both UI states
     setData(prev => {
       if (!prev) return prev;
@@ -328,6 +345,32 @@ const MomentBoard: React.FC = () => {
       }
     } catch (err) {
       console.error('Error in handleFavorite:', err);
+    }
+  };
+
+  const handleDoubleTap = (cardId: string) => {
+    // Clear any existing timer for this card
+    if (doubleTapTimers[cardId]) {
+      clearTimeout(doubleTapTimers[cardId]);
+      setDoubleTapTimers(prev => {
+        const newTimers = { ...prev };
+        delete newTimers[cardId];
+        return newTimers;
+      });
+      
+      // This is a double tap - trigger favorite
+      handleFavorite(cardId);
+    } else {
+      // First tap - set a timer
+      const timer = setTimeout(() => {
+        setDoubleTapTimers(prev => {
+          const newTimers = { ...prev };
+          delete newTimers[cardId];
+          return newTimers;
+        });
+      }, 300); // 300ms window for double tap
+      
+      setDoubleTapTimers(prev => ({ ...prev, [cardId]: timer }));
     }
   };
 
@@ -563,7 +606,7 @@ const MomentBoard: React.FC = () => {
       {/* Tabs - Material 3 Primary Tabs */}
       <div className="flex items-center justify-center w-full mb-2">
         <div className="flex w-full max-w-2xl mx-auto border-b border-outline-variant">
-          {['All photos', 'Favorite photos', 'About'].map((tab, idx) => (
+          {['All', 'Favorites', 'About'].map((tab, idx) => (
             <button
               key={tab}
               onClick={() => setActiveTab(idx)}
@@ -594,7 +637,7 @@ const MomentBoard: React.FC = () => {
                 tabIndex={0}
               >
                 {photoChip === 'all' && <Check size={16} className="text-primary" />}
-                All photos ({data?.cards?.filter(card => card.type === 'photo').length || 0})
+                All ({data?.cards?.filter(card => card.type === 'photo').length || 0})
               </button>
               <button
                 onClick={() => setPhotoChip('yours')}
@@ -604,7 +647,7 @@ const MomentBoard: React.FC = () => {
                 tabIndex={0}
               >
                 {photoChip === 'yours' && <Check size={16} className="text-primary" />}
-                Your photos ({data?.cards?.filter(card => card.type === 'photo' && card.is_own_card).length || 0})
+                Yours ({data?.cards?.filter(card => card.type === 'photo' && card.is_own_card).length || 0})
               </button>
               <button
                 onClick={() => setPhotoChip('others')}
@@ -614,7 +657,7 @@ const MomentBoard: React.FC = () => {
                 tabIndex={0}
               >
                 {photoChip === 'others' && <Check size={16} className="text-primary" />}
-                Others photos ({data?.cards?.filter(card => card.type === 'photo' && !card.is_own_card).length || 0})
+                Others ({data?.cards?.filter(card => card.type === 'photo' && !card.is_own_card).length || 0})
               </button>
             </div>
           </div>
@@ -629,25 +672,51 @@ const MomentBoard: React.FC = () => {
                 !card.is_own_card
               )
               .map(card => (
-                <div key={card.id} className="w-full rounded-2xl overflow-hidden bg-surface border border-outline-variant">
-                  {card.optimized_url || card.media_url ? (
-                    <img
-                      src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
-                      alt={card.description || ''}
-                      className="w-full aspect-[4/5] object-cover"
-                      style={{ display: 'block', maxWidth: '100%' }}
-                    />
-                  ) : (
-                    <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                      No photo
-                    </div>
-                  )}
+                <div key={card.id} className="w-full rounded-2xl overflow-hidden bg-surface border border-outline-variant relative">
+                  <div 
+                    className="relative w-full aspect-[4/5] cursor-pointer"
+                    onTouchStart={() => handleDoubleTap(card.id)}
+                    style={{ touchAction: 'manipulation' }}
+                  >
+                    {card.optimized_url || card.media_url ? (
+                      <img
+                        src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
+                        alt={card.description || ''}
+                        className="w-full aspect-[4/5] object-cover"
+                        style={{ display: 'block', maxWidth: '100%' }}
+                      />
+                    ) : (
+                      <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                        No photo
+                      </div>
+                    )}
+                    
+                    {/* Double tap heart animation overlay */}
+                    {favoriteAnimations[card.id] && (
+                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                        <div className="animate-ping">
+                          <Heart 
+                            size={80} 
+                            className="text-primary fill-primary drop-shadow-lg" 
+                          />
+                        </div>
+                      </div>
+                    )}
+                  </div>
+                  
                   <div className="flex items-center justify-between px-4 py-3">
                     <span className="text-label-large font-roboto-flex text-on-surface truncate">{card.uploader_display_name}</span>
-                    <span className="flex items-center gap-1 text-on-surface-variant">
-                      <Heart size={18} className="inline-block" />
+                    <button 
+                      onClick={() => handleFavorite(card.id)}
+                      className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
+                      aria-label={card.is_favorited ? "Remove from favorites" : "Add to favorites"}
+                    >
+                      <Heart 
+                        size={18} 
+                        className={`${card.is_favorited ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} 
+                      />
                       {card.is_favorited ? 1 : 0}
-                    </span>
+                    </button>
                   </div>
                 </div>
               ))}
@@ -661,6 +730,74 @@ const MomentBoard: React.FC = () => {
             )}
           </div>
         </>
+      )}
+
+      {/* Favorites Tab */}
+      {activeTab === 1 && (
+        <div className="w-full max-w-2xl mx-auto px-4 pb-16 mt-4">
+          {data?.cards?.filter(card => card.type === 'photo' && card.is_favorited).length === 0 ? (
+            <div className="text-center py-12">
+              <div className="text-on-surface-variant mb-4">
+                <Heart size={48} className="mx-auto text-on-surface-variant/50" />
+              </div>
+              <p className="text-title-medium font-roboto-flex text-on-surface-variant mb-2">No favorites yet</p>
+              <p className="text-body-medium text-on-surface-variant">Double-tap photos to add them to your favorites</p>
+            </div>
+          ) : (
+            <div className="grid grid-cols-2 gap-4">
+              {data?.cards
+                ?.filter(card => card.type === 'photo' && card.is_favorited)
+                .map(card => (
+                  <div key={card.id} className="rounded-2xl overflow-hidden bg-surface border border-outline-variant relative">
+                    <div 
+                      className="relative w-full aspect-[4/5] cursor-pointer"
+                      onTouchStart={() => handleDoubleTap(card.id)}
+                      style={{ touchAction: 'manipulation' }}
+                    >
+                      {card.optimized_url || card.media_url ? (
+                        <img
+                          src={(card.optimized_url || card.media_url) + '?width=400&quality=80'}
+                          alt={card.description || ''}
+                          className="w-full aspect-[4/5] object-cover"
+                          style={{ display: 'block', maxWidth: '100%' }}
+                        />
+                      ) : (
+                        <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                          No photo
+                        </div>
+                      )}
+                      
+                      {/* Double tap heart animation overlay */}
+                      {favoriteAnimations[card.id] && (
+                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                          <div className="animate-ping">
+                            <Heart 
+                              size={40} 
+                              className="text-primary fill-primary drop-shadow-lg" 
+                            />
+                          </div>
+                        </div>
+                      )}
+                    </div>
+                    
+                    <div className="flex items-center justify-between px-3 py-2">
+                      <span className="text-label-small font-roboto-flex text-on-surface truncate flex-1 mr-2">{card.uploader_display_name}</span>
+                      <button 
+                        onClick={() => handleFavorite(card.id)}
+                        className="flex items-center gap-1 text-primary hover:text-primary/80 transition-colors flex-shrink-0"
+                        aria-label="Remove from favorites"
+                      >
+                        <Heart 
+                          size={16} 
+                          className="fill-primary text-primary" 
+                        />
+                      </button>
+                    </div>
+                  </div>
+                ))}
+            </div>
+          )}
+        </div>
       )}
 
       {/* About Tab */}
