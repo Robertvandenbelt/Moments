@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
   { label: 'Timeline', icon: 'home', to: '/timeline' },
-  { label: 'Add Moment', icon: 'add', to: '/create' },
   { label: 'Settings', icon: 'settings', to: '/profile' },
 ];
 
@@ -12,10 +11,8 @@ const BottomNavBar: React.FC = () => {
 
   return (
     <nav className="fixed bottom-0 left-0 right-0 z-50 bg-surface shadow-lg border-t border-outline-variant flex justify-around items-center h-20 md:hidden">
-      {navItems.map((item, idx) => {
+      {navItems.map((item) => {
         const isActive = location.pathname === item.to || (item.to === '/timeline' && location.pathname === '/');
-        // Only show label for 'Add Moment' on mobile
-        const showLabel = idx === 1;
         return (
           <Link
             key={item.to}
@@ -29,8 +26,7 @@ const BottomNavBar: React.FC = () => {
             >
               {item.icon}
             </span>
-            {/* Show label only for Add Moment on mobile, all labels on md+ */}
-            <span className={`text-xs mt-1 font-roboto-flex font-medium ${showLabel ? '' : 'hidden'} md:inline`}>{item.label}</span>
+            <span className="text-xs mt-1 font-roboto-flex font-medium hidden md:inline">{item.label}</span>
           </Link>
         );
       })}

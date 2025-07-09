@@ -7,6 +7,7 @@ import { Profile as ProfileType } from '../lib/types';
 import 'material-symbols/outlined.css';
 import SidebarNav from '../components/SidebarNav';
 import BottomNavBar from '../components/BottomNavBar';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 const Profile: React.FC = () => {
   const { user } = useAuth();
@@ -130,6 +131,9 @@ const Profile: React.FC = () => {
       </div>
       {/* Bottom Navigation Bar for mobile */}
       <BottomNavBar />
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
     </div>
   );
 };

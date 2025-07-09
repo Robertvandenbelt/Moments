@@ -10,6 +10,7 @@ import 'material-symbols/outlined.css';
 import BottomNavBar from '../components/BottomNavBar';
 import SidebarNav from '../components/SidebarNav';
 import Avatar from '../components/Avatar';
+import FloatingActionButton from '../components/FloatingActionButton';
 
 type GroupedMoments = {
   [key: string]: {
@@ -212,6 +213,9 @@ const Timeline: React.FC = () => {
 
       {/* Bottom Navigation Bar */}
       <BottomNavBar />
+
+      {/* Floating Action Button */}
+      <FloatingActionButton />
 
       {/* Filter Modal (M3 bottom sheet style) */}
       {filterModalOpen && (

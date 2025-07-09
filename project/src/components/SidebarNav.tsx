@@ -3,7 +3,6 @@ import { Link, useLocation } from 'react-router-dom';
 
 const navItems = [
   { label: 'Timeline', icon: 'home', to: '/timeline' },
-  { label: 'Add Moment', icon: 'add', to: '/create' },
   { label: 'Settings', icon: 'settings', to: '/profile' },
 ];
 
