@@ -78,7 +78,6 @@ const MomentBoard: React.FC = () => {
   const [isMoreMenuOpen, setIsMoreMenuOpen] = useState(false);
   const moreMenuRef = useRef<HTMLButtonElement>(null);
   const [shareFeedback, setShareFeedback] = useState('');
-  const [photoView, setPhotoView] = useState<'feed' | 'swipe'>('feed');
   const [filterMenuOpen, setFilterMenuOpen] = useState(false);
   const filterOptions = [
     { key: 'all', label: `All (${data?.cards?.filter(card => card.type === 'photo').length || 0})` },
@@ -722,207 +721,75 @@ const MomentBoard: React.FC = () => {
               </div>
             )}
           </div>
-          {/* Feed/Swipe icon toggle */}
-          <div className="inline-flex rounded-full bg-surface-container-lowest border border-outline-variant shadow-sm ml-2" role="group" aria-label="Photo view mode">
-            <button
-              type="button"
-              aria-pressed={photoView === 'feed'}
-              onClick={() => setPhotoView('feed')}
-              className={`p-2 flex items-center justify-center rounded-l-full transition-colors focus:outline-none ${photoView === 'feed' ? 'bg-primary text-on-primary' : 'bg-surface text-on-surface hover:bg-surface-container-highest'}`}
-              style={{ width: 40, height: 40 }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>view_list</span>
-            </button>
-            <button
-              type="button"
-              aria-pressed={photoView === 'swipe'}
-              onClick={() => setPhotoView('swipe')}
-              className={`p-2 flex items-center justify-center rounded-r-full transition-colors focus:outline-none ${photoView === 'swipe' ? 'bg-primary text-on-primary' : 'bg-surface text-on-surface hover:bg-surface-container-highest'}`}
-              style={{ width: 40, height: 40 }}
-            >
-              <span className="material-symbols-outlined" style={{ fontSize: 22 }}>view_carousel</span>
-            </button>
-          </div>
         </div>
       )}
 
-      {/* Feed or Swipe view for All tab */}
+      {/* Feed view for All tab */}
       {activeTab === 0 && (
-        photoView === 'feed' ? (
-          <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-8 pb-16">
-            {data?.cards
-              ?.filter(card => card.type === 'photo')
-              ?.filter(card =>
-                photoChip === 'all' ? true :
-                photoChip === 'yours' ? card.is_own_card :
-                !card.is_own_card
-              )
-              .map(card => (
-                <div key={card.id} className="w-full rounded-2xl overflow-hidden bg-surface border border-outline-variant relative">
-                  <div 
-                    className="relative w-full aspect-[4/5] cursor-pointer"
-                    onTouchStart={() => handleDoubleTap(card.id)}
-                    style={{ touchAction: 'manipulation' }}
-                  >
-                    {card.optimized_url || card.media_url ? (
-                      <img
-                        src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
-                        alt={card.description || ''}
-                        className="w-full aspect-[4/5] object-cover"
-                        style={{ display: 'block', maxWidth: '100%' }}
-                      />
-                    ) : (
-                      <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                        No photo
-                      </div>
-                    )}
-                    {/* Double tap heart animation overlay */}
-                    {favoriteAnimations[card.id] && (
-                      <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                        <div className="animate-ping">
-                          <Heart 
-                            size={80} 
-                            className="text-primary fill-primary drop-shadow-lg" 
-                          />
-                        </div>
-                      </div>
-                    )}
-                  </div>
-                  <div className="flex items-center justify-between px-4 py-3">
-                    <span className="text-label-large font-roboto-flex text-on-surface truncate">{card.uploader_display_name}</span>
-                    <button 
-                      onClick={() => handleFavorite(card.id)}
-                      className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
-                      aria-label={card.is_favorited ? "Remove from favorites" : "Add to favorites"}
-                    >
-                      <Heart 
-                        size={18} 
-                        className={`${card.is_favorited ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} 
-                      />
-                      {card.is_favorited ? 1 : 0}
-                    </button>
-                  </div>
-                </div>
-              ))}
-            {data?.cards?.filter(card => card.type === 'photo')
-              ?.filter(card =>
-                photoChip === 'all' ? true :
-                photoChip === 'yours' ? card.is_own_card :
-                !card.is_own_card
-              ).length === 0 && (
-                <div className="text-on-surface-variant text-center py-12">No photos to show.</div>
-              )}
-          </div>
-        ) : (
-          // Swipe view implementation
-          <div className="flex flex-col items-center w-full max-w-md mx-auto pb-16">
-            <div className="relative w-full aspect-[4/5] flex items-center justify-center">
-              {(() => {
-                const filtered = data?.cards
-                  ?.filter(card => card.type === 'photo')
-                  ?.filter(card =>
-                    photoChip === 'all' ? true :
-                    photoChip === 'yours' ? card.is_own_card :
-                    !card.is_own_card
-                  ) || [];
-                if (filtered.length === 0) {
-                  return <div className="w-full h-full flex items-center justify-center text-on-surface-variant">No photos to show.</div>;
-                }
-                const card = filtered[safeCardIndex];
-                return card ? (
-                  <div key={card.id} className="w-full h-full rounded-2xl overflow-hidden bg-surface border border-outline-variant relative flex flex-col">
-                    <div className="relative w-full aspect-[4/5] flex-1 cursor-pointer"
-                      onTouchStart={() => handleDoubleTap(card.id)}
-                      style={{ touchAction: 'manipulation' }}
-                    >
-                      {card.optimized_url || card.media_url ? (
-                        <img
-                          src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
-                          alt={card.description || ''}
-                          className="w-full h-full object-cover absolute inset-0"
-                          style={{ maxWidth: '100%' }}
-                        />
-                      ) : (
-                        <div className="w-full h-full bg-surface-container-high flex items-center justify-center text-on-surface-variant">
-                          No photo
-                        </div>
-                      )}
-                      {/* Double tap heart animation overlay */}
-                      {favoriteAnimations[card.id] && (
-                        <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
-                          <div className="animate-ping">
-                            <Heart 
-                              size={80} 
-                              className="text-primary fill-primary drop-shadow-lg" 
-                            />
-                          </div>
-                        </div>
-                      )}
+        <div className="flex flex-col items-center w-full max-w-2xl mx-auto gap-8 pb-16">
+          {data?.cards
+            ?.filter(card => card.type === 'photo')
+            ?.filter(card =>
+              photoChip === 'all' ? true :
+              photoChip === 'yours' ? card.is_own_card :
+              !card.is_own_card
+            )
+            .map(card => (
+              <div key={card.id} className="w-full rounded-2xl overflow-hidden bg-gradient-to-br from-orange-50 to-teal-50 border border-outline-variant relative">
+                <div 
+                  className="relative w-full aspect-[4/5] cursor-pointer"
+                  onTouchStart={() => handleDoubleTap(card.id)}
+                  style={{ touchAction: 'manipulation' }}
+                >
+                  {card.optimized_url || card.media_url ? (
+                    <img
+                      src={(card.optimized_url || card.media_url) + '?width=800&quality=80'}
+                      alt={card.description || ''}
+                      className="w-full aspect-[4/5] object-cover"
+                      style={{ display: 'block', maxWidth: '100%' }}
+                    />
+                  ) : (
+                    <div className="w-full aspect-[4/5] bg-surface-container-high flex items-center justify-center text-on-surface-variant">
+                      No photo
                     </div>
-                    <div className="flex items-center justify-between px-4 py-3">
-                      <span className="text-label-large font-roboto-flex text-on-surface truncate">{card.uploader_display_name}</span>
-                      <button 
-                        onClick={() => handleFavorite(card.id)}
-                        className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
-                        aria-label={card.is_favorited ? "Remove from favorites" : "Add to favorites"}
-                      >
+                  )}
+                  {/* Double tap heart animation overlay */}
+                  {favoriteAnimations[card.id] && (
+                    <div className="absolute inset-0 flex items-center justify-center pointer-events-none">
+                      <div className="animate-ping">
                         <Heart 
-                          size={18} 
-                          className={`${card.is_favorited ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} 
+                          size={80} 
+                          className="text-primary fill-primary drop-shadow-lg" 
                         />
-                        {card.is_favorited ? 1 : 0}
-                      </button>
+                      </div>
                     </div>
-                  </div>
-                ) : null;
-              })()}
-              {/* Left/right arrows */}
-              <button
-                onClick={goToPreviousCard}
-                disabled={safeCardIndex === 0}
-                className="absolute left-2 top-1/2 -translate-y-1/2 bg-surface-container-highest rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-primary/10 disabled:opacity-40"
-                aria-label="Previous photo"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 28 }}>chevron_left</span>
-              </button>
-              <button
-                onClick={goToNextCard}
-                disabled={(() => {
-                  const filtered = data?.cards
-                    ?.filter(card => card.type === 'photo')
-                    ?.filter(card =>
-                      photoChip === 'all' ? true :
-                      photoChip === 'yours' ? card.is_own_card :
-                      !card.is_own_card
-                    ) || [];
-                  return safeCardIndex === filtered.length - 1;
-                })()}
-                className="absolute right-2 top-1/2 -translate-y-1/2 bg-surface-container-highest rounded-full w-10 h-10 flex items-center justify-center shadow hover:bg-primary/10 disabled:opacity-40"
-                aria-label="Next photo"
-              >
-                <span className="material-symbols-outlined" style={{ fontSize: 28 }}>chevron_right</span>
-              </button>
-            </div>
-            {/* Page indicator */}
-            <div className="flex justify-center mt-4 gap-2">
-              {(() => {
-                const filtered = data?.cards
-                  ?.filter(card => card.type === 'photo')
-                  ?.filter(card =>
-                    photoChip === 'all' ? true :
-                    photoChip === 'yours' ? card.is_own_card :
-                    !card.is_own_card
-                  ) || [];
-                return filtered.map((_, idx) => (
-                  <span
-                    key={idx}
-                    className={`w-2.5 h-2.5 rounded-full ${idx === safeCardIndex ? 'bg-primary' : 'bg-outline-variant'} transition-colors`}
-                  />
-                ));
-              })()}
-            </div>
-          </div>
-        )
+                  )}
+                </div>
+                <div className="flex items-center justify-between px-4 py-3">
+                  <span className="text-label-large font-roboto-flex text-on-surface truncate">{card.uploader_display_name}</span>
+                  <button 
+                    onClick={() => handleFavorite(card.id)}
+                    className="flex items-center gap-1 text-on-surface-variant hover:text-primary transition-colors"
+                    aria-label={card.is_favorited ? "Remove from favorites" : "Add to favorites"}
+                  >
+                    <Heart 
+                      size={18} 
+                      className={`${card.is_favorited ? 'fill-primary text-primary' : 'text-on-surface-variant'}`} 
+                    />
+                    {card.is_favorited ? 1 : 0}
+                  </button>
+                </div>
+              </div>
+            ))}
+          {data?.cards?.filter(card => card.type === 'photo')
+            ?.filter(card =>
+              photoChip === 'all' ? true :
+              photoChip === 'yours' ? card.is_own_card :
+              !card.is_own_card
+            ).length === 0 && (
+              <div className="text-on-surface-variant text-center py-12">No photos to show.</div>
+            )}
+        </div>
       )}
 
       {/* Favorites tab: 2-column grid of favorite photos */}
@@ -941,7 +808,7 @@ const MomentBoard: React.FC = () => {
               {data?.cards
                 ?.filter(card => card.type === 'photo' && card.is_favorited)
                 .map(card => (
-                  <div key={card.id} className="rounded-2xl overflow-hidden bg-surface border border-outline-variant relative">
+                  <div key={card.id} className="rounded-2xl overflow-hidden bg-gradient-to-br from-orange-50 to-teal-50 border border-outline-variant relative">
                     <div 
                       className="relative w-full aspect-[4/5] cursor-pointer"
                       onTouchStart={() => handleDoubleTap(card.id)}
@@ -993,25 +860,23 @@ const MomentBoard: React.FC = () => {
 
       {/* About tab: show all meta data from the Moment */}
       {activeTab === 2 && data && (
-        <div className="flex items-center justify-center w-full mt-8">
-          <div className="w-full max-w-2xl mx-auto bg-surface rounded-2xl border border-outline-variant p-6 shadow-sm">
-            <h2 className="text-title-large font-bold text-on-surface mb-2">{data.board.title || 'Untitled Moment'}</h2>
-            <div className="text-label-large text-on-surface-variant mb-2">
-              {formatDate(data.board.date_start)}
-              {data.board.date_end && ` - ${formatDate(data.board.date_end)}`}
+        <div className="w-full max-w-2xl mx-auto mt-8 px-4">
+          <h2 className="text-title-large font-bold text-on-surface mb-2">{data.board.title || 'Untitled Moment'}</h2>
+          <div className="text-label-large text-on-surface-variant mb-2">
+            {formatDate(data.board.date_start)}
+            {data.board.date_end && ` - ${formatDate(data.board.date_end)}`}
+          </div>
+          {data.board.description && (
+            <div className="mb-4">
+              <div className="text-body-large font-roboto-flex text-on-surface-variant whitespace-pre-line">{data.board.description}</div>
             </div>
-            {data.board.description && (
-              <div className="mb-4">
-                <div className="text-body-large font-roboto-flex text-on-surface-variant whitespace-pre-line">{data.board.description}</div>
-              </div>
-            )}
-            <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-label-large text-on-surface-variant">
-              <div><span className="font-bold">Owner:</span> {data.board.owner_display_name || data.board.created_by}</div>
-              <div><span className="font-bold">Participants:</span> {data.board.participant_count}</div>
-              <div><span className="font-bold">Cards:</span> {data.board.card_count}</div>
-              <div><span className="font-bold">Role:</span> {data.board.role}</div>
-              {/* Add more meta fields as needed */}
-            </div>
+          )}
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-2 mt-4 text-label-large text-on-surface-variant">
+            <div><span className="font-bold">Owner:</span> {data.board.owner_display_name || data.board.created_by}</div>
+            <div><span className="font-bold">Participants:</span> {data.board.participant_count}</div>
+            <div><span className="font-bold">Cards:</span> {data.board.card_count}</div>
+            <div><span className="font-bold">Role:</span> {data.board.role}</div>
+            {/* Add more meta fields as needed */}
           </div>
         </div>
       )}

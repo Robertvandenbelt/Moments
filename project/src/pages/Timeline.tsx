@@ -172,7 +172,7 @@ const Timeline: React.FC = () => {
                       </div>
                     </div>
                     <Link to={`/board/${moment.id}`} className="block w-full">
-                      <div className="w-full mb-6 p-0 overflow-hidden rounded-2xl bg-surface border border-outline-variant">
+                      <div className="w-full mb-6 p-0 overflow-hidden rounded-2xl bg-gradient-to-br from-orange-50 to-teal-50 border border-outline-variant">
                         {/* Card Image/Content */}
                         <div className="px-0 pt-0 pb-0">
                           <div className="rounded-t-2xl overflow-hidden bg-surface-container-high aspect-[4/5] relative">
