@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useMemo, useRef, useCallback } from 'react';
 import { useParams, Link, useNavigate } from 'react-router-dom';
-import { ArrowLeft, Trash2, Edit, LogOut, Heart, ChevronLeft, ChevronRight, Check } from 'lucide-react';
+import { ArrowLeft, Trash2, Edit, LogOut, Heart, ChevronLeft, ChevronRight, Check, Plus } from 'lucide-react';
 import { supabase } from '../lib/supabaseClient';
 import { format } from 'date-fns';
 import { parseISO } from 'date-fns/parseISO';
@@ -880,6 +880,15 @@ const MomentBoard: React.FC = () => {
           </div>
         </div>
       )}
+
+      {/* Floating Action Button */}
+      <button
+        onClick={() => navigate('/create')}
+        className="fixed bottom-20 left-1/2 -translate-x-1/2 md:left-8 md:translate-x-0 z-40 flex items-center justify-center w-14 h-14 bg-primary text-on-primary rounded-full shadow-lg hover:shadow-xl hover:bg-primary-container transition-all duration-200 focus:outline-none focus:ring-4 focus:ring-primary/20"
+        aria-label="Create new moment"
+      >
+        <Plus className="w-6 h-6" />
+      </button>
     </div>
   );
 };

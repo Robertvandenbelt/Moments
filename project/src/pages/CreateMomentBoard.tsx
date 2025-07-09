@@ -1,25 +1,21 @@
 import React, { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { format } from 'date-fns';
+import { ArrowLeft, Calendar, Edit3, Plus } from 'lucide-react';
 import DatePickerModal, { DatePickerMode } from '../components/DatePickerModal';
 import { createMomentBoard } from '../services/supabase';
 
-const PRIMARY_COLOR = '#6750A4';
-const OUTLINE_COLOR = '#D1C4E9';
 const TITLE_MAX = 50;
-const DESC_MAX = 500;
 
 const CreateMomentBoard: React.FC = () => {
   const navigate = useNavigate();
   const [pickerMode, setPickerMode] = useState<DatePickerMode>('single');
   const [modalOpen, setModalOpen] = useState(false);
-  const [selectedDate, setSelectedDate] = useState<string | null>(format(new Date(), 'yyyy-MM-dd'));
+  const [selectedDate, setSelectedDate] = useState<string | null>(null);
   const [selectedRange, setSelectedRange] = useState<{ from: string; to: string } | null>(null);
   const [title, setTitle] = useState('');
-  const [description, setDescription] = useState('');
   const [isLoading, setIsLoading] = useState(false);
 
-  // Show value in input/button
   const getDisplayValue = () => {
     if (pickerMode === 'single') {
       return selectedDate ? format(new Date(selectedDate), 'MMM d, yyyy') : 'Select date';
@@ -27,7 +23,7 @@ const CreateMomentBoard: React.FC = () => {
       if (selectedRange && selectedRange.from && selectedRange.to) {
         return `${format(new Date(selectedRange.from), 'MMM d, yyyy')} – ${format(new Date(selectedRange.to), 'MMM d, yyyy')}`;
       } else {
-        return 'Select range';
+        return 'Select date range';
       }
     }
   };
@@ -36,11 +32,13 @@ const CreateMomentBoard: React.FC = () => {
     e.preventDefault();
     if (pickerMode === 'single' && !selectedDate) return;
     if (pickerMode === 'range' && (!selectedRange || !selectedRange.from || !selectedRange.to)) return;
+    if (!title.trim()) return;
+    
     setIsLoading(true);
     try {
       const board = await createMomentBoard({
-        title: title || undefined,
-        description: description || undefined,
+        title: title.trim(),
+        description: undefined,
         date_start: pickerMode === 'single' ? selectedDate! : selectedRange!.from,
         date_end: pickerMode === 'range' ? selectedRange!.to : undefined
       });
@@ -52,96 +50,146 @@ const CreateMomentBoard: React.FC = () => {
     }
   };
 
+  const isFormValid = () => {
+    const hasValidDate = pickerMode === 'single' ? selectedDate !== null : 
+      (selectedRange !== null && selectedRange.from && selectedRange.to);
+    const hasValidTitle = title.trim().length > 0;
+    return hasValidDate && hasValidTitle;
+  };
+
   return (
-    <div className="min-h-screen bg-background flex flex-col items-center justify-center">
-      <div className="max-w-md w-full p-8 rounded-xl shadow" style={{ background: '#DCE9D7' }}>
-        <h1 className="text-2xl font-bold mb-6">Create new Moment</h1>
-        {/* Material 3 Segmented Button */}
-        <div className="inline-flex mb-4 shadow-sm rounded-full bg-surface-container-lowest border border-outline-variant" role="group" aria-label="Date picker mode">
+    <div className="min-h-screen bg-gradient-to-br from-orange-50 to-teal-50">
+      {/* Top App Bar */}
+      <div className="sticky top-0 z-40 bg-surface/80 backdrop-blur-md border-b border-outline-variant">
+        <div className="flex items-center justify-between px-4 py-3">
           <button
-            type="button"
-            aria-pressed={pickerMode === 'single'}
-            onClick={() => setPickerMode('single')}
-            className={`px-4 py-2 focus:z-10 focus:outline-none text-label-large font-roboto-flex rounded-l-full border-r border-outline-variant transition-colors
-              ${pickerMode === 'single' ? 'bg-primary text-on-primary border-primary' : 'bg-surface text-on-surface hover:bg-surface-container-highest'}`}
+            onClick={() => navigate(-1)}
+            className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors"
+            aria-label="Go back"
           >
-            Single Date
+            <ArrowLeft className="w-6 h-6 text-on-surface" />
           </button>
-          <button
-            type="button"
-            aria-pressed={pickerMode === 'range'}
-            onClick={() => setPickerMode('range')}
-            className={`px-4 py-2 focus:z-10 focus:outline-none text-label-large font-roboto-flex rounded-r-full transition-colors
-              ${pickerMode === 'range' ? 'bg-primary text-on-primary border-primary' : 'bg-surface text-on-surface hover:bg-surface-container-highest'}`}
-          >
-            Date Range
-          </button>
+          <h1 className="text-title-large font-roboto-flex text-on-surface">Create Moment</h1>
+          <div className="w-10" /> {/* Spacer for centering */}
         </div>
-        <form onSubmit={handleCreate} className="space-y-6">
+      </div>
+
+      {/* Main Content */}
+      <div className="px-4 py-6 max-w-md mx-auto">
+        <div className="space-y-8">
+          {/* Date Selection Section */}
           <div>
-            <label className="block mb-2 font-medium">Date <span className="text-red-500">*</span></label>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-primary-container">
+                <Calendar className="w-5 h-5 text-on-primary-container" />
+              </div>
+              <h2 className="text-title-medium font-roboto-flex text-on-surface">When did it happen? <span className="text-error">*</span></h2>
+            </div>
+            
+            {/* Date Mode Toggle */}
+            <div className="inline-flex mb-4 shadow-sm rounded-full bg-surface-container-lowest border border-outline-variant" role="group">
+              <button
+                type="button"
+                onClick={() => setPickerMode('single')}
+                className={`px-4 py-2 text-label-large font-roboto-flex rounded-l-full border-r border-outline-variant transition-colors ${
+                  pickerMode === 'single' 
+                    ? 'bg-primary text-on-primary' 
+                    : 'bg-surface text-on-surface hover:bg-surface-container-highest'
+                }`}
+              >
+                Single Date
+              </button>
+              <button
+                type="button"
+                onClick={() => setPickerMode('range')}
+                className={`px-4 py-2 text-label-large font-roboto-flex rounded-r-full transition-colors ${
+                  pickerMode === 'range' 
+                    ? 'bg-primary text-on-primary' 
+                    : 'bg-surface text-on-surface hover:bg-surface-container-highest'
+                }`}
+              >
+                Date Range
+              </button>
+            </div>
+
+            {/* Date Display - Material 3 Outlined Text Field */}
+            <div className="relative">
+              <button
+                type="button"
+                onClick={() => setModalOpen(true)}
+                className="w-full px-4 py-4 rounded-4xl bg-surface text-left border border-outline-variant hover:border-primary hover:bg-surface-container-lowest transition-colors focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20"
+              >
+                <div className="flex items-center justify-between">
+                  <span className="text-body-large text-on-surface">{getDisplayValue()}</span>
+                  <Calendar className="w-5 h-5 text-on-surface-variant" />
+                </div>
+              </button>
+            </div>
+          </div>
+
+          {/* Title Section - Material 3 Outlined Text Field */}
+          <div>
+            <div className="flex items-center gap-3 mb-4">
+              <div className="flex items-center justify-center w-10 h-10 rounded-full bg-secondary-container">
+                <Edit3 className="w-5 h-5 text-on-secondary-container" />
+              </div>
+              <h2 className="text-title-medium font-roboto-flex text-on-surface">Give it a title <span className="text-error">*</span></h2>
+            </div>
+            
+            <div className="space-y-2">
+              <div className="relative">
+                <input
+                  type="text"
+                  value={title}
+                  maxLength={TITLE_MAX}
+                  onChange={e => setTitle(e.target.value.slice(0, TITLE_MAX))}
+                  className="w-full px-4 py-4 rounded-4xl bg-surface text-body-large text-on-surface border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors peer"
+                  placeholder=" "
+                  required
+                />
+                <label className="absolute left-4 top-4 text-body-large text-on-surface-variant transition-all duration-200 peer-focus:text-primary peer-focus:text-label-small peer-focus:-translate-y-2 peer-focus:bg-surface peer-focus:px-2 peer-[:not(:placeholder-shown)]:text-label-small peer-[:not(:placeholder-shown)]:-translate-y-2 peer-[:not(:placeholder-shown)]:bg-surface peer-[:not(:placeholder-shown)]:px-2">
+                  e.g., Summer Vacation 2024
+                </label>
+              </div>
+              <div className="flex justify-end">
+                <span className="text-label-small text-on-surface-variant">{title.length}/{TITLE_MAX}</span>
+              </div>
+            </div>
+          </div>
+
+          {/* Action Buttons */}
+          <div className="space-y-3 pt-4">
             <button
               type="button"
-              className="w-full px-4 py-3 border rounded text-left bg-gray-50"
-              onClick={() => setModalOpen(true)}
+              onClick={handleCreate}
+              disabled={isLoading || !isFormValid()}
+              className="w-full py-4 px-6 bg-primary text-on-primary rounded-4xl text-label-large font-roboto-flex hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed flex items-center justify-center gap-2"
             >
-              {getDisplayValue()}
+              {isLoading ? (
+                <>
+                  <div className="w-5 h-5 border-2 border-on-primary border-t-transparent rounded-full animate-spin" />
+                  Creating...
+                </>
+              ) : (
+                <>
+                  <Plus className="w-5 h-5" />
+                  Create Moment
+                </>
+              )}
             </button>
-          </div>
-          <div>
-            <label htmlFor="title" className="block text-title-medium font-roboto-flex text-on-background mb-2">
-              Title (optional)
-            </label>
-            <input
-              type="text"
-              id="title"
-              name="title"
-              value={title}
-              maxLength={TITLE_MAX}
-              onChange={e => setTitle(e.target.value.slice(0, TITLE_MAX))}
-              className="w-full px-4 py-4 rounded-xl bg-surface text-body-large text-on-surface border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary"
-              placeholder="Enter a title for your moment board"
-            />
-            <div className="flex justify-end mt-1">
-              <span className="text-xs text-on-surface-variant">{title.length}/{TITLE_MAX}</span>
-            </div>
-          </div>
-          <div>
-            <label htmlFor="description" className="block text-title-medium font-roboto-flex text-on-background mb-2">
-              Description (optional)
-            </label>
-            <textarea
-              id="description"
-              name="description"
-              value={description}
-              maxLength={DESC_MAX}
-              onChange={e => setDescription(e.target.value.slice(0, DESC_MAX))}
-              rows={4}
-              className="w-full px-4 py-4 rounded-xl bg-surface text-body-large text-on-surface border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary resize-none"
-              placeholder="Describe what this moment board is about"
-            />
-            <div className="flex justify-end mt-1">
-              <span className="text-xs text-on-surface-variant">{description.length}/{DESC_MAX}</span>
-            </div>
-          </div>
-          <div className="flex gap-4">
+            
             <button
               type="button"
               onClick={() => navigate(-1)}
-              className="flex-1 py-4 px-6 bg-surface-container-highest text-on-surface rounded-xl text-label-large font-roboto-flex hover:bg-surface-container-high transition-colors"
+              className="w-full py-4 px-6 bg-surface-container-highest text-on-surface rounded-4xl text-label-large font-roboto-flex hover:bg-surface-container-high transition-colors"
             >
               Cancel
             </button>
-            <button
-              type="submit"
-              disabled={isLoading || (pickerMode === 'single' && !selectedDate) || (pickerMode === 'range' && (!selectedRange || !selectedRange.from || !selectedRange.to))}
-              className="flex-1 py-4 px-6 bg-primary text-on-primary rounded-xl text-label-large font-roboto-flex hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
-            >
-              {isLoading ? 'Creating...' : 'Create Moment'}
-            </button>
           </div>
-        </form>
+        </div>
       </div>
+
+      {/* Date Picker Modal */}
       <DatePickerModal
         open={modalOpen}
         mode={pickerMode}

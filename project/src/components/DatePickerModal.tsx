@@ -1,19 +1,9 @@
 import React, { useState } from 'react';
 import { DayPicker, DateRange } from 'react-day-picker';
-import { format, getYear, setYear, subMonths, addMonths } from 'date-fns';
+import { format, getYear, setYear, subMonths, addMonths, getMonth, setMonth } from 'date-fns';
+import { ChevronLeft, ChevronRight } from 'lucide-react';
 
-// Props: onDateSelected (date string or null), onDateRangeSelected (range or null), onDismiss, initialDate, initialRange, mode, open
 export type DatePickerMode = 'single' | 'range';
-
-const PRIMARY_COLOR = '#6750A4'; // Google M3 primary
-const SECONDARY_COLOR = '#E27D60'; // Your secondary
-const MODAL_RADIUS = 28;
-const BUTTON_RADIUS = 12;
-const BUTTON_FONT_WEIGHT = 600;
-const BUTTON_FONT_SIZE = 16;
-const BUTTON_MIN_WIDTH = 80;
-const BUTTON_MIN_HEIGHT = 40;
-const BUTTON_PADDING = '12px 20px';
 
 type DatePickerModalProps = {
   open: boolean;
@@ -29,46 +19,82 @@ const CustomCaption: React.FC<{
   setCurrentMonth: (date: Date) => void;
 }> = ({ displayMonth, setCurrentMonth }) => {
   const currentYear = getYear(new Date());
-  const years = Array.from({ length: 51 }, (_, i) => currentYear - 25 + i); // 25 years back, 25 forward
+  const years = Array.from({ length: 51 }, (_, i) => currentYear - 25 + i);
+  const months = [
+    'January', 'February', 'March', 'April', 'May', 'June',
+    'July', 'August', 'September', 'October', 'November', 'December'
+  ];
 
   const handleYearChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
     const newYear = parseInt(e.target.value, 10);
     setCurrentMonth(setYear(displayMonth, newYear));
   };
 
+  const handleMonthChange = (e: React.ChangeEvent<HTMLSelectElement>) => {
+    const newMonth = parseInt(e.target.value, 10);
+    setCurrentMonth(setMonth(displayMonth, newMonth));
+  };
+
   return (
-    <div style={{ display: 'flex', alignItems: 'center', gap: 8, justifyContent: 'center', padding: '8px 0' }}>
-      <button
-        type="button"
-        onClick={() => setCurrentMonth(subMonths(displayMonth, 1))}
-        aria-label="Previous month"
-        style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: PRIMARY_COLOR, borderRadius: BUTTON_RADIUS, padding: 4, minWidth: 32 }}
-      >
-        {'<'}
-      </button>
-      <span style={{ fontWeight: 500, fontSize: 16 }}>
-        {displayMonth.toLocaleString(undefined, { month: 'long' })}
-      </span>
-      <select
-        value={getYear(displayMonth)}
-        onChange={handleYearChange}
-        style={{ fontSize: 16, borderRadius: BUTTON_RADIUS, padding: '2px 6px', border: `1px solid ${PRIMARY_COLOR}`, color: PRIMARY_COLOR, fontWeight: BUTTON_FONT_WEIGHT, background: 'white', minWidth: 60, maxWidth: 70 }}
-        aria-label="Select year"
-      >
-        {years.map((year) => (
-          <option key={year} value={year}>
-            {year}
-          </option>
-        ))}
-      </select>
-      <button
-        type="button"
-        onClick={() => setCurrentMonth(addMonths(displayMonth, 1))}
-        aria-label="Next month"
-        style={{ background: 'none', border: 'none', fontSize: 20, cursor: 'pointer', color: PRIMARY_COLOR, borderRadius: BUTTON_RADIUS, padding: 4, minWidth: 32 }}
-      >
-        {'>'}
-      </button>
+    <div className="flex items-center justify-between px-4 py-3">
+      {/* Month and Year Dropdowns */}
+      <div className="flex items-center gap-3">
+        <div className="relative">
+          <select
+            value={getMonth(displayMonth)}
+            onChange={handleMonthChange}
+            className="appearance-none bg-surface-container-lowest text-on-surface text-label-large font-roboto-flex px-3 py-2 pr-8 rounded-lg border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors cursor-pointer"
+            aria-label="Select month"
+          >
+            {months.map((month, index) => (
+              <option key={month} value={index}>
+                {month}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ChevronRight className="w-4 h-4 text-on-surface-variant rotate-90" />
+          </div>
+        </div>
+        
+        <div className="relative">
+          <select
+            value={getYear(displayMonth)}
+            onChange={handleYearChange}
+            className="appearance-none bg-surface-container-lowest text-on-surface text-label-large font-roboto-flex px-3 py-2 pr-8 rounded-lg border border-outline-variant focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20 transition-colors cursor-pointer"
+            aria-label="Select year"
+          >
+            {years.map((year) => (
+              <option key={year} value={year}>
+                {year}
+              </option>
+            ))}
+          </select>
+          <div className="absolute right-2 top-1/2 -translate-y-1/2 pointer-events-none">
+            <ChevronRight className="w-4 h-4 text-on-surface-variant rotate-90" />
+          </div>
+        </div>
+      </div>
+
+      {/* Navigation Arrows */}
+      <div className="flex items-center gap-1">
+        <button
+          type="button"
+          onClick={() => setCurrentMonth(subMonths(displayMonth, 1))}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors"
+          aria-label="Previous month"
+        >
+          <ChevronLeft className="w-5 h-5 text-on-surface" />
+        </button>
+        <button
+          type="button"
+          onClick={() => setCurrentMonth(addMonths(displayMonth, 1))}
+          className="flex items-center justify-center w-10 h-10 rounded-full hover:bg-surface-container-highest transition-colors"
+          aria-label="Next month"
+        >
+          <ChevronRight className="w-5 h-5 text-on-surface" />
+        </button>
+      </div>
     </div>
   );
 };
@@ -79,14 +105,14 @@ const getHeaderLabel = (
   range: DateRange | undefined
 ) => {
   if (mode === 'single') {
-    return selected ? format(selected, 'MMM d, yyyy') : 'Select date';
+    return selected ? format(selected, 'MMMM d, yyyy') : 'Select date';
   } else {
     if (range?.from && range?.to) {
       return `${format(range.from, 'MMM d')} – ${format(range.to, 'MMM d, yyyy')}`;
     } else if (range?.from) {
       return `${format(range.from, 'MMM d, yyyy')} –`;
     } else {
-      return 'Select range';
+      return 'Select date range';
     }
   }
 };
@@ -117,44 +143,113 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
   if (!open) return null;
 
   return (
-    <div
-      style={{
-        position: 'fixed',
-        inset: 0,
-        background: 'rgba(0,0,0,0.5)',
-        display: 'flex',
-        alignItems: 'center',
-        justifyContent: 'center',
-        zIndex: 1000
-      }}
-      aria-modal="true"
-      role="dialog"
-      tabIndex={-1}
-      onClick={onCancel}
-    >
-      <div
-        style={{
-          background: 'white',
-          borderRadius: MODAL_RADIUS,
-          minWidth: 340,
-          maxWidth: 400,
-          width: '100%',
-          boxShadow: '0 8px 32px rgba(0,0,0,0.24)',
-          display: 'flex',
-          flexDirection: 'column',
-          padding: 0
-        }}
+    <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-50 p-4">
+      <div 
+        className="bg-surface rounded-3xl shadow-2xl max-w-sm w-full max-h-[90vh] overflow-hidden"
         onClick={e => e.stopPropagation()}
-        role="document"
       >
         {/* Header */}
-        <div style={{ padding: '24px 24px 0 24px', borderTopLeftRadius: MODAL_RADIUS, borderTopRightRadius: MODAL_RADIUS }}>
-          <div style={{ fontSize: 24, fontWeight: 600, minHeight: 40, display: 'flex', alignItems: 'center', gap: 8 }}>
+        <div className="px-6 pt-6 pb-4 border-b border-outline-variant">
+          <h2 className="text-headline-small font-roboto-flex text-on-surface">
             {getHeaderLabel(mode, selected, range)}
-          </div>
+          </h2>
         </div>
-        {/* Calendar with custom caption */}
-        <div style={{ padding: '16px 24px 0 24px' }}>
+
+        {/* Calendar */}
+        <div className="p-4">
+          <style>{`
+            .rdp {
+              --rdp-cell-size: 40px;
+              --rdp-accent-color: #6750A4;
+              --rdp-background-color: #E8DEF8;
+              --rdp-accent-color-dark: #6750A4;
+              --rdp-background-color-dark: #E8DEF8;
+              --rdp-outline: 2px solid var(--rdp-accent-color);
+              --rdp-outline-selected: 2px solid var(--rdp-accent-color);
+              margin: 0;
+            }
+            
+            .rdp-table {
+              width: 100%;
+              border-collapse: collapse;
+            }
+            
+            .rdp-head_cell {
+              font-weight: 500;
+              font-size: 12px;
+              color: #6750A4;
+              padding: 8px 0;
+              text-align: center;
+              font-family: 'Roboto Flex', sans-serif;
+            }
+            
+            .rdp-cell {
+              padding: 0;
+              text-align: center;
+            }
+            
+            .rdp-button {
+              width: var(--rdp-cell-size);
+              height: var(--rdp-cell-size);
+              border-radius: 50%;
+              border: none;
+              background: transparent;
+              color: #1C1B1F;
+              font-size: 14px;
+              font-family: 'Roboto Flex', sans-serif;
+              cursor: pointer;
+              transition: all 0.2s ease;
+            }
+            
+            .rdp-button:hover:not([disabled]) {
+              background: #E8DEF8;
+              color: #6750A4;
+            }
+            
+            .rdp-button:focus-visible {
+              outline: 2px solid #6750A4;
+              outline-offset: 2px;
+            }
+            
+            .rdp-day_selected {
+              background: #6750A4 !important;
+              color: white !important;
+            }
+            
+            .rdp-day_selected:hover {
+              background: #5A4A7A !important;
+            }
+            
+            .rdp-day_range_start {
+              background: #6750A4 !important;
+              color: white !important;
+            }
+            
+            .rdp-day_range_end {
+              background: #6750A4 !important;
+              color: white !important;
+            }
+            
+            .rdp-day_range_middle {
+              background: #E8DEF8 !important;
+              color: #6750A4 !important;
+            }
+            
+            .rdp-day_today {
+              font-weight: bold;
+              color: #6750A4;
+            }
+            
+            .rdp-day_outside {
+              color: #CAC4D0;
+            }
+            
+            .rdp-button[disabled] {
+              color: #CAC4D0;
+              cursor: not-allowed;
+            }
+          `}</style>
+          
           {mode === 'single' ? (
             <DayPicker
               mode="single"
@@ -181,24 +276,13 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
             />
           )}
         </div>
+
         {/* Actions */}
-        <div style={{ display: 'flex', justifyContent: 'flex-end', gap: 8, padding: '0 24px 24px 24px' }}>
+        <div className="flex justify-end gap-3 px-6 pb-6">
           <button
             type="button"
             onClick={onCancel}
-            style={{
-              background: SECONDARY_COLOR,
-              color: '#fff',
-              border: 'none',
-              borderRadius: BUTTON_RADIUS,
-              fontWeight: BUTTON_FONT_WEIGHT,
-              fontSize: BUTTON_FONT_SIZE,
-              minWidth: BUTTON_MIN_WIDTH,
-              minHeight: BUTTON_MIN_HEIGHT,
-              padding: BUTTON_PADDING,
-              cursor: 'pointer',
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-            }}
+            className="px-6 py-3 text-label-large font-roboto-flex text-on-surface hover:bg-surface-container-highest rounded-full transition-colors"
           >
             Cancel
           </button>
@@ -222,20 +306,7 @@ const DatePickerModal: React.FC<DatePickerModalProps> = ({
               (mode === 'single' && !selected) ||
               (mode === 'range' && (!range || !range.from || !range.to))
             }
-            style={{
-              background: PRIMARY_COLOR,
-              color: '#fff',
-              border: 'none',
-              borderRadius: BUTTON_RADIUS,
-              fontWeight: BUTTON_FONT_WEIGHT,
-              fontSize: BUTTON_FONT_SIZE,
-              minWidth: BUTTON_MIN_WIDTH,
-              minHeight: BUTTON_MIN_HEIGHT,
-              padding: BUTTON_PADDING,
-              cursor: (mode === 'single' && !selected) || (mode === 'range' && (!range || !range.from || !range.to)) ? 'not-allowed' : 'pointer',
-              opacity: (mode === 'single' && !selected) || (mode === 'range' && (!range || !range.from || !range.to)) ? 0.5 : 1,
-              boxShadow: '0 1px 2px rgba(0,0,0,0.04)'
-            }}
+            className="px-6 py-3 bg-primary text-on-primary text-label-large font-roboto-flex rounded-full hover:bg-primary-container transition-colors disabled:opacity-50 disabled:cursor-not-allowed"
           >
             OK
           </button>
